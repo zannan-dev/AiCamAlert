@@ -12,7 +12,10 @@ import android.location.LocationManager
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.media.ToneGenerator
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -130,6 +133,53 @@ fun fetchBestLocation(
     }
 }
 
+fun isOverlayPermissionGranted(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Settings.canDrawOverlays(context)
+    } else true
+}
+
+fun isBatteryOptimizationIgnored(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        pm?.isIgnoringBatteryOptimizations(context.packageName) ?: true
+    } else true
+}
+
+fun requestOverlayPermission(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        try {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:${context.packageName}")
+            )
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
+fun requestBatteryOptimizationExemption(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        try {
+            val intent = Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                Uri.parse("package:${context.packageName}")
+            )
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                context.startActivity(intent)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+    }
+}
+
 object ProximitySoundAlertManager {
     private var toneGenerator: ToneGenerator? = null
     private var lastAlertTime = 0L
@@ -180,6 +230,23 @@ fun CameraListScreen(
     val prefs = remember(context) { context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE) }
     var isBackgroundRadarEnabled by remember { mutableStateOf(prefs.getBoolean("bg_radar_enabled", true)) }
 
+    var hasOverlayPermission by remember { mutableStateOf(isOverlayPermissionGranted(context)) }
+    var hasBatteryExemption by remember { mutableStateOf(isBatteryOptimizationIgnored(context)) }
+
+    DisposableEffect(context) {
+        val listener = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasOverlayPermission = isOverlayPermissionGranted(context)
+                hasBatteryExemption = isBatteryOptimizationIgnored(context)
+            }
+        }
+        val lifecycle = (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle
+        lifecycle?.addObserver(listener)
+        onDispose {
+            lifecycle?.removeObserver(listener)
+        }
+    }
+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -192,16 +259,11 @@ fun CameraListScreen(
         isBackgroundRadarEnabled = enabled
         prefs.edit().putBoolean("bg_radar_enabled", enabled).apply()
         if (enabled) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(context)) {
-                try {
-                    val intent = Intent(
-                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        android.net.Uri.parse("package:${context.packageName}")
-                    )
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+            if (!hasOverlayPermission) {
+                requestOverlayPermission(context)
+            }
+            if (!hasBatteryExemption) {
+                requestBatteryOptimizationExemption(context)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val hasNotifPermission = ContextCompat.checkSelfPermission(
@@ -447,7 +509,16 @@ fun CameraListScreen(
                     onSortChange = { sortByDistance = it }
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                if (isBackgroundRadarEnabled) {
+                    BackgroundPermissionSetupCard(
+                        hasOverlayPermission = hasOverlayPermission,
+                        hasBatteryExemption = hasBatteryExemption,
+                        onRequestOverlay = { requestOverlayPermission(context) },
+                        onRequestBatteryExemption = { requestBatteryOptimizationExemption(context) }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Location Status Bar
                 LocationStatusBar(
@@ -612,6 +683,95 @@ fun EmptyCameraState(onResetFilters: () -> Unit) {
                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Reset Filters", fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+fun BackgroundPermissionSetupCard(
+    hasOverlayPermission: Boolean,
+    hasBatteryExemption: Boolean,
+    onRequestOverlay: () -> Unit,
+    onRequestBatteryExemption: () -> Unit
+) {
+    if (hasOverlayPermission && hasBatteryExemption) return
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.SettingsPower,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "⚡ Background Alert Setup Required",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "To show full-screen alerts when app is closed or phone is locked, please enable these options:",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (!hasOverlayPermission) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("1. Display Over Other Apps", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Shows full-screen pay alerts over lock screen & other apps", fontSize = 10.sp, color = Color.Gray)
+                    }
+                    Button(
+                        onClick = onRequestOverlay,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text("ALLOW", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            if (!hasOverlayPermission && !hasBatteryExemption) {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            if (!hasBatteryExemption) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("2. Turn Off Battery Restrictions", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Prevents Android OS from stopping background radar service", fontSize = 10.sp, color = Color.Gray)
+                    }
+                    Button(
+                        onClick = onRequestBatteryExemption,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text("UNRESTRICT", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
     }
