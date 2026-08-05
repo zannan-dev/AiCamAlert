@@ -1,0 +1,4226 @@
+[
+  {
+    "name": "Parassala",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.3150151,
+    "longitude": 77.1287226
+  },
+  {
+    "name": "Pambukala",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.3254417,
+    "longitude": 77.0641614
+  },
+  {
+    "name": "Kovalam Jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.399849392,
+    "longitude": 76.98087696
+  },
+  {
+    "name": "Neyyattinkara_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4078907,
+    "longitude": 77.0794932
+  },
+  {
+    "name": "Neyyattinkara_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4080435,
+    "longitude": 77.0792108
+  },
+  {
+    "name": "Thozhukkal",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4167193,
+    "longitude": 77.0803191
+  },
+  {
+    "name": "Balaramapuram_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4263583,
+    "longitude": 77.038985
+  },
+  {
+    "name": "Balaramapuram_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.427158591,
+    "longitude": 77.03957643
+  },
+  {
+    "name": "Pallichal Jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.443115896,
+    "longitude": 77.01732215
+  },
+  {
+    "name": "Thiruvallom",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4431921,
+    "longitude": 76.9524799
+  },
+  {
+    "name": "Kumarichantha",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.45163636,
+    "longitude": 76.9470077
+  },
+  {
+    "name": "Vellayani Jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4590336,
+    "longitude": 76.9973992
+  },
+  {
+    "name": "Vellayani Jn_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.459099405,
+    "longitude": 76.99749157
+  },
+  {
+    "name": "Manacaud Jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4719437,
+    "longitude": 76.9481288
+  },
+  {
+    "name": "Eenjakkal_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.480571432,
+    "longitude": 76.93514396
+  },
+  {
+    "name": "Eenjakkal_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.480781673,
+    "longitude": 76.93591442
+  },
+  {
+    "name": "Killipalam, near PRS hopspital",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.481339441,
+    "longitude": 76.9595876
+  },
+  {
+    "name": "Killipalam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.481502261,
+    "longitude": 76.95821229
+  },
+  {
+    "name": "Power house road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.484994424,
+    "longitude": 76.95298903
+  },
+  {
+    "name": "East fort stretch",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.48596404,
+    "longitude": 76.94781505
+  },
+  {
+    "name": "Thambanoor",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4870139,
+    "longitude": 76.9521384
+  },
+  {
+    "name": "Malayinkeezh",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4875062,
+    "longitude": 77.0364776
+  },
+  {
+    "name": "Kaithamukk",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.489562938,
+    "longitude": 76.94019489
+  },
+  {
+    "name": "MG Road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.490216194,
+    "longitude": 76.9473004
+  },
+  {
+    "name": "Poojapura",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4910375,
+    "longitude": 76.9738924
+  },
+  {
+    "name": "All saints",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.494618515,
+    "longitude": 76.9098068
+  },
+  {
+    "name": "All saints_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.494954755,
+    "longitude": 76.90943129
+  },
+  {
+    "name": "Pettah",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.49520478,
+    "longitude": 76.92757811
+  },
+  {
+    "name": "Vettukadu",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.4965309,
+    "longitude": 76.8987359
+  },
+  {
+    "name": "Holy Angels Convent road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.498014727,
+    "longitude": 76.94286201
+  },
+  {
+    "name": "AKG center",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.500406184,
+    "longitude": 76.94618963
+  },
+  {
+    "name": "Mangattukadav",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5004297,
+    "longitude": 77.0062457
+  },
+  {
+    "name": "Vazhuthacaud, WC jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5004554,
+    "longitude": 76.9582906
+  },
+  {
+    "name": "Palayam, near AKG center",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.500657531,
+    "longitude": 76.94628283
+  },
+  {
+    "name": "Chakka bypass",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5021486,
+    "longitude": 76.9127634
+  },
+  {
+    "name": "Palayam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.502110568,
+    "longitude": 76.95008822
+  },
+  {
+    "name": "Kattakada_3",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5023271,
+    "longitude": 77.0718469
+  },
+  {
+    "name": "Edapazhanji Bridge",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5045791,
+    "longitude": 76.9705438
+  },
+  {
+    "name": "Kattakada_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5060175,
+    "longitude": 77.079171
+  },
+  {
+    "name": "Kattakada_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5074106,
+    "longitude": 77.0869781
+  },
+  {
+    "name": "Kundamankadavu_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5088349,
+    "longitude": 77.0033788
+  },
+  {
+    "name": "Kundamankadavu_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.509155,
+    "longitude": 77.0048124
+  },
+  {
+    "name": "Veli",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5123626,
+    "longitude": 76.8908583
+  },
+  {
+    "name": "KIMS Hopspital Jn, Venpalavattam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.513192199,
+    "longitude": 76.91054508
+  },
+  {
+    "name": "Venpalavattom near KIMS",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5140597,
+    "longitude": 76.913645
+  },
+  {
+    "name": "Venpalavattam, Poonthi road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5141757,
+    "longitude": 76.9136729
+  },
+  {
+    "name": "Vilappilsala",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5218664,
+    "longitude": 77.0346773
+  },
+  {
+    "name": "Pattom",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5230483,
+    "longitude": 76.9407198
+  },
+  {
+    "name": "Kottamukk,Aakkulam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5230868,
+    "longitude": 76.9122663
+  },
+  {
+    "name": "Pulimood Jn, Vattiyoorkav",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5235036,
+    "longitude": 76.9862784
+  },
+  {
+    "name": "Pattom(PVDS)",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.526084221,
+    "longitude": 76.93893425
+  },
+  {
+    "name": "Kallikkaad",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5294323,
+    "longitude": 77.1232054
+  },
+  {
+    "name": "Ulloor",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.529678,
+    "longitude": 76.9326316
+  },
+  {
+    "name": "Ambalamukk",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.529742424,
+    "longitude": 76.96094949
+  },
+  {
+    "name": "Poovachal",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5347751,
+    "longitude": 77.0867638
+  },
+  {
+    "name": "Puliyarakonam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5354007,
+    "longitude": 77.0161863
+  },
+  {
+    "name": "Bypass near UST Global",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.537797443,
+    "longitude": 76.87918805
+  },
+  {
+    "name": "Vazhayila, To Peroorkada",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5426433,
+    "longitude": 76.9711209
+  },
+  {
+    "name": "Nettayam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5437866,
+    "longitude": 76.9876427
+  },
+  {
+    "name": "Vazhayila, To Nedumangadu",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5450854,
+    "longitude": 76.9727058
+  },
+  {
+    "name": "Kottamughal_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5521029,
+    "longitude": 76.9423557
+  },
+  {
+    "name": "Kottamughal_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5522066,
+    "longitude": 76.9426095
+  },
+  {
+    "name": "Mannanthala, Pothencode road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5607153,
+    "longitude": 76.9434491
+  },
+  {
+    "name": "Mannanthala, Peroorkada road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5607214,
+    "longitude": 76.9434257
+  },
+  {
+    "name": "Paravankunnu Jn.",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5678039,
+    "longitude": 76.8733965
+  },
+  {
+    "name": "Vettroad, towards Pothencode",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5824067,
+    "longitude": 76.8638977
+  },
+  {
+    "name": "Vettroad, Pothencode road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5844392,
+    "longitude": 76.8704745
+  },
+  {
+    "name": "Vattappara_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5928899,
+    "longitude": 76.9525046
+  },
+  {
+    "name": "Vattappara",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.5930096,
+    "longitude": 76.9514364
+  },
+  {
+    "name": "Nedumangad, Peroorkada road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6006022,
+    "longitude": 76.9959209
+  },
+  {
+    "name": "Nedumangadu, Kulavikkonam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6015071,
+    "longitude": 77.0076317
+  },
+  {
+    "name": "Nedumangadu, Ponmudi road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6078024,
+    "longitude": 77.0054544
+  },
+  {
+    "name": "Nedumangadu",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.614673,
+    "longitude": 76.9977609
+  },
+  {
+    "name": "Nedumangadu Vembayam road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6161716,
+    "longitude": 76.9898788
+  },
+  {
+    "name": "MC road, Venjaramood",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6712494,
+    "longitude": 76.9114421
+  },
+  {
+    "name": "Thandrampoyka",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6871302,
+    "longitude": 76.9067379
+  },
+  {
+    "name": "Mama Moonnumukku, Attingal",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6883583,
+    "longitude": 76.8238267
+  },
+  {
+    "name": "Kizhakkenalumukk, Attingal",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6951859,
+    "longitude": 76.817494
+  },
+  {
+    "name": "Kacherinada, Attingal Jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.6981355,
+    "longitude": 76.8136267
+  },
+  {
+    "name": "Alamcode Jn",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.721520048,
+    "longitude": 76.81288954
+  },
+  {
+    "name": "Karet",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7273407,
+    "longitude": 76.8983141
+  },
+  {
+    "name": "Varkala Sivagiri roundabout",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7319773,
+    "longitude": 76.7316021
+  },
+  {
+    "name": "Varkala Sivagiri roundabout_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7320087,
+    "longitude": 76.7316126
+  },
+  {
+    "name": "Varkala, railway station road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7494784,
+    "longitude": 76.7143884
+  },
+  {
+    "name": "Varkala road, Kallambalam",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7618969,
+    "longitude": 76.7877894
+  },
+  {
+    "name": "Kilimanoor",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7681143,
+    "longitude": 76.8851514
+  },
+  {
+    "name": "Navaikulam_2",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7961101,
+    "longitude": 76.7691311
+  },
+  {
+    "name": "Navaikulam_1",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7961348,
+    "longitude": 76.7692244
+  },
+  {
+    "name": "Kallambalam, Kilimanoor road",
+    "district": "Thiruvananthapuram",
+    "latitude": 8.7964798,
+    "longitude": 76.7688777
+  },
+  {
+    "name": "Parippally Jn, Chadayamangalam road",
+    "district": "Kollam",
+    "latitude": 8.8122447,
+    "longitude": 76.7590673
+  },
+  {
+    "name": "Parippally Jn, towards Paravoor",
+    "district": "Kollam",
+    "latitude": 8.8125148,
+    "longitude": 76.7585943
+  },
+  {
+    "name": "Madathara Jn, Thenmala road",
+    "district": "Kollam",
+    "latitude": 8.8178617,
+    "longitude": 77.0146428
+  },
+  {
+    "name": "Nilamel Jn, Parippally road",
+    "district": "Kollam",
+    "latitude": 8.8236526,
+    "longitude": 76.8811416
+  },
+  {
+    "name": "Hospital Jn, Kadakkal, Kulathupuzha road",
+    "district": "Kollam",
+    "latitude": 8.826195,
+    "longitude": 76.917526
+  },
+  {
+    "name": "Ooranvila, Chathannoor, bus stand Jn",
+    "district": "Kollam",
+    "latitude": 8.8586276,
+    "longitude": 76.7235559
+  },
+  {
+    "name": "Thirumukk Jn, Chathannoor",
+    "district": "Kollam",
+    "latitude": 8.8617743,
+    "longitude": 76.7065132
+  },
+  {
+    "name": "Kottiyam Jn, towards Kollam",
+    "district": "Kollam",
+    "latitude": 8.8659031,
+    "longitude": 76.671286
+  },
+  {
+    "name": "Kottiyam Jn, Kannanalloor road",
+    "district": "Kollam",
+    "latitude": 8.8660198,
+    "longitude": 76.6709043
+  },
+  {
+    "name": "Chadayamangalam",
+    "district": "Kollam",
+    "latitude": 8.8736165,
+    "longitude": 76.8695075
+  },
+  {
+    "name": "Oyoor Jn, Poyappally road",
+    "district": "Kollam",
+    "latitude": 8.8747709,
+    "longitude": 76.7738671
+  },
+  {
+    "name": "SN College Jn",
+    "district": "Kollam",
+    "latitude": 8.8810515,
+    "longitude": 76.6003846
+  },
+  {
+    "name": "Kollam railway station, Karbala to Chinnakkada road",
+    "district": "Kollam",
+    "latitude": 8.8856396,
+    "longitude": 76.5966519
+  },
+  {
+    "name": "Kannanalloor Jn, Kundara road",
+    "district": "Kollam",
+    "latitude": 8.8949073,
+    "longitude": 76.6819167
+  },
+  {
+    "name": "Ayoor, Trivandrum road",
+    "district": "Kollam",
+    "latitude": 8.8955354,
+    "longitude": 76.8620022
+  },
+  {
+    "name": "Mukhathala, Kollam road",
+    "district": "Kollam",
+    "latitude": 8.8972983,
+    "longitude": 76.6666695
+  },
+  {
+    "name": "Palakadavu",
+    "district": "Kollam",
+    "latitude": 8.9024596,
+    "longitude": 76.6204293
+  },
+  {
+    "name": "Kulathooppuzha Jn, Madathara road",
+    "district": "Kollam",
+    "latitude": 8.9038094,
+    "longitude": 77.0574798
+  },
+  {
+    "name": "Ramankulangara, Kollam road",
+    "district": "Kollam",
+    "latitude": 8.9047572,
+    "longitude": 76.5622133
+  },
+  {
+    "name": "Pooyappally, Oyoor road",
+    "district": "Kollam",
+    "latitude": 8.9065533,
+    "longitude": 76.7623571
+  },
+  {
+    "name": "Mangad",
+    "district": "Kollam",
+    "latitude": 8.91462187,
+    "longitude": 76.61587257
+  },
+  {
+    "name": "Karikkod, Kundara road",
+    "district": "Kollam",
+    "latitude": 8.9168397,
+    "longitude": 76.6325294
+  },
+  {
+    "name": "Kureepuzha",
+    "district": "Kollam",
+    "latitude": 8.922098891,
+    "longitude": 76.58296455
+  },
+  {
+    "name": "Vadakke Jn, Nedumoncavu",
+    "district": "Kollam",
+    "latitude": 8.924849,
+    "longitude": 76.7361317
+  },
+  {
+    "name": "Anchal Jn, Kulathupuzha road",
+    "district": "Kollam",
+    "latitude": 8.9274682,
+    "longitude": 76.9133146
+  },
+  {
+    "name": "Sakthikulangara",
+    "district": "Kollam",
+    "latitude": 8.9296026,
+    "longitude": 76.5495661
+  },
+  {
+    "name": "Pavoor Vayal Jn",
+    "district": "Kollam",
+    "latitude": 8.9367684,
+    "longitude": 76.613282
+  },
+  {
+    "name": "Vettuthara Jn",
+    "district": "Kollam",
+    "latitude": 8.9418012,
+    "longitude": 76.5391648
+  },
+  {
+    "name": "Odanavattom",
+    "district": "Kollam",
+    "latitude": 8.9450739,
+    "longitude": 76.7718315
+  },
+  {
+    "name": "Mukkada, Kundara road",
+    "district": "Kollam",
+    "latitude": 8.9592251,
+    "longitude": 76.6767568
+  },
+  {
+    "name": "Thenmala Jn Chenkotta road",
+    "district": "Kollam",
+    "latitude": 8.967804954,
+    "longitude": 77.07041077
+  },
+  {
+    "name": "Ezhukone, Kottarakkara road",
+    "district": "Kollam",
+    "latitude": 8.9806723,
+    "longitude": 76.7213028
+  },
+  {
+    "name": "Karikkam, Kottarakkara road",
+    "district": "Kollam",
+    "latitude": 8.992999,
+    "longitude": 76.7920006
+  },
+  {
+    "name": "Titanium Jn, Sasthamkotta road",
+    "district": "Kollam",
+    "latitude": 9.000891,
+    "longitude": 76.5353628
+  },
+  {
+    "name": "Randu road Jn",
+    "district": "Kollam",
+    "latitude": 9.0020333,
+    "longitude": 76.6628836
+  },
+  {
+    "name": "Market Jn Kottarakkara, Puthoor road",
+    "district": "Kollam",
+    "latitude": 9.0063966,
+    "longitude": 76.7721014
+  },
+  {
+    "name": "Punaloor, Kottarakkara road",
+    "district": "Kollam",
+    "latitude": 9.0176838,
+    "longitude": 76.9255281
+  },
+  {
+    "name": "Karalimukk Jn",
+    "district": "Kollam",
+    "latitude": 9.0243105,
+    "longitude": 76.606057
+  },
+  {
+    "name": "Kunnikode, Kottarakkara road",
+    "district": "Kollam",
+    "latitude": 9.0262467,
+    "longitude": 76.8508431
+  },
+  {
+    "name": "Puthoor, Kottarakkara road",
+    "district": "Kollam",
+    "latitude": 9.0416382,
+    "longitude": 76.7151043
+  },
+  {
+    "name": "Mynagappally - Sasthamkotta road",
+    "district": "Kollam",
+    "latitude": 9.0423429,
+    "longitude": 76.585005
+  },
+  {
+    "name": "Sasthamkotta",
+    "district": "Kollam",
+    "latitude": 9.0432876,
+    "longitude": 76.625558
+  },
+  {
+    "name": "Karunagappally Jn",
+    "district": "Kollam",
+    "latitude": 9.0484933,
+    "longitude": 76.5363593
+  },
+  {
+    "name": "Bharanikavu Jn",
+    "district": "Kollam",
+    "latitude": 9.0595063,
+    "longitude": 76.6391344
+  },
+  {
+    "name": "Nediyavila Jn",
+    "district": "Kollam",
+    "latitude": 9.061752,
+    "longitude": 76.6746959
+  },
+  {
+    "name": "Patharam. High School Jn. Karunagappally road",
+    "district": "Kollam",
+    "latitude": 9.0751864,
+    "longitude": 76.6050413
+  },
+  {
+    "name": "Puthiyakavu Jn",
+    "district": "Kollam",
+    "latitude": 9.0781564,
+    "longitude": 76.5316868
+  },
+  {
+    "name": "Alappat Jn, Kulakkada",
+    "district": "Kollam",
+    "latitude": 9.0803718,
+    "longitude": 76.7529852
+  },
+  {
+    "name": "Thazhava Jn",
+    "district": "Kollam",
+    "latitude": 9.0875852,
+    "longitude": 76.5543571
+  },
+  {
+    "name": "Chakkuvally Jn",
+    "district": "Kollam",
+    "latitude": 9.0886587,
+    "longitude": 76.6382357
+  },
+  {
+    "name": "Pathanapuram",
+    "district": "Kollam",
+    "latitude": 9.0888818,
+    "longitude": 76.8560478
+  },
+  {
+    "name": "Oachira Bypass Jn,",
+    "district": "Kollam",
+    "latitude": 9.1293042,
+    "longitude": 76.5153318
+  },
+  {
+    "name": "Kadampanad Jn, Eanath road",
+    "district": "Pathanamthitta",
+    "latitude": 9.0919576,
+    "longitude": 76.6865217
+  },
+  {
+    "name": "Enath, Adoor MC road",
+    "district": "Pathanamthitta",
+    "latitude": 9.0930627,
+    "longitude": 76.753298
+  },
+  {
+    "name": "Kalanjoor Jn, Elamannoor - Paadam road",
+    "district": "Pathanamthitta",
+    "latitude": 9.120333726,
+    "longitude": 76.85105704
+  },
+  {
+    "name": "Nellimuttilpadi Jn, Sasthamkotta road",
+    "district": "Pathanamthitta",
+    "latitude": 9.1396588,
+    "longitude": 76.733111
+  },
+  {
+    "name": "Ezhamkulam Jn, Adoor road",
+    "district": "Pathanamthitta",
+    "latitude": 9.1449214,
+    "longitude": 76.7681462
+  },
+  {
+    "name": "Adoor Jn",
+    "district": "Pathanamthitta",
+    "latitude": 9.152474357,
+    "longitude": 76.73564393
+  },
+  {
+    "name": "High school Jn, Adoor",
+    "district": "Pathanamthitta",
+    "latitude": 9.161539215,
+    "longitude": 76.72083948
+  },
+  {
+    "name": "Anandapally Jn, Pathanamthitta road",
+    "district": "Pathanamthitta",
+    "latitude": 9.1763663,
+    "longitude": 76.7415494
+  },
+  {
+    "name": "Pandalam Medical mission Jn",
+    "district": "Pathanamthitta",
+    "latitude": 9.216957047,
+    "longitude": 76.68110758
+  },
+  {
+    "name": "Konni, Pathanapuram road",
+    "district": "Pathanamthitta",
+    "latitude": 9.221877207,
+    "longitude": 76.85094573
+  },
+  {
+    "name": "Pandalam, Kaippattoor road",
+    "district": "Pathanamthitta",
+    "latitude": 9.223665948,
+    "longitude": 76.68318529
+  },
+  {
+    "name": "MC road, Kulanada",
+    "district": "Pathanamthitta",
+    "latitude": 9.242484078,
+    "longitude": 76.67236827
+  },
+  {
+    "name": "Omallur, Puthenpeedika, Pathanamthitta road",
+    "district": "Pathanamthitta",
+    "latitude": 9.254415318,
+    "longitude": 76.76195439
+  },
+  {
+    "name": "Pathanamthitta Stadium Jn",
+    "district": "Pathanamthitta",
+    "latitude": 9.26127506,
+    "longitude": 76.78206794
+  },
+  {
+    "name": "Parumala Church Junction",
+    "district": "Pathanamthitta",
+    "latitude": 9.326112,
+    "longitude": 76.53661
+  },
+  {
+    "name": "Aban Jn, Sabarimala road",
+    "district": "Pathanamthitta",
+    "latitude": 9.265480185,
+    "longitude": 76.79015882
+  },
+  {
+    "name": "Elanthoor Jn, Kozhancheri road",
+    "district": "Pathanamthitta",
+    "latitude": 9.3000101,
+    "longitude": 76.7298612
+  },
+  {
+    "name": "Chittar Jn, Thannithod road. Near bus stand",
+    "district": "Pathanamthitta",
+    "latitude": 9.32961267,
+    "longitude": 76.92585547
+  },
+  {
+    "name": "Kozhanchery. Thiruvalla road. Near bridge",
+    "district": "Pathanamthitta",
+    "latitude": 9.337144186,
+    "longitude": 76.7062382
+  },
+  {
+    "name": "Vadasserikkara, Chittar road",
+    "district": "Pathanamthitta",
+    "latitude": 9.3372718,
+    "longitude": 76.8272158
+  },
+  {
+    "name": "Kuttoor, Thiruvalla MCroad",
+    "district": "Pathanamthitta",
+    "latitude": 9.357776036,
+    "longitude": 76.58901528
+  },
+  {
+    "name": "Valanjavattom, Kavumbhagam - Mavelikkara road -",
+    "district": "Pathanamthitta",
+    "latitude": 9.358736388,
+    "longitude": 76.54154856
+  },
+  {
+    "name": "Blockpady",
+    "district": "Pathanamthitta",
+    "latitude": 9.3619815,
+    "longitude": 76.7769622
+  },
+  {
+    "name": "Perunad Market Jn,",
+    "district": "Pathanamthitta",
+    "latitude": 9.367490594,
+    "longitude": 76.8494115
+  },
+  {
+    "name": "Podiyadi - Nedumbaram, Ambalapuzha (Edathua) - Thiruvalla road",
+    "district": "Pathanamthitta",
+    "latitude": 9.367994079,
+    "longitude": 76.53536808
+  },
+  {
+    "name": "Perumbuzha, Ranni, Pathanamthitta road",
+    "district": "Pathanamthitta",
+    "latitude": 9.3794648,
+    "longitude": 76.7796609
+  },
+  {
+    "name": "Cross Jn, Thiruvalla",
+    "district": "Pathanamthitta",
+    "latitude": 9.380888604,
+    "longitude": 76.57468557
+  },
+  {
+    "name": "Idinjillam(Kavumbhagam Road)",
+    "district": "Pathanamthitta",
+    "latitude": 9.408548,
+    "longitude": 76.549922
+  },
+  {
+    "name": "Angadimukk, Ranni. Kozhancheri road",
+    "district": "Pathanamthitta",
+    "latitude": 9.3827545,
+    "longitude": 76.7793253
+  },
+  {
+    "name": "Eraviperur, Thiruvalla road",
+    "district": "Pathanamthitta",
+    "latitude": 9.382892869,
+    "longitude": 76.63860731
+  },
+  {
+    "name": "Thadiyoor, Thiruvalla road",
+    "district": "Pathanamthitta",
+    "latitude": 9.383039079,
+    "longitude": 76.70694429
+  },
+  {
+    "name": "Ittiyappara, Ranni",
+    "district": "Pathanamthitta",
+    "latitude": 9.384907708,
+    "longitude": 76.78373929
+  },
+  {
+    "name": "Thottabhagam, Thiruvalla road",
+    "district": "Pathanamthitta",
+    "latitude": 9.385840861,
+    "longitude": 76.61077838
+  },
+  {
+    "name": "Bypass road, Changanassery Road",
+    "district": "Pathanamthitta",
+    "latitude": 9.388378985,
+    "longitude": 76.57820966
+  },
+  {
+    "name": "Vennikkulam, Thiruvalla road",
+    "district": "Pathanamthitta",
+    "latitude": 9.390396769,
+    "longitude": 76.65297657
+  },
+  {
+    "name": "Chilanga Jn",
+    "district": "Pathanamthitta",
+    "latitude": 9.391943839,
+    "longitude": 76.57780398
+  },
+  {
+    "name": "Perunthuruthi, Thiruvalla - Changanassery road",
+    "district": "Pathanamthitta",
+    "latitude": 9.4064875,
+    "longitude": 76.5597525
+  },
+  {
+    "name": "Chalappaly, Mallappally road",
+    "district": "Pathanamthitta",
+    "latitude": 9.416454894,
+    "longitude": 76.72854949
+  },
+  {
+    "name": "Mandamaruthi Jn, Ponkunnam road",
+    "district": "Pathanamthitta",
+    "latitude": 9.421429464,
+    "longitude": 76.79758955
+  },
+  {
+    "name": "Vechoochira, Mannadisala Navodaya school road",
+    "district": "Pathanamthitta",
+    "latitude": 9.431753782,
+    "longitude": 76.85190696
+  },
+  {
+    "name": "Kunnanthanam Jn, Mallappally road",
+    "district": "Pathanamthitta",
+    "latitude": 9.434784043,
+    "longitude": 76.61206283
+  },
+  {
+    "name": "Mallapally, Thiruvalla road",
+    "district": "Pathanamthitta",
+    "latitude": 9.443949079,
+    "longitude": 76.6511758
+  },
+  {
+    "name": "Chungapara Jn, Mallappally road",
+    "district": "Pathanamthitta",
+    "latitude": 9.45162396,
+    "longitude": 76.74552318
+  },
+  {
+    "name": "Nedungadappally, Changanassery road",
+    "district": "Pathanamthitta",
+    "latitude": 9.4627189,
+    "longitude": 76.6380813
+  },
+  {
+    "name": "Mukkada jn",
+    "district": "Alappuzha",
+    "latitude": 9.151489277,
+    "longitude": 76.51384301
+  },
+  {
+    "name": "Kayamkulam Govt Hospital Rd",
+    "district": "Alappuzha",
+    "latitude": 9.171988,
+    "longitude": 76.498481
+  },
+  {
+    "name": "Charumoodu",
+    "district": "Alappuzha",
+    "latitude": 9.1748553,
+    "longitude": 76.6124068
+  },
+  {
+    "name": "Pullukulangara",
+    "district": "Alappuzha",
+    "latitude": 9.1760545,
+    "longitude": 76.4732807
+  },
+  {
+    "name": "Kattanam",
+    "district": "Alappuzha",
+    "latitude": 9.1764854,
+    "longitude": 76.5629889
+  },
+  {
+    "name": "Kuttitheruvu jn",
+    "district": "Alappuzha",
+    "latitude": 9.176729,
+    "longitude": 76.5257847
+  },
+  {
+    "name": "Muthukulam high school junction",
+    "district": "Alappuzha",
+    "latitude": 9.2136987,
+    "longitude": 76.4614916
+  },
+  {
+    "name": "mangam kuzhiyil",
+    "district": "Alappuzha",
+    "latitude": 9.2348281,
+    "longitude": 76.5898527
+  },
+  {
+    "name": "Thattarambalam",
+    "district": "Alappuzha",
+    "latitude": 9.2473627,
+    "longitude": 76.5205897
+  },
+  {
+    "name": "Choondupalaka junction muttom",
+    "district": "Alappuzha",
+    "latitude": 9.2513432,
+    "longitude": 76.4879771
+  },
+  {
+    "name": "Kollakadavu",
+    "district": "Alappuzha",
+    "latitude": 9.252497346,
+    "longitude": 76.5856424
+  },
+  {
+    "name": "Michel junction",
+    "district": "Alappuzha",
+    "latitude": 9.2531055,
+    "longitude": 76.5403902
+  },
+  {
+    "name": "Thrickunnappuzha",
+    "district": "Alappuzha",
+    "latitude": 9.258257,
+    "longitude": 76.415632
+  },
+  {
+    "name": "Ikya Junction",
+    "district": "Alappuzha",
+    "latitude": 9.177174,
+    "longitude": 76.4849
+  },
+  {
+    "name": "Madhava junction",
+    "district": "Alappuzha",
+    "latitude": 9.283838795,
+    "longitude": 76.45450585
+  },
+  {
+    "name": "Mulakuzha",
+    "district": "Alappuzha",
+    "latitude": 9.3011009,
+    "longitude": 76.6315041
+  },
+  {
+    "name": "Nangyarkulangara(Thrikkunnapuzha Road)",
+    "district": "Alappuzha",
+    "latitude": 9.259619,
+    "longitude": 76.460688
+  },
+  {
+    "name": "Marketjuncion,kacheri junction",
+    "district": "Alappuzha",
+    "latitude": 9.31364889,
+    "longitude": 76.61914151
+  },
+  {
+    "name": "Veeyapuram",
+    "district": "Alappuzha",
+    "latitude": 9.3184482,
+    "longitude": 76.4594956
+  },
+  {
+    "name": "Mannaar",
+    "district": "Alappuzha",
+    "latitude": 9.3256887,
+    "longitude": 76.5322876
+  },
+  {
+    "name": "Kallisseri",
+    "district": "Alappuzha",
+    "latitude": 9.3363559,
+    "longitude": 76.6033317
+  },
+  {
+    "name": "Edathua",
+    "district": "Alappuzha",
+    "latitude": 9.3634802,
+    "longitude": 76.4762779
+  },
+  {
+    "name": "Thottappalli",
+    "district": "Alappuzha",
+    "latitude": 9.315957,
+    "longitude": 76.387853
+  },
+  {
+    "name": "Ambalappuzha(Edathua Road)",
+    "district": "Alappuzha",
+    "latitude": 9.383509,
+    "longitude": 76.357872
+  },
+  {
+    "name": "Valanjavazhi(SN Kavala)",
+    "district": "Alappuzha",
+    "latitude": 9.401926,
+    "longitude": 76.357819
+  },
+  {
+    "name": "Kaichoondy",
+    "district": "Alappuzha",
+    "latitude": 9.512952,
+    "longitude": 76.3382155
+  },
+  {
+    "name": "Kaithavan, kalarcode",
+    "district": "Alappuzha",
+    "latitude": 9.4704225,
+    "longitude": 76.3443066
+  },
+  {
+    "name": "Valiyakulam junction",
+    "district": "Alappuzha",
+    "latitude": 9.4818996,
+    "longitude": 76.3313591
+  },
+  {
+    "name": "Zackariya bazar",
+    "district": "Alappuzha",
+    "latitude": 9.4919314,
+    "longitude": 76.3263084
+  },
+  {
+    "name": "Power house bridge",
+    "district": "Alappuzha",
+    "latitude": 9.5005718,
+    "longitude": 76.328774
+  },
+  {
+    "name": "District court alappuzha",
+    "district": "Alappuzha",
+    "latitude": 9.502623,
+    "longitude": 76.3415061
+  },
+  {
+    "name": "Valyachudukaad",
+    "district": "Alappuzha",
+    "latitude": 9.475753,
+    "longitude": 76.337596
+  },
+  {
+    "name": "Irumbu Paalam",
+    "district": "Alappuzha",
+    "latitude": 9.496021,
+    "longitude": 76.338934
+  },
+  {
+    "name": "Muhamma",
+    "district": "Alappuzha",
+    "latitude": 9.604249436,
+    "longitude": 76.35916572
+  },
+  {
+    "name": "Thannermukkom bund",
+    "district": "Alappuzha",
+    "latitude": 9.677170769,
+    "longitude": 76.39267389
+  },
+  {
+    "name": "Cherthala court junction",
+    "district": "Alappuzha",
+    "latitude": 9.690197053,
+    "longitude": 76.34328235
+  },
+  {
+    "name": "Kattoor",
+    "district": "Alappuzha",
+    "latitude": 9.566642,
+    "longitude": 76.308784
+  },
+  {
+    "name": "Shaktheeswaran Junction",
+    "district": "Alappuzha",
+    "latitude": 9.695453,
+    "longitude": 76.325799
+  },
+  {
+    "name": "thuravoor td junction",
+    "district": "Alappuzha",
+    "latitude": 9.7681592,
+    "longitude": 76.3186806
+  },
+  {
+    "name": "Thyckattushery ferry",
+    "district": "Alappuzha",
+    "latitude": 9.775303248,
+    "longitude": 76.33569639
+  },
+  {
+    "name": "Arookutti bridge",
+    "district": "Alappuzha",
+    "latitude": 9.869442701,
+    "longitude": 76.32134791
+  },
+  {
+    "name": "Laikadu bridge – 1",
+    "district": "Kottayam",
+    "latitude": 9.429684644,
+    "longitude": 76.54460393
+  },
+  {
+    "name": "Laikadu Bridge – 2",
+    "district": "Kottayam",
+    "latitude": 9.429820249,
+    "longitude": 76.54453553
+  },
+  {
+    "name": "Kattachira",
+    "district": "Kottayam",
+    "latitude": 9.676098,
+    "longitude": 76.589123
+  },
+  {
+    "name": "Parelappally church",
+    "district": "Kottayam",
+    "latitude": 9.456794,
+    "longitude": 76.552288
+  },
+  {
+    "name": "Kannanperoor bridge – 1",
+    "district": "Kottayam",
+    "latitude": 9.4698699,
+    "longitude": 76.5295594
+  },
+  {
+    "name": "Kannanperoor bridge – 2",
+    "district": "Kottayam",
+    "latitude": 9.4704057,
+    "longitude": 76.5294309
+  },
+  {
+    "name": "Karukachal – 1",
+    "district": "Kottayam",
+    "latitude": 9.5007746,
+    "longitude": 76.635727
+  },
+  {
+    "name": "Karukachal – 2",
+    "district": "Kottayam",
+    "latitude": 9.504676691,
+    "longitude": 76.64065551
+  },
+  {
+    "name": "Kanjirappally",
+    "district": "Kottayam",
+    "latitude": 9.5603616,
+    "longitude": 76.8106445
+  },
+  {
+    "name": "Near Police station, Ponkunnam, KK road",
+    "district": "Kottayam",
+    "latitude": 9.5621733,
+    "longitude": 76.7721317
+  },
+  {
+    "name": "Ponkunnam Police station Pala road",
+    "district": "Kottayam",
+    "latitude": 9.5641394,
+    "longitude": 76.7622764
+  },
+  {
+    "name": "Kodimatha - 2, Manipuzha",
+    "district": "Kottayam",
+    "latitude": 9.566053765,
+    "longitude": 76.51861466
+  },
+  {
+    "name": "Pala Road - Ponkunnam",
+    "district": "Kottayam",
+    "latitude": 9.5687085,
+    "longitude": 76.7533038
+  },
+  {
+    "name": "Kodimatha – 1",
+    "district": "Kottayam",
+    "latitude": 9.5727248,
+    "longitude": 76.5196126
+  },
+  {
+    "name": "Kottayam Kumaly road",
+    "district": "Kottayam",
+    "latitude": 9.5883523,
+    "longitude": 76.539343
+  },
+  {
+    "name": "KK road Kanjikuzhi",
+    "district": "Kottayam",
+    "latitude": 9.5885892,
+    "longitude": 76.5364632
+  },
+  {
+    "name": "Kottayam Kumarakom road – 1",
+    "district": "Kottayam",
+    "latitude": 9.5946188,
+    "longitude": 76.5208013
+  },
+  {
+    "name": "Kottayam Kumarakom road – 2",
+    "district": "Kottayam",
+    "latitude": 9.5951792,
+    "longitude": 76.5176962
+  },
+  {
+    "name": "Nagampadom bridge – 1",
+    "district": "Kottayam",
+    "latitude": 9.5987549,
+    "longitude": 76.528686
+  },
+  {
+    "name": "Nagampadom bridge – 2",
+    "district": "Kottayam",
+    "latitude": 9.6104973,
+    "longitude": 76.5333283
+  },
+  {
+    "name": "St. Joseph church, Paika town – 2",
+    "district": "Kottayam",
+    "latitude": 9.653175887,
+    "longitude": 76.72407959
+  },
+  {
+    "name": "Central junction – 2",
+    "district": "Kottayam",
+    "latitude": 9.664478133,
+    "longitude": 76.55377742
+  },
+  {
+    "name": "St. Joseph church, Paika town – 1",
+    "district": "Kottayam",
+    "latitude": 9.674031945,
+    "longitude": 76.69993635
+  },
+  {
+    "name": "Central junction – 1",
+    "district": "Kottayam",
+    "latitude": 9.6784259,
+    "longitude": 76.5579359
+  },
+  {
+    "name": "Aaniyilapp, Eerattupetta",
+    "district": "Kottayam",
+    "latitude": 9.679143,
+    "longitude": 76.7883634
+  },
+  {
+    "name": "Aruvithura church - 1, Erattupetta",
+    "district": "Kottayam",
+    "latitude": 9.6856967,
+    "longitude": 76.7770483
+  },
+  {
+    "name": "Aruvithura Church - 2, Earttupetta",
+    "district": "Kottayam",
+    "latitude": 9.6861883,
+    "longitude": 76.77715
+  },
+  {
+    "name": "Near Mubarak Masjid, Nadaykkal",
+    "district": "Kottayam",
+    "latitude": 9.6902408,
+    "longitude": 76.7862001
+  },
+  {
+    "name": "Almanar HSS, Erattupetta",
+    "district": "Kottayam",
+    "latitude": 9.691043443,
+    "longitude": 76.78213701
+  },
+  {
+    "name": "Masjid noor juma masjid, Erattupetta 1",
+    "district": "Kottayam",
+    "latitude": 9.6932172,
+    "longitude": 76.7702609
+  },
+  {
+    "name": "Masjid Noor Juma Masjid, Erattupetta 2",
+    "district": "Kottayam",
+    "latitude": 9.694570762,
+    "longitude": 76.76719274
+  },
+  {
+    "name": "Ponkunnam Bridge – 2",
+    "district": "Kottayam",
+    "latitude": 9.7044824,
+    "longitude": 76.6840418
+  },
+  {
+    "name": "Head post office Pala – 2",
+    "district": "Kottayam",
+    "latitude": 9.7058014,
+    "longitude": 76.6695493
+  },
+  {
+    "name": "Ponkunnam Bridge – 1",
+    "district": "Kottayam",
+    "latitude": 9.7096535,
+    "longitude": 76.6825593
+  },
+  {
+    "name": "Head post office Pala – 1",
+    "district": "Kottayam",
+    "latitude": 9.709763291,
+    "longitude": 76.6788096
+  },
+  {
+    "name": "SRTO 1 Pala",
+    "district": "Kottayam",
+    "latitude": 9.7115617,
+    "longitude": 76.6993877
+  },
+  {
+    "name": "SRTO 2 Pala",
+    "district": "Kottayam",
+    "latitude": 9.7118116,
+    "longitude": 76.6933798
+  },
+  {
+    "name": "Near KSEB Pala - 1",
+    "district": "Kottayam",
+    "latitude": 9.7172254,
+    "longitude": 76.6827236
+  },
+  {
+    "name": "RV junction Pala – 2",
+    "district": "Kottayam",
+    "latitude": 9.71725,
+    "longitude": 76.689245
+  },
+  {
+    "name": "Near KSEB Pala – 2",
+    "district": "Kottayam",
+    "latitude": 9.720274817,
+    "longitude": 76.67952508
+  },
+  {
+    "name": "RV Junction Pala – 1",
+    "district": "Kottayam",
+    "latitude": 9.731908559,
+    "longitude": 76.69260956
+  },
+  {
+    "name": "Near Govt hospital Thalayolaparambu",
+    "district": "Kottayam",
+    "latitude": 9.782885372,
+    "longitude": 76.4550842
+  },
+  {
+    "name": "Govt hospital junction",
+    "district": "Kottayam",
+    "latitude": 9.78597031,
+    "longitude": 76.45416252
+  },
+  {
+    "name": "Near Thalappara junction",
+    "district": "Kottayam",
+    "latitude": 9.7877782,
+    "longitude": 76.4589748
+  },
+  {
+    "name": "GH road",
+    "district": "Idukki",
+    "latitude": 10.0882902,
+    "longitude": 77.0602522
+  },
+  {
+    "name": "Munnar,theatre bazar",
+    "district": "Idukki",
+    "latitude": 10.07719032,
+    "longitude": 77.0630119
+  },
+  {
+    "name": "Adimali 2",
+    "district": "Idukki",
+    "latitude": 10.0157731,
+    "longitude": 76.9531487
+  },
+  {
+    "name": "Adimali 1",
+    "district": "Idukki",
+    "latitude": 10.01440244,
+    "longitude": 76.94490921
+  },
+  {
+    "name": "Pooppara junction",
+    "district": "Idukki",
+    "latitude": 9.976697723,
+    "longitude": 77.20877789
+  },
+  {
+    "name": "Rajakumari",
+    "district": "Idukki",
+    "latitude": 9.968620779,
+    "longitude": 77.15131022
+  },
+  {
+    "name": "Rajakkad",
+    "district": "Idukki",
+    "latitude": 9.9629834,
+    "longitude": 77.0994237
+  },
+  {
+    "name": "Murickassery",
+    "district": "Idukki",
+    "latitude": 9.91356247,
+    "longitude": 77.00971037
+  },
+  {
+    "name": "Vengalloor",
+    "district": "Idukki",
+    "latitude": 9.912343441,
+    "longitude": 76.69755958
+  },
+  {
+    "name": "muthalakodam",
+    "district": "Idukki",
+    "latitude": 9.910857217,
+    "longitude": 76.73423443
+  },
+  {
+    "name": "Al azhar college",
+    "district": "Idukki",
+    "latitude": 9.908105043,
+    "longitude": 76.7211201
+  },
+  {
+    "name": "Vengalloor 2",
+    "district": "Idukki",
+    "latitude": 9.9077899,
+    "longitude": 76.7081101
+  },
+  {
+    "name": "Mangattu kavala",
+    "district": "Idukki",
+    "latitude": 9.902387925,
+    "longitude": 76.72605067
+  },
+  {
+    "name": "Boys high school junction",
+    "district": "Idukki",
+    "latitude": 9.9004221,
+    "longitude": 76.7212189
+  },
+  {
+    "name": "Kaarickode",
+    "district": "Idukki",
+    "latitude": 9.90026553,
+    "longitude": 76.72958214
+  },
+  {
+    "name": "Kolani parackadavu",
+    "district": "Idukki",
+    "latitude": 9.8991448,
+    "longitude": 76.6983965
+  },
+  {
+    "name": "Municipal park",
+    "district": "Idukki",
+    "latitude": 9.897289994,
+    "longitude": 76.71179876
+  },
+  {
+    "name": "Manakkad junction",
+    "district": "Idukki",
+    "latitude": 9.896583841,
+    "longitude": 76.70565952
+  },
+  {
+    "name": "Kanjiramattom junction",
+    "district": "Idukki",
+    "latitude": 9.895990975,
+    "longitude": 76.71881273
+  },
+  {
+    "name": "Karimban",
+    "district": "Idukki",
+    "latitude": 9.89267487,
+    "longitude": 76.9721809
+  },
+  {
+    "name": "Kolani",
+    "district": "Idukki",
+    "latitude": 9.888143246,
+    "longitude": 76.69663087
+  },
+  {
+    "name": "Thopramkudy",
+    "district": "Idukki",
+    "latitude": 9.877691208,
+    "longitude": 77.05638416
+  },
+  {
+    "name": "Mrala",
+    "district": "Idukki",
+    "latitude": 9.8575367,
+    "longitude": 76.729575
+  },
+  {
+    "name": "Cheruthoni",
+    "district": "Idukki",
+    "latitude": 9.843387137,
+    "longitude": 76.9847038
+  },
+  {
+    "name": "Nedumkandam",
+    "district": "Idukki",
+    "latitude": 9.839621896,
+    "longitude": 77.15740319
+  },
+  {
+    "name": "Thankamani",
+    "district": "Idukki",
+    "latitude": 9.8382501,
+    "longitude": 77.0394942
+  },
+  {
+    "name": "Kattappana 2 erattayar road",
+    "district": "Idukki",
+    "latitude": 9.760443133,
+    "longitude": 77.11509168
+  },
+  {
+    "name": "Kattappana",
+    "district": "Idukki",
+    "latitude": 9.755893837,
+    "longitude": 77.11893763
+  },
+  {
+    "name": "Kanchiyar",
+    "district": "Idukki",
+    "latitude": 9.745630929,
+    "longitude": 77.07694028
+  },
+  {
+    "name": "Upputhura",
+    "district": "Idukki",
+    "latitude": 9.697227216,
+    "longitude": 77.02065345
+  },
+  {
+    "name": "Anackara",
+    "district": "Idukki",
+    "latitude": 9.662839752,
+    "longitude": 77.15958249
+  },
+  {
+    "name": "Wagamon",
+    "district": "Idukki",
+    "latitude": 9.6498758,
+    "longitude": 76.9263138
+  },
+  {
+    "name": "1st mile",
+    "district": "Idukki",
+    "latitude": 9.618762107,
+    "longitude": 77.15818606
+  },
+  {
+    "name": "Kuttikanam Elappara road Pallickunn",
+    "district": "Idukki",
+    "latitude": 9.61081595,
+    "longitude": 76.9689827
+  },
+  {
+    "name": "Kumily",
+    "district": "Idukki",
+    "latitude": 9.606601151,
+    "longitude": 77.1634271
+  },
+  {
+    "name": "Kuttikanam(Kuttikanam Mundakayam road)",
+    "district": "Idukki",
+    "latitude": 9.579294929,
+    "longitude": 76.97063595
+  },
+  {
+    "name": "Vandiperiyar",
+    "district": "Idukki",
+    "latitude": 9.571476784,
+    "longitude": 77.08882179
+  },
+  {
+    "name": "Mundakkayam(Mundakayam Kuttikanam road)",
+    "district": "Idukki",
+    "latitude": 9.5389935,
+    "longitude": 76.9010992
+  },
+  {
+    "name": "Aryankavu",
+    "district": "Ernakulam",
+    "latitude": 9.8481617,
+    "longitude": 76.4095606
+  },
+  {
+    "name": "Puthenkavu",
+    "district": "Ernakulam",
+    "latitude": 9.857015711,
+    "longitude": 76.38364255
+  },
+  {
+    "name": "Aroor  Thoppumpadi  road",
+    "district": "Ernakulam",
+    "latitude": 9.887245502,
+    "longitude": 76.29822023
+  },
+  {
+    "name": "Kumbalam Panangad bridge",
+    "district": "Ernakulam",
+    "latitude": 9.910791162,
+    "longitude": 76.31650921
+  },
+  {
+    "name": "Aroor",
+    "district": "Ernakulam",
+    "latitude": 9.914415886,
+    "longitude": 76.58340879
+  },
+  {
+    "name": "Nettoor",
+    "district": "Ernakulam",
+    "latitude": 9.915166257,
+    "longitude": 76.31679989
+  },
+  {
+    "name": "Udyamperoor",
+    "district": "Ernakulam",
+    "latitude": 9.917132338,
+    "longitude": 76.36263315
+  },
+  {
+    "name": "Near Alexander Parampithara bridge",
+    "district": "Ernakulam",
+    "latitude": 9.9294878,
+    "longitude": 76.29045
+  },
+  {
+    "name": "Parippu jn",
+    "district": "Ernakulam",
+    "latitude": 9.935489681,
+    "longitude": 76.25284564
+  },
+  {
+    "name": "Thiruvankulam",
+    "district": "Ernakulam",
+    "latitude": 9.9456043,
+    "longitude": 76.3697717
+  },
+  {
+    "name": "Karigachira",
+    "district": "Ernakulam",
+    "latitude": 9.952463981,
+    "longitude": 76.35868125
+  },
+  {
+    "name": "Aavoli",
+    "district": "Ernakulam",
+    "latitude": 9.954176883,
+    "longitude": 76.62787311
+  },
+  {
+    "name": "Anicadu",
+    "district": "Ernakulam",
+    "latitude": 9.9620057,
+    "longitude": 76.6176238
+  },
+  {
+    "name": "Irumbanam",
+    "district": "Ernakulam",
+    "latitude": 9.965175,
+    "longitude": 76.357405
+  },
+  {
+    "name": "Valakom",
+    "district": "Ernakulam",
+    "latitude": 9.9782523,
+    "longitude": 76.5302171
+  },
+  {
+    "name": "Mudickal",
+    "district": "Ernakulam",
+    "latitude": 9.978715937,
+    "longitude": 76.57932378
+  },
+  {
+    "name": "Muvattupuzha pvt bus stand",
+    "district": "Ernakulam",
+    "latitude": 9.979156759,
+    "longitude": 76.58680648
+  },
+  {
+    "name": "Marine drive",
+    "district": "Ernakulam",
+    "latitude": 9.980284402,
+    "longitude": 76.27557904
+  },
+  {
+    "name": "Kaalamukku",
+    "district": "Ernakulam",
+    "latitude": 9.9853721,
+    "longitude": 76.2407218
+  },
+  {
+    "name": "Kadathi",
+    "district": "Ernakulam",
+    "latitude": 9.9862008,
+    "longitude": 76.5659816
+  },
+  {
+    "name": "Kakkadasseri",
+    "district": "Ernakulam",
+    "latitude": 9.997385143,
+    "longitude": 76.59879595
+  },
+  {
+    "name": "Vazhappally",
+    "district": "Ernakulam",
+    "latitude": 9.997955372,
+    "longitude": 76.57208115
+  },
+  {
+    "name": "Pattimattom",
+    "district": "Ernakulam",
+    "latitude": 10.02408381,
+    "longitude": 76.45411827
+  },
+  {
+    "name": "Njarackal",
+    "district": "Ernakulam",
+    "latitude": 10.03852724,
+    "longitude": 76.21974785
+  },
+  {
+    "name": "Mannoor",
+    "district": "Ernakulam",
+    "latitude": 10.0449882,
+    "longitude": 76.53393
+  },
+  {
+    "name": "Keezhillam",
+    "district": "Ernakulam",
+    "latitude": 10.0497006,
+    "longitude": 76.5327291
+  },
+  {
+    "name": "Oonukal",
+    "district": "Ernakulam",
+    "latitude": 10.0522005,
+    "longitude": 76.70564611
+  },
+  {
+    "name": "Vimalagiri College junction",
+    "district": "Ernakulam",
+    "latitude": 10.05898524,
+    "longitude": 76.61548533
+  },
+  {
+    "name": "Kozhippalli",
+    "district": "Ernakulam",
+    "latitude": 10.06020471,
+    "longitude": 76.63584363
+  },
+  {
+    "name": "Arackapadi",
+    "district": "Ernakulam",
+    "latitude": 10.06435431,
+    "longitude": 76.46179743
+  },
+  {
+    "name": "Kothamangalam Govt hospital",
+    "district": "Ernakulam",
+    "latitude": 10.06630893,
+    "longitude": 76.61727369
+  },
+  {
+    "name": "Nangeli padi",
+    "district": "Ernakulam",
+    "latitude": 10.06983322,
+    "longitude": 76.60161965
+  },
+  {
+    "name": "Varappuzha bridge – 1",
+    "district": "Ernakulam",
+    "latitude": 10.07711176,
+    "longitude": 76.27662007
+  },
+  {
+    "name": "Varappuzha bridge – 2",
+    "district": "Ernakulam",
+    "latitude": 10.07929935,
+    "longitude": 76.27416048
+  },
+  {
+    "name": "Odackali",
+    "district": "Ernakulam",
+    "latitude": 10.0893592,
+    "longitude": 76.5643124
+  },
+  {
+    "name": "Thaqua nagar Thandekad",
+    "district": "Ernakulam",
+    "latitude": 10.09694676,
+    "longitude": 76.45036854
+  },
+  {
+    "name": "Koonammavu",
+    "district": "Ernakulam",
+    "latitude": 10.10128865,
+    "longitude": 76.2653501
+  },
+  {
+    "name": "Cherukunnam",
+    "district": "Ernakulam",
+    "latitude": 10.1014788,
+    "longitude": 76.5417965
+  },
+  {
+    "name": "Paathipalam",
+    "district": "Ernakulam",
+    "latitude": 10.10773107,
+    "longitude": 76.47571106
+  },
+  {
+    "name": "Perumbavoor signal MC road",
+    "district": "Ernakulam",
+    "latitude": 10.11142885,
+    "longitude": 76.47907086
+  },
+  {
+    "name": "AM road Perumbavoor – 2",
+    "district": "Ernakulam",
+    "latitude": 10.11452785,
+    "longitude": 76.47011496
+  },
+  {
+    "name": "Iringol",
+    "district": "Ernakulam",
+    "latitude": 10.11558109,
+    "longitude": 76.5008799
+  },
+  {
+    "name": "AM road Perumbavoor – 1",
+    "district": "Ernakulam",
+    "latitude": 10.11615837,
+    "longitude": 76.48461901
+  },
+  {
+    "name": "Muvattupuzha KSRTC junction",
+    "district": "Ernakulam",
+    "latitude": 10.11660098,
+    "longitude": 76.44559488
+  },
+  {
+    "name": "Kaduval jn",
+    "district": "Ernakulam",
+    "latitude": 10.12299557,
+    "longitude": 76.47338625
+  },
+  {
+    "name": "Cherayi padam",
+    "district": "Ernakulam",
+    "latitude": 10.14111319,
+    "longitude": 76.20319828
+  },
+  {
+    "name": "Perumpadanna North Paravoor",
+    "district": "Ernakulam",
+    "latitude": 10.1411133,
+    "longitude": 76.2031983
+  },
+  {
+    "name": "Mannam",
+    "district": "Ernakulam",
+    "latitude": 10.14620795,
+    "longitude": 76.25461958
+  },
+  {
+    "name": "Thamara valavu North Paravoor",
+    "district": "Ernakulam",
+    "latitude": 10.14982443,
+    "longitude": 76.24219224
+  },
+  {
+    "name": "Manjali bridge",
+    "district": "Ernakulam",
+    "latitude": 10.15340028,
+    "longitude": 76.27307452
+  },
+  {
+    "name": "Athani",
+    "district": "Ernakulam",
+    "latitude": 10.1556682,
+    "longitude": 76.35283504
+  },
+  {
+    "name": "Nayathodu, Mattor  airport  road",
+    "district": "Ernakulam",
+    "latitude": 10.1635835,
+    "longitude": 76.4037938
+  },
+  {
+    "name": "Mattoor",
+    "district": "Ernakulam",
+    "latitude": 10.17006547,
+    "longitude": 76.43074952
+  },
+  {
+    "name": "Kalady Malayattoor road",
+    "district": "Ernakulam",
+    "latitude": 10.1702164,
+    "longitude": 76.4449203
+  },
+  {
+    "name": "Malliankara",
+    "district": "Ernakulam",
+    "latitude": 10.1742599,
+    "longitude": 76.181373
+  },
+  {
+    "name": "TELK – 2",
+    "district": "Ernakulam",
+    "latitude": 10.1780564,
+    "longitude": 76.3781394
+  },
+  {
+    "name": "TELK - 1",
+    "district": "Ernakulam",
+    "latitude": 10.17805652,
+    "longitude": 76.37815006
+  },
+  {
+    "name": "Moothakunnam",
+    "district": "Ernakulam",
+    "latitude": 10.1828053,
+    "longitude": 76.2048861
+  },
+  {
+    "name": "Vengoor",
+    "district": "Ernakulam",
+    "latitude": 10.18397303,
+    "longitude": 76.40595518
+  },
+  {
+    "name": "Angamaly nh jn",
+    "district": "Ernakulam",
+    "latitude": 10.19297151,
+    "longitude": 76.38687462
+  },
+  {
+    "name": "Angadikadvu",
+    "district": "Ernakulam",
+    "latitude": 10.19672737,
+    "longitude": 76.38265617
+  },
+  {
+    "name": "Kidangoor",
+    "district": "Ernakulam",
+    "latitude": 10.1984172,
+    "longitude": 76.39603738
+  },
+  {
+    "name": "Karayamparambu – 1",
+    "district": "Ernakulam",
+    "latitude": 10.2053278,
+    "longitude": 76.3825742
+  },
+  {
+    "name": "Karayamparambu – 2",
+    "district": "Ernakulam",
+    "latitude": 10.20556809,
+    "longitude": 76.38207179
+  },
+  {
+    "name": "Valiyapanikan Thuruth",
+    "district": "Thrissur",
+    "latitude": 10.19681185,
+    "longitude": 76.20065186
+  },
+  {
+    "name": "Methala (Actual Location Arakulam)",
+    "district": "Thrissur",
+    "latitude": 10.2125041,
+    "longitude": 76.197451
+  },
+  {
+    "name": "Ubazar-Eriyad",
+    "district": "Thrissur",
+    "latitude": 10.22819541,
+    "longitude": 76.17450569
+  },
+  {
+    "name": "North nada-Kodungalloor",
+    "district": "Thrissur",
+    "latitude": 10.2284536,
+    "longitude": 76.1983165
+  },
+  {
+    "name": "Maala",
+    "district": "Thrissur",
+    "latitude": 10.24056295,
+    "longitude": 76.2714994
+  },
+  {
+    "name": "Karupadanna(Konathkunn)",
+    "district": "Thrissur",
+    "latitude": 10.2755239,
+    "longitude": 76.2102196
+  },
+  {
+    "name": "Mathilmoola",
+    "district": "Thrissur",
+    "latitude": 10.28143994,
+    "longitude": 76.17075965
+  },
+  {
+    "name": "Mathilakam",
+    "district": "Thrissur",
+    "latitude": 10.293174,
+    "longitude": 76.1608167
+  },
+  {
+    "name": "Thriprayar Temple Gate",
+    "district": "Thrissur",
+    "latitude": 10.414214,
+    "longitude": 76.113296
+  },
+  {
+    "name": "Edathirinji-Irinjalakuda",
+    "district": "Thrissur",
+    "latitude": 10.34083974,
+    "longitude": 76.20320264
+  },
+  {
+    "name": "RS road-Irinjalakuda(Don bosco view road)",
+    "district": "Thrissur",
+    "latitude": 10.3436783,
+    "longitude": 76.22512
+  },
+  {
+    "name": "Irinjalakuda",
+    "district": "Thrissur",
+    "latitude": 10.34706886,
+    "longitude": 76.21238217
+  },
+  {
+    "name": "SN Nagar-Irinjalakuda",
+    "district": "Thrissur",
+    "latitude": 10.357114,
+    "longitude": 76.218667
+  },
+  {
+    "name": "Valappad",
+    "district": "Thrissur",
+    "latitude": 10.39669516,
+    "longitude": 76.11572977
+  },
+  {
+    "name": "Thalikulam",
+    "district": "Thrissur",
+    "latitude": 10.43997236,
+    "longitude": 76.09513946
+  },
+  {
+    "name": "Vadanappalli-Puthukulangara",
+    "district": "Thrissur",
+    "latitude": 10.46192044,
+    "longitude": 76.08393185
+  },
+  {
+    "name": "Arimbur",
+    "district": "Thrissur",
+    "latitude": 10.49768549,
+    "longitude": 76.15175217
+  },
+  {
+    "name": "Kuriyachira",
+    "district": "Thrissur",
+    "latitude": 10.49837218,
+    "longitude": 76.22837048
+  },
+  {
+    "name": "Chettupuzha Bridge",
+    "district": "Thrissur",
+    "latitude": 10.4988487,
+    "longitude": 76.1642427
+  },
+  {
+    "name": "Ancherichira",
+    "district": "Thrissur",
+    "latitude": 10.50474055,
+    "longitude": 76.24681268
+  },
+  {
+    "name": "Nadathara 2",
+    "district": "Thrissur",
+    "latitude": 10.51333723,
+    "longitude": 76.25843402
+  },
+  {
+    "name": "Nadathara NH",
+    "district": "Thrissur",
+    "latitude": 10.51386466,
+    "longitude": 76.25835221
+  },
+  {
+    "name": "Nellikkunn",
+    "district": "Thrissur",
+    "latitude": 10.51391147,
+    "longitude": 76.24358699
+  },
+  {
+    "name": "Civil line road 2",
+    "district": "Thrissur",
+    "latitude": 10.52184762,
+    "longitude": 76.19932014
+  },
+  {
+    "name": "Chettuva M E S center junction",
+    "district": "Thrissur",
+    "latitude": 10.52432913,
+    "longitude": 76.04994021
+  },
+  {
+    "name": "Round West, Thrissur",
+    "district": "Thrissur",
+    "latitude": 10.52482325,
+    "longitude": 76.212008
+  },
+  {
+    "name": "Kalathode",
+    "district": "Thrissur",
+    "latitude": 10.52654461,
+    "longitude": 76.2535695
+  },
+  {
+    "name": "Poonkunnam",
+    "district": "Thrissur",
+    "latitude": 10.53309666,
+    "longitude": 76.20195039
+  },
+  {
+    "name": "Patturaikkal",
+    "district": "Thrissur",
+    "latitude": 10.53662332,
+    "longitude": 76.21187456
+  },
+  {
+    "name": "Puzhakkal",
+    "district": "Thrissur",
+    "latitude": 10.54389471,
+    "longitude": 76.18195117
+  },
+  {
+    "name": "Peringavu, Viyyur",
+    "district": "Thrissur",
+    "latitude": 10.54827988,
+    "longitude": 76.21200632
+  },
+  {
+    "name": "Vimala college",
+    "district": "Thrissur",
+    "latitude": 10.55217815,
+    "longitude": 76.22671589
+  },
+  {
+    "name": "Manathala, Chavakkad",
+    "district": "Thrissur",
+    "latitude": 10.58814761,
+    "longitude": 76.01579871
+  },
+  {
+    "name": "Thykkad, Guruvayur",
+    "district": "Thrissur",
+    "latitude": 10.59864119,
+    "longitude": 76.05300095
+  },
+  {
+    "name": "Mulamkunnathukaavu(Killannur)",
+    "district": "Thrissur",
+    "latitude": 10.59963,
+    "longitude": 76.2106117
+  },
+  {
+    "name": "Athani bypass(Thrissur-Ottapalam road)",
+    "district": "Thrissur",
+    "latitude": 10.6201171,
+    "longitude": 76.2170267
+  },
+  {
+    "name": "Choondal",
+    "district": "Thrissur",
+    "latitude": 10.63049213,
+    "longitude": 76.08832229
+  },
+  {
+    "name": "Kunnamkulam",
+    "district": "Thrissur",
+    "latitude": 10.6463695,
+    "longitude": 76.0658423
+  },
+  {
+    "name": "Chowannur",
+    "district": "Thrissur",
+    "latitude": 10.6546989,
+    "longitude": 76.0801941
+  },
+  {
+    "name": "Vellarakkad",
+    "district": "Thrissur",
+    "latitude": 10.6773816,
+    "longitude": 76.120344
+  },
+  {
+    "name": "Porkulam",
+    "district": "Thrissur",
+    "latitude": 10.68085605,
+    "longitude": 76.07051142
+  },
+  {
+    "name": "Pazhayannur(Vazhakkod-Alathur road)",
+    "district": "Thrissur",
+    "latitude": 10.68570939,
+    "longitude": 76.41827021
+  },
+  {
+    "name": "Aakkikavu - Perumbilavu",
+    "district": "Thrissur",
+    "latitude": 10.6932856,
+    "longitude": 76.0916377
+  },
+  {
+    "name": "Chelakkara(Vazhakod-Alathur road)",
+    "district": "Thrissur",
+    "latitude": 10.69563592,
+    "longitude": 76.33140653
+  },
+  {
+    "name": "Mulloorkara, Aattoor",
+    "district": "Thrissur",
+    "latitude": 10.70844143,
+    "longitude": 76.28029201
+  },
+  {
+    "name": "Kadavaloor",
+    "district": "Thrissur",
+    "latitude": 10.71822523,
+    "longitude": 76.07257873
+  },
+  {
+    "name": "Thiruvilwamala(Pazhayannoor-Lakkidi road)",
+    "district": "Thrissur",
+    "latitude": 10.73031001,
+    "longitude": 76.42706014
+  },
+  {
+    "name": "Cheruthuruthy",
+    "district": "Thrissur",
+    "latitude": 10.74907876,
+    "longitude": 76.27474453
+  },
+  {
+    "name": "Thalasseri, Aranattukara",
+    "district": "Thrissur",
+    "latitude": 10.7507917,
+    "longitude": 76.2115867
+  },
+  {
+    "name": "Vadakkancheri",
+    "district": "Palakkad",
+    "latitude": 10.58989959,
+    "longitude": 76.4804941
+  },
+  {
+    "name": "Ayinampadam",
+    "district": "Palakkad",
+    "latitude": 10.59395717,
+    "longitude": 76.59151945
+  },
+  {
+    "name": "Valliyode",
+    "district": "Palakkad",
+    "latitude": 10.59742512,
+    "longitude": 76.49920151
+  },
+  {
+    "name": "Mangalam Bridge",
+    "district": "Palakkad",
+    "latitude": 10.59998314,
+    "longitude": 76.4891563
+  },
+  {
+    "name": "Vattekkad",
+    "district": "Palakkad",
+    "latitude": 10.61083387,
+    "longitude": 76.67523555
+  },
+  {
+    "name": "Nedumani",
+    "district": "Palakkad",
+    "latitude": 10.61190224,
+    "longitude": 76.70605313
+  },
+  {
+    "name": "Ayakkad",
+    "district": "Palakkad",
+    "latitude": 10.61357631,
+    "longitude": 76.47384088
+  },
+  {
+    "name": "Keezhachira",
+    "district": "Palakkad",
+    "latitude": 10.63236084,
+    "longitude": 76.6939795
+  },
+  {
+    "name": "Pazhayannur  Road,  Alathur",
+    "district": "Palakkad",
+    "latitude": 10.6484858,
+    "longitude": 76.5363474
+  },
+  {
+    "name": "Thathamangalam – Pallimukk",
+    "district": "Palakkad",
+    "latitude": 10.68264571,
+    "longitude": 76.70019552
+  },
+  {
+    "name": "BEML(Menom para Rd)",
+    "district": "Palakkad",
+    "latitude": 10.794028,
+    "longitude": 76.781087
+  },
+  {
+    "name": "Paathikkal",
+    "district": "Palakkad",
+    "latitude": 10.732129,
+    "longitude": 76.641843
+  },
+  {
+    "name": "Panayoor",
+    "district": "Palakkad",
+    "latitude": 10.71366988,
+    "longitude": 76.73400778
+  },
+  {
+    "name": "Nalleppilly",
+    "district": "Palakkad",
+    "latitude": 10.72734462,
+    "longitude": 76.78069666
+  },
+  {
+    "name": "Kinassery",
+    "district": "Palakkad",
+    "latitude": 10.73392003,
+    "longitude": 76.65445179
+  },
+  {
+    "name": "Kadumthuruthy",
+    "district": "Palakkad",
+    "latitude": 10.7390755,
+    "longitude": 76.652642
+  },
+  {
+    "name": "Kozhinjampara",
+    "district": "Palakkad",
+    "latitude": 10.743509,
+    "longitude": 76.83071516
+  },
+  {
+    "name": "Vavanoor",
+    "district": "Palakkad",
+    "latitude": 10.75958984,
+    "longitude": 76.13053892
+  },
+  {
+    "name": "Kottayi",
+    "district": "Palakkad",
+    "latitude": 10.76072192,
+    "longitude": 76.54409934
+  },
+  {
+    "name": "Manapullikkavu",
+    "district": "Palakkad",
+    "latitude": 10.76097719,
+    "longitude": 76.66502774
+  },
+  {
+    "name": "Koottupatha, Marutha road",
+    "district": "Palakkad",
+    "latitude": 10.76757724,
+    "longitude": 76.69448443
+  },
+  {
+    "name": "Koduvayoor Rd, Kuzhalmantham",
+    "district": "Palakkad",
+    "latitude": 10.716079,
+    "longitude": 76.603115
+  },
+  {
+    "name": "Chakkanthara",
+    "district": "Palakkad",
+    "latitude": 10.76967962,
+    "longitude": 76.63973115
+  },
+  {
+    "name": "Ottappalam",
+    "district": "Palakkad",
+    "latitude": 10.77293148,
+    "longitude": 76.37481943
+  },
+  {
+    "name": "Thenariparamb, Koduvayur-Thrippallur Rd",
+    "district": "Palakkad",
+    "latitude": 10.646504,
+    "longitude": 76.568361
+  },
+  {
+    "name": "Mepparambu",
+    "district": "Palakkad",
+    "latitude": 10.77562833,
+    "longitude": 76.62854936
+  },
+  {
+    "name": "Pathirippala(PVDS)",
+    "district": "Palakkad",
+    "latitude": 10.77951052,
+    "longitude": 76.47438806
+  },
+  {
+    "name": "Pathirippala",
+    "district": "Palakkad",
+    "latitude": 10.7803058,
+    "longitude": 76.4764205
+  },
+  {
+    "name": "Nellukuthamkulam",
+    "district": "Palakkad",
+    "latitude": 10.67708,
+    "longitude": 76.466931
+  },
+  {
+    "name": "Chuvanna gate",
+    "district": "Palakkad",
+    "latitude": 10.78598962,
+    "longitude": 76.26103207
+  },
+  {
+    "name": "Guruvayur road, Pattambi",
+    "district": "Palakkad",
+    "latitude": 10.79846755,
+    "longitude": 76.18004177
+  },
+  {
+    "name": "Mitranandapuram-Lakkidi",
+    "district": "Palakkad",
+    "latitude": 10.756351,
+    "longitude": 76.436415
+  },
+  {
+    "name": "Murikkumpatta",
+    "district": "Palakkad",
+    "latitude": 10.80169901,
+    "longitude": 76.40668441
+  },
+  {
+    "name": "Parali check Post",
+    "district": "Palakkad",
+    "latitude": 10.80181164,
+    "longitude": 76.55282691
+  },
+  {
+    "name": "Mele Pattambi",
+    "district": "Palakkad",
+    "latitude": 10.80901247,
+    "longitude": 76.1873015
+  },
+  {
+    "name": "Pirayiri",
+    "district": "Palakkad",
+    "latitude": 10.769897,
+    "longitude": 76.617767
+  },
+  {
+    "name": "Vallapuzha",
+    "district": "Palakkad",
+    "latitude": 10.83965714,
+    "longitude": 76.25115652
+  },
+  {
+    "name": "Kongad",
+    "district": "Palakkad",
+    "latitude": 10.86029328,
+    "longitude": 76.50792707
+  },
+  {
+    "name": "Cherpalassery",
+    "district": "Palakkad",
+    "latitude": 10.88163489,
+    "longitude": 76.31849103
+  },
+  {
+    "name": "Thiruvazhiyode",
+    "district": "Palakkad",
+    "latitude": 10.8947187,
+    "longitude": 76.3881981
+  },
+  {
+    "name": "Koppam Jn- Palakkad 100ft Rd",
+    "district": "Palakkad",
+    "latitude": 10.781601,
+    "longitude": 76.659033
+  },
+  {
+    "name": "Kanjirani(Kongad-Sreekrishnapuram Rd)",
+    "district": "Palakkad",
+    "latitude": 10.899751,
+    "longitude": 76.530788
+  },
+  {
+    "name": "Kallanchola(Ponnamkode-Karakurishi Rd)",
+    "district": "Palakkad",
+    "latitude": 10.944476,
+    "longitude": 76.514589
+  },
+  {
+    "name": "Thenkara(Mannarkkad-Aanakatti Rd)",
+    "district": "Palakkad",
+    "latitude": 10.99853,
+    "longitude": 76.470079
+  },
+  {
+    "name": "Nellipuzha(Mannarkad-Anakatti Rd)",
+    "district": "Palakkad",
+    "latitude": 10.99674,
+    "longitude": 76.46945
+  },
+  {
+    "name": "Alanalloor",
+    "district": "Palakkad",
+    "latitude": 11.00706753,
+    "longitude": 76.3508093
+  },
+  {
+    "name": "Kottappalla",
+    "district": "Palakkad",
+    "latitude": 11.06053881,
+    "longitude": 76.34816632
+  },
+  {
+    "name": "Kootumuchi",
+    "district": "Malappuram",
+    "latitude": 11.088412,
+    "longitude": 75.868781
+  },
+  {
+    "name": "Naduvattom",
+    "district": "Malappuram",
+    "latitude": 10.76954491,
+    "longitude": 76.01507083
+  },
+  {
+    "name": "Kariparamba",
+    "district": "Malappuram",
+    "latitude": 11.041908,
+    "longitude": 75.898306
+  },
+  {
+    "name": "Kavil padi ,Edappal",
+    "district": "Malappuram",
+    "latitude": 10.80530982,
+    "longitude": 76.00798007
+  },
+  {
+    "name": "Parambilangadi",
+    "district": "Malappuram",
+    "latitude": 10.987125,
+    "longitude": 75.994884
+  },
+  {
+    "name": "Perunthallur",
+    "district": "Malappuram",
+    "latitude": 10.8424255,
+    "longitude": 75.94499175
+  },
+  {
+    "name": "Kadungathukund",
+    "district": "Malappuram",
+    "latitude": 10.939883,
+    "longitude": 75.982135
+  },
+  {
+    "name": "Kuttikalathani",
+    "district": "Malappuram",
+    "latitude": 10.925323,
+    "longitude": 75.997456
+  },
+  {
+    "name": "Kottapuram",
+    "district": "Malappuram",
+    "latitude": 10.88131782,
+    "longitude": 76.08574905
+  },
+  {
+    "name": "Pulamanthole",
+    "district": "Malappuram",
+    "latitude": 10.899838,
+    "longitude": 76.1903065
+  },
+  {
+    "name": "Thazhe palam, Tirur",
+    "district": "Malappuram",
+    "latitude": 10.91664502,
+    "longitude": 75.91820955
+  },
+  {
+    "name": "Onappuda, Kulathoor",
+    "district": "Malappuram",
+    "latitude": 10.941303,
+    "longitude": 76.1495703
+  },
+  {
+    "name": "Moonnakkal",
+    "district": "Malappuram",
+    "latitude": 10.897823,
+    "longitude": 76.077103
+  },
+  {
+    "name": "Amminikkad, School padi",
+    "district": "Malappuram",
+    "latitude": 10.967327,
+    "longitude": 76.27398849
+  },
+  {
+    "name": "Manathumangalam",
+    "district": "Malappuram",
+    "latitude": 10.995808,
+    "longitude": 76.222475
+  },
+  {
+    "name": "Nadakkavu, Tanur",
+    "district": "Malappuram",
+    "latitude": 10.9715196,
+    "longitude": 75.8830613
+  },
+  {
+    "name": "Perinthalmanna",
+    "district": "Malappuram",
+    "latitude": 10.97393664,
+    "longitude": 76.23663001
+  },
+  {
+    "name": "Jubilee Jn, Angadippuram",
+    "district": "Malappuram",
+    "latitude": 10.97585885,
+    "longitude": 76.21210758
+  },
+  {
+    "name": "padapparambu",
+    "district": "Malappuram",
+    "latitude": 10.988062,
+    "longitude": 76.1067626
+  },
+  {
+    "name": "Thadathil valavu",
+    "district": "Malappuram",
+    "latitude": 10.99082296,
+    "longitude": 76.17673025
+  },
+  {
+    "name": "Edarikode",
+    "district": "Malappuram",
+    "latitude": 10.99208088,
+    "longitude": 75.97984336
+  },
+  {
+    "name": "Kodakkal",
+    "district": "Malappuram",
+    "latitude": 10.851352,
+    "longitude": 76.027689
+  },
+  {
+    "name": "Chattiparambu",
+    "district": "Malappuram",
+    "latitude": 10.99905923,
+    "longitude": 76.0889117
+  },
+  {
+    "name": "Puthur bridge",
+    "district": "Malappuram",
+    "latitude": 11.00597653,
+    "longitude": 76.01253413
+  },
+  {
+    "name": "Perunthallur-2",
+    "district": "Malappuram",
+    "latitude": 10.837815,
+    "longitude": 75.946806
+  },
+  {
+    "name": "Mankada, Verumpulakkal",
+    "district": "Malappuram",
+    "latitude": 11.02756401,
+    "longitude": 76.16978131
+  },
+  {
+    "name": "Koottilangadi",
+    "district": "Malappuram",
+    "latitude": 11.0338985,
+    "longitude": 76.09980751
+  },
+  {
+    "name": "Nooradi bridge",
+    "district": "Malappuram",
+    "latitude": 11.03897515,
+    "longitude": 76.06926989
+  },
+  {
+    "name": "Parappanangadi",
+    "district": "Malappuram",
+    "latitude": 11.04239156,
+    "longitude": 75.86144663
+  },
+  {
+    "name": "Kuttalur",
+    "district": "Malappuram",
+    "latitude": 11.0522243,
+    "longitude": 75.99224355
+  },
+  {
+    "name": "KK Jn, Biyyam",
+    "district": "Malappuram",
+    "latitude": 10.786412,
+    "longitude": 75.951539
+  },
+  {
+    "name": "Konompara, Melmuri",
+    "district": "Malappuram",
+    "latitude": 11.06404382,
+    "longitude": 76.07821036
+  },
+  {
+    "name": "Marancheri",
+    "district": "Malappuram",
+    "latitude": 10.758934,
+    "longitude": 75.966826
+  },
+  {
+    "name": "Kolathuparamba(Kottakkal-Malappuram road)",
+    "district": "Malappuram",
+    "latitude": 11.015905,
+    "longitude": 76.014906
+  },
+  {
+    "name": "Kodakkallu, Kunnumpuram",
+    "district": "Malappuram",
+    "latitude": 11.07917815,
+    "longitude": 75.94977245
+  },
+  {
+    "name": "Pandikkad(Payyapramba)",
+    "district": "Malappuram",
+    "latitude": 11.10368704,
+    "longitude": 76.23009514
+  },
+  {
+    "name": "Vazhaparapadi",
+    "district": "Malappuram",
+    "latitude": 11.10831438,
+    "longitude": 76.12163767
+  },
+  {
+    "name": "Thurakkal, Manjeri",
+    "district": "Malappuram",
+    "latitude": 11.1197107,
+    "longitude": 76.1129682
+  },
+  {
+    "name": "Kadappadi valluvampuram",
+    "district": "Malappuram",
+    "latitude": 11.12736617,
+    "longitude": 76.04756713
+  },
+  {
+    "name": "Changaramkulam",
+    "district": "Malappuram",
+    "latitude": 10.736071,
+    "longitude": 76.028617
+  },
+  {
+    "name": "Nelli parambu, Manjeri",
+    "district": "Malappuram",
+    "latitude": 11.1306266,
+    "longitude": 76.11421198
+  },
+  {
+    "name": "Kodangad (Kozhikode-Malappuram road)",
+    "district": "Malappuram",
+    "latitude": 11.14053401,
+    "longitude": 75.97637326
+  },
+  {
+    "name": "Alungal, pulikkal",
+    "district": "Malappuram",
+    "latitude": 11.16855924,
+    "longitude": 75.92770658
+  },
+  {
+    "name": "Muchikachola, Naduvath",
+    "district": "Malappuram",
+    "latitude": 11.20903116,
+    "longitude": 76.22630417
+  },
+  {
+    "name": "Cherumon,Edavanna",
+    "district": "Malappuram",
+    "latitude": 11.22508238,
+    "longitude": 76.14607528
+  },
+  {
+    "name": "Arekode",
+    "district": "Malappuram",
+    "latitude": 11.23971902,
+    "longitude": 76.04663808
+  },
+  {
+    "name": "Edavannapara",
+    "district": "Malappuram",
+    "latitude": 11.24548362,
+    "longitude": 75.97378794
+  },
+  {
+    "name": "Thazhe chandhakunnu(Janathapadi padikkunn)",
+    "district": "Malappuram",
+    "latitude": 11.28416006,
+    "longitude": 76.23733208
+  },
+  {
+    "name": "Palunda",
+    "district": "Malappuram",
+    "latitude": 11.34605525,
+    "longitude": 76.28594711
+  },
+  {
+    "name": "Nallalam",
+    "district": "Kozhikode",
+    "latitude": 11.16848359,
+    "longitude": 75.83062604
+  },
+  {
+    "name": "Beypore",
+    "district": "Kozhikode",
+    "latitude": 11.1705624,
+    "longitude": 75.80604963
+  },
+  {
+    "name": "Nallur",
+    "district": "Kozhikode",
+    "latitude": 11.171417,
+    "longitude": 75.8392795
+  },
+  {
+    "name": "Mathottam",
+    "district": "Kozhikode",
+    "latitude": 11.21022598,
+    "longitude": 75.79780854
+  },
+  {
+    "name": "Kallayi",
+    "district": "Kozhikode",
+    "latitude": 11.23285001,
+    "longitude": 75.78900855
+  },
+  {
+    "name": "Vaidyarangadi(Palakkad road)",
+    "district": "Kozhikode",
+    "latitude": 11.178204,
+    "longitude": 75.879253
+  },
+  {
+    "name": "Station link road",
+    "district": "Kozhikode",
+    "latitude": 11.24670657,
+    "longitude": 75.7824073
+  },
+  {
+    "name": "Calicut beach",
+    "district": "Kozhikode",
+    "latitude": 11.25244144,
+    "longitude": 75.77105485
+  },
+  {
+    "name": "Mananchira(PVDS)",
+    "district": "Kozhikode",
+    "latitude": 11.25317967,
+    "longitude": 75.77944513
+  },
+  {
+    "name": "Pavamani road",
+    "district": "Kozhikode",
+    "latitude": 11.25514705,
+    "longitude": 75.78490242
+  },
+  {
+    "name": "Mananchira",
+    "district": "Kozhikode",
+    "latitude": 11.2560168,
+    "longitude": 75.77897977
+  },
+  {
+    "name": "Narikkuni",
+    "district": "Kozhikode",
+    "latitude": 11.367075,
+    "longitude": 75.862449
+  },
+  {
+    "name": "Anakuzhikara(Kuttikattur)",
+    "district": "Kozhikode",
+    "latitude": 11.2666833,
+    "longitude": 75.8842633
+  },
+  {
+    "name": "Kavil(Omasseri-Koduvalli Rd)",
+    "district": "Kozhikode",
+    "latitude": 11.36848,
+    "longitude": 75.929739
+  },
+  {
+    "name": "Ramanattukara West(Ferok road)",
+    "district": "Kozhikode",
+    "latitude": 11.179588,
+    "longitude": 75.853828
+  },
+  {
+    "name": "Chevarambalam",
+    "district": "Kozhikode",
+    "latitude": 11.27692944,
+    "longitude": 75.80908187
+  },
+  {
+    "name": "Vellimadukunnu",
+    "district": "Kozhikode",
+    "latitude": 11.29298116,
+    "longitude": 75.82259886
+  },
+  {
+    "name": "Kunnamangalam",
+    "district": "Kozhikode",
+    "latitude": 11.30416061,
+    "longitude": 75.87206081
+  },
+  {
+    "name": "Pavangad",
+    "district": "Kozhikode",
+    "latitude": 11.30808382,
+    "longitude": 75.75856917
+  },
+  {
+    "name": "Mukkam(Kodiyathur)",
+    "district": "Kozhikode",
+    "latitude": 11.3175814,
+    "longitude": 75.9963532
+  },
+  {
+    "name": "Kattangal",
+    "district": "Kozhikode",
+    "latitude": 11.31892735,
+    "longitude": 75.94088629
+  },
+  {
+    "name": "Poonoor (Actual Location name - Eranhikkal)",
+    "district": "Kozhikode",
+    "latitude": 11.33434521,
+    "longitude": 75.76364893
+  },
+  {
+    "name": "Madrasa Bazar, Koduvalli",
+    "district": "Kozhikode",
+    "latitude": 11.34498229,
+    "longitude": 75.90027664
+  },
+  {
+    "name": "Puladikkunn Jn(Eranhikkal-Puladikkunn road)",
+    "district": "Kozhikode",
+    "latitude": 11.333988,
+    "longitude": 75.76279
+  },
+  {
+    "name": "Pantheernkaav(Mankav road)",
+    "district": "Kozhikode",
+    "latitude": 11.230238,
+    "longitude": 75.84634
+  },
+  {
+    "name": "Puthoormadam(Perumanna pantheernakav road)",
+    "district": "Kozhikode",
+    "latitude": 11.236431,
+    "longitude": 75.867988
+  },
+  {
+    "name": "Vattakkundungal",
+    "district": "Kozhikode",
+    "latitude": 11.40199756,
+    "longitude": 75.92799727
+  },
+  {
+    "name": "Karikkamkulam(Kakkdoi-Eranhipalam road)",
+    "district": "Kozhikode",
+    "latitude": 11.291377,
+    "longitude": 75.789094
+  },
+  {
+    "name": "Nanmanda",
+    "district": "Kozhikode",
+    "latitude": 11.4196956,
+    "longitude": 75.8311491
+  },
+  {
+    "name": "Erakkulam(Vengeri-Balusseri road)",
+    "district": "Kozhikode",
+    "latitude": 11.321614,
+    "longitude": 75.804377
+  },
+  {
+    "name": "Thazhe Omasseri",
+    "district": "Kozhikode",
+    "latitude": 11.43596246,
+    "longitude": 75.90234295
+  },
+  {
+    "name": "Balusseri",
+    "district": "Kozhikode",
+    "latitude": 11.44783097,
+    "longitude": 75.82591105
+  },
+  {
+    "name": "Vattoli bazar",
+    "district": "Kozhikode",
+    "latitude": 11.4478408,
+    "longitude": 75.860113
+  },
+  {
+    "name": "Ulliyeri",
+    "district": "Kozhikode",
+    "latitude": 11.44901592,
+    "longitude": 75.77444516
+  },
+  {
+    "name": "Purakkatteri(Atholi-NH road)",
+    "district": "Kozhikode",
+    "latitude": 11.342558,
+    "longitude": 75.760904
+  },
+  {
+    "name": "Engapuzha",
+    "district": "Kozhikode",
+    "latitude": 11.4687164,
+    "longitude": 75.96936498
+  },
+  {
+    "name": "Korappuzha(Kozhikode city-Vengalam Road)",
+    "district": "Kozhikode",
+    "latitude": 11.359801,
+    "longitude": 75.742052
+  },
+  {
+    "name": "Naduvanoor",
+    "district": "Kozhikode",
+    "latitude": 11.48138689,
+    "longitude": 75.77483978
+  },
+  {
+    "name": "Payyoli Beach road",
+    "district": "Kozhikode",
+    "latitude": 11.512781,
+    "longitude": 75.612925
+  },
+  {
+    "name": "Kizhur",
+    "district": "Kozhikode",
+    "latitude": 11.52179216,
+    "longitude": 75.63378409
+  },
+  {
+    "name": "Meppayyur",
+    "district": "Kozhikode",
+    "latitude": 11.52929939,
+    "longitude": 75.70798069
+  },
+  {
+    "name": "Thiruvangoor(Atholi-Thiruvangoor Jn road)",
+    "district": "Kozhikode",
+    "latitude": 11.383603,
+    "longitude": 75.7383001
+  },
+  {
+    "name": "Kakkad",
+    "district": "Kozhikode",
+    "latitude": 11.55271797,
+    "longitude": 75.76314166
+  },
+  {
+    "name": "Pannimukku",
+    "district": "Kozhikode",
+    "latitude": 11.56445084,
+    "longitude": 75.72323676
+  },
+  {
+    "name": "Perambra",
+    "district": "Kozhikode",
+    "latitude": 11.56537844,
+    "longitude": 75.7557163
+  },
+  {
+    "name": "Sand Banks Road-Vadakara",
+    "district": "Kozhikode",
+    "latitude": 11.590646,
+    "longitude": 75.581227
+  },
+  {
+    "name": "Thiruvallur",
+    "district": "Kozhikode",
+    "latitude": 11.59062144,
+    "longitude": 75.66995904
+  },
+  {
+    "name": "2/6 Koothali",
+    "district": "Kozhikode",
+    "latitude": 11.59225838,
+    "longitude": 75.76677036
+  },
+  {
+    "name": "Vadakara Old bus stand",
+    "district": "Kozhikode",
+    "latitude": 11.59650012,
+    "longitude": 75.58919102
+  },
+  {
+    "name": "Peruvattam Thaazha(Vadakara town road)",
+    "district": "Kozhikode",
+    "latitude": 11.608133,
+    "longitude": 75.580708
+  },
+  {
+    "name": "Villiappally",
+    "district": "Kozhikode",
+    "latitude": 11.62397016,
+    "longitude": 75.62692769
+  },
+  {
+    "name": "Kuyimbil, Paleri",
+    "district": "Kozhikode",
+    "latitude": 11.6246159,
+    "longitude": 75.7569538
+  },
+  {
+    "name": "Cheriyakumbalam",
+    "district": "Kozhikode",
+    "latitude": 11.64524408,
+    "longitude": 75.75487275
+  },
+  {
+    "name": "Kuttiadi",
+    "district": "Kozhikode",
+    "latitude": 11.65139644,
+    "longitude": 75.75019732
+  },
+  {
+    "name": "Orkkaterry",
+    "district": "Kozhikode",
+    "latitude": 11.654627,
+    "longitude": 75.6045249
+  },
+  {
+    "name": "Edacheri",
+    "district": "Kozhikode",
+    "latitude": 11.6637881,
+    "longitude": 75.62258184
+  },
+  {
+    "name": "Paikkalangadi, Thottilpalam",
+    "district": "Kozhikode",
+    "latitude": 11.6716551,
+    "longitude": 75.7700029
+  },
+  {
+    "name": "Kappad(Thiruvangoor-Kappad beach road)",
+    "district": "Kozhikode",
+    "latitude": 11.380664,
+    "longitude": 75.725784
+  },
+  {
+    "name": "Kakkattil",
+    "district": "Kozhikode",
+    "latitude": 11.67859051,
+    "longitude": 75.7006596
+  },
+  {
+    "name": "Meppayil(Meppayil-Vadakara town road)",
+    "district": "Kozhikode",
+    "latitude": 11.589991,
+    "longitude": 75.604843
+  },
+  {
+    "name": "Nadapuram",
+    "district": "Kozhikode",
+    "latitude": 11.6862882,
+    "longitude": 75.6557102
+  },
+  {
+    "name": "Kallachi",
+    "district": "Kozhikode",
+    "latitude": 11.6883248,
+    "longitude": 75.6705233
+  },
+  {
+    "name": "Chettuvetti, Nadapuram",
+    "district": "Kozhikode",
+    "latitude": 11.689381,
+    "longitude": 75.6509827
+  },
+  {
+    "name": "Lakkidi",
+    "district": "Wayanad",
+    "latitude": 11.5178294,
+    "longitude": 76.021165
+  },
+  {
+    "name": "Chithragiri, Vaduvanchal",
+    "district": "Wayanad",
+    "latitude": 11.5542364,
+    "longitude": 76.2238312
+  },
+  {
+    "name": "Vaduvanchal",
+    "district": "Wayanad",
+    "latitude": 11.55987423,
+    "longitude": 76.22426637
+  },
+  {
+    "name": "Meppadi",
+    "district": "Wayanad",
+    "latitude": 11.562278,
+    "longitude": 76.12548396
+  },
+  {
+    "name": "Kalpetta",
+    "district": "Wayanad",
+    "latitude": 11.60751815,
+    "longitude": 76.08342256
+  },
+  {
+    "name": "Ambalavayal",
+    "district": "Wayanad",
+    "latitude": 11.62328183,
+    "longitude": 76.21098809
+  },
+  {
+    "name": "Kainatti",
+    "district": "Wayanad",
+    "latitude": 11.63470502,
+    "longitude": 76.08853787
+  },
+  {
+    "name": "Muttil",
+    "district": "Wayanad",
+    "latitude": 11.64118895,
+    "longitude": 76.10740084
+  },
+  {
+    "name": "Sulthan Bathery",
+    "district": "Wayanad",
+    "latitude": 11.658445,
+    "longitude": 76.2475233
+  },
+  {
+    "name": "Meenangadi",
+    "district": "Wayanad",
+    "latitude": 11.66019721,
+    "longitude": 76.16357099
+  },
+  {
+    "name": "Kaippanchery",
+    "district": "Wayanad",
+    "latitude": 11.66367121,
+    "longitude": 76.26815803
+  },
+  {
+    "name": "Kottakunnu, Sulthan Bathery",
+    "district": "Wayanad",
+    "latitude": 11.6683653,
+    "longitude": 76.26938079
+  },
+  {
+    "name": "Kambalakkad",
+    "district": "Wayanad",
+    "latitude": 11.66999784,
+    "longitude": 76.07935667
+  },
+  {
+    "name": "KSRTC Dipo",
+    "district": "Wayanad",
+    "latitude": 11.67269387,
+    "longitude": 76.25895303
+  },
+  {
+    "name": "Padinjarathara 2",
+    "district": "Wayanad",
+    "latitude": 11.67364574,
+    "longitude": 75.971324
+  },
+  {
+    "name": "Kambalakkad, Pallimukku",
+    "district": "Wayanad",
+    "latitude": 11.68378342,
+    "longitude": 76.07699499
+  },
+  {
+    "name": "Padinjarathara",
+    "district": "Wayanad",
+    "latitude": 11.6840637,
+    "longitude": 75.9745167
+  },
+  {
+    "name": "Kenichira",
+    "district": "Wayanad",
+    "latitude": 11.72376873,
+    "longitude": 76.15087073
+  },
+  {
+    "name": "Karimbummal, Panamaram",
+    "district": "Wayanad",
+    "latitude": 11.73164312,
+    "longitude": 76.07334383
+  },
+  {
+    "name": "Pazhanchana, Vellamunda",
+    "district": "Wayanad",
+    "latitude": 11.73184697,
+    "longitude": 75.95158562
+  },
+  {
+    "name": "Tharuvana",
+    "district": "Wayanad",
+    "latitude": 11.73802794,
+    "longitude": 75.97807243
+  },
+  {
+    "name": "Nadavayal",
+    "district": "Wayanad",
+    "latitude": 11.73919065,
+    "longitude": 76.12094164
+  },
+  {
+    "name": "Panamaram",
+    "district": "Wayanad",
+    "latitude": 11.73928257,
+    "longitude": 76.07274737
+  },
+  {
+    "name": "Panamaram bridge",
+    "district": "Wayanad",
+    "latitude": 11.74134701,
+    "longitude": 76.07205402
+  },
+  {
+    "name": "Payode, Manthavady",
+    "district": "Wayanad",
+    "latitude": 11.7909933,
+    "longitude": 76.00201048
+  },
+  {
+    "name": "Thalassery road, Manthavady",
+    "district": "Wayanad",
+    "latitude": 11.81314175,
+    "longitude": 75.99465284
+  },
+  {
+    "name": "Vayalkarara, Kattikulam",
+    "district": "Wayanad",
+    "latitude": 11.84219716,
+    "longitude": 76.05726499
+  },
+  {
+    "name": "Parimadam, new Mahe",
+    "district": "Kannur",
+    "latitude": 11.70909349,
+    "longitude": 75.52850235
+  },
+  {
+    "name": "New bus stand Thalassery - 1",
+    "district": "Kannur",
+    "latitude": 11.74923402,
+    "longitude": 75.494732
+  },
+  {
+    "name": "New bus stand Thalassery - 2",
+    "district": "Kannur",
+    "latitude": 11.74999129,
+    "longitude": 75.49454123
+  },
+  {
+    "name": "Koduvalli gate NH( Kannur Kozhikode road)",
+    "district": "Kannur",
+    "latitude": 11.76647522,
+    "longitude": 75.47800139
+  },
+  {
+    "name": "Koduvalli gate NH(Kozhikode Kannur road)",
+    "district": "Kannur",
+    "latitude": 11.7678483,
+    "longitude": 75.4779841
+  },
+  {
+    "name": "Koothuparmba (Iritty Thalassery road)",
+    "district": "Kannur",
+    "latitude": 11.83035301,
+    "longitude": 75.56623098
+  },
+  {
+    "name": "Thottada",
+    "district": "Kannur",
+    "latitude": 11.85320999,
+    "longitude": 75.41445047
+  },
+  {
+    "name": "Thayil",
+    "district": "Kannur",
+    "latitude": 11.85766526,
+    "longitude": 75.39058451
+  },
+  {
+    "name": "Mele chovva(Mattannur Kannur road)",
+    "district": "Kannur",
+    "latitude": 11.87158481,
+    "longitude": 75.3963422
+  },
+  {
+    "name": "Mele chovva",
+    "district": "Kannur",
+    "latitude": 11.8716127,
+    "longitude": 75.3970265
+  },
+  {
+    "name": "Muneeswaram Kovil Road",
+    "district": "Kannur",
+    "latitude": 11.87379524,
+    "longitude": 75.36486514
+  },
+  {
+    "name": "chalad(kannur valapattanam road)",
+    "district": "Kannur",
+    "latitude": 11.8804855,
+    "longitude": 75.3549242
+  },
+  {
+    "name": "Ancharakandi (airport Kannur town road)",
+    "district": "Kannur",
+    "latitude": 11.88055768,
+    "longitude": 75.50654981
+  },
+  {
+    "name": "Thalap",
+    "district": "Kannur",
+    "latitude": 11.88557714,
+    "longitude": 75.37240349
+  },
+  {
+    "name": "Chakkarakkal (Kannur Mattannur road)",
+    "district": "Kannur",
+    "latitude": 11.88900564,
+    "longitude": 75.4749554
+  },
+  {
+    "name": "Uravachal (Thalasseri Mattannur road)",
+    "district": "Kannur",
+    "latitude": 11.89602196,
+    "longitude": 75.58486227
+  },
+  {
+    "name": "Chathurakinar (Mattannur Kannur town road)",
+    "district": "Kannur",
+    "latitude": 11.90020259,
+    "longitude": 75.41772611
+  },
+  {
+    "name": "Puthiyatheru (Kannur Kasargod road)",
+    "district": "Kannur",
+    "latitude": 11.91592655,
+    "longitude": 75.36036037
+  },
+  {
+    "name": "Mattannoor hospital jn(Thalasseri Iritty road)",
+    "district": "Kannur",
+    "latitude": 11.92877602,
+    "longitude": 75.57223409
+  },
+  {
+    "name": "Chalode (Mattannur Kannur road)",
+    "district": "Kannur",
+    "latitude": 11.9295082,
+    "longitude": 75.50415225
+  },
+  {
+    "name": "Mattannur (Mattannur airport road)",
+    "district": "Kannur",
+    "latitude": 11.9312353,
+    "longitude": 75.57009403
+  },
+  {
+    "name": "Mattool south,(pazhayangadi matool road)",
+    "district": "Kannur",
+    "latitude": 11.9547775,
+    "longitude": 75.2976538
+  },
+  {
+    "name": "Mangattuparamb",
+    "district": "Kannur",
+    "latitude": 11.984387,
+    "longitude": 75.365851
+  },
+  {
+    "name": "Keeriyad",
+    "district": "Kannur",
+    "latitude": 11.926778,
+    "longitude": 75.358927
+  },
+  {
+    "name": "Punnad(Iritty Kannur road)",
+    "district": "Kannur",
+    "latitude": 11.96402644,
+    "longitude": 75.65558575
+  },
+  {
+    "name": "Kambil",
+    "district": "Kannur",
+    "latitude": 11.96672483,
+    "longitude": 75.3966976
+  },
+  {
+    "name": "Payancherimukku (Paiancheri junction Peravoor road)",
+    "district": "Kannur",
+    "latitude": 11.9828667,
+    "longitude": 75.67658879
+  },
+  {
+    "name": "Payincheri ( Peravoor Payincheri junction)",
+    "district": "Kannur",
+    "latitude": 11.98308513,
+    "longitude": 75.67637488
+  },
+  {
+    "name": "Iritty (Thalassery Iritty bridge)",
+    "district": "Kannur",
+    "latitude": 11.9877967,
+    "longitude": 75.67697503
+  },
+  {
+    "name": "Iritty (Iritty bridge Thalassery road)",
+    "district": "Kannur",
+    "latitude": 11.98799086,
+    "longitude": 75.67668971
+  },
+  {
+    "name": "Irikkur (Irrikkur Thaliparamb road)",
+    "district": "Kannur",
+    "latitude": 11.99126589,
+    "longitude": 75.54867458
+  },
+  {
+    "name": "Mayyil",
+    "district": "Kannur",
+    "latitude": 11.99411683,
+    "longitude": 75.44931315
+  },
+  {
+    "name": "Puthiyangadi (Chootad beach Mattool road)",
+    "district": "Kannur",
+    "latitude": 12.02018846,
+    "longitude": 75.24525136
+  },
+  {
+    "name": "Pazhangadi - 2,(Payyannur Kannur road)",
+    "district": "Kannur",
+    "latitude": 12.02449834,
+    "longitude": 75.26678145
+  },
+  {
+    "name": "Pazhayangadi,(Kannur Payyannur road )",
+    "district": "Kannur",
+    "latitude": 12.02468165,
+    "longitude": 75.26669361
+  },
+  {
+    "name": "Madayipara",
+    "district": "Kannur",
+    "latitude": 12.03060184,
+    "longitude": 75.2597554
+  },
+  {
+    "name": "Vallithode (Mysore Iritty road)",
+    "district": "Kannur",
+    "latitude": 12.03487057,
+    "longitude": 75.71359556
+  },
+  {
+    "name": "Ulikkal (Ulikkal jn Iritty road)",
+    "district": "Kannur",
+    "latitude": 12.03779876,
+    "longitude": 75.66545494
+  },
+  {
+    "name": "Ulikkal (Payyavoor Ulikkal jn)",
+    "district": "Kannur",
+    "latitude": 12.04054035,
+    "longitude": 75.66080768
+  },
+  {
+    "name": "Manna (Thaliparamba Iritty road)",
+    "district": "Kannur",
+    "latitude": 12.04059478,
+    "longitude": 75.36216885
+  },
+  {
+    "name": "Chiravakku, Thaliparambu (Payyannur Kannur road)",
+    "district": "Kannur",
+    "latitude": 12.04192999,
+    "longitude": 75.35571747
+  },
+  {
+    "name": "Sreekandapuram (Thaliparamb Sreekandapuram road)",
+    "district": "Kannur",
+    "latitude": 12.04491385,
+    "longitude": 75.50673019
+  },
+  {
+    "name": "Payyavoor (Sreekandapuram Payyavoor road)",
+    "district": "Kannur",
+    "latitude": 12.0600183,
+    "longitude": 75.5780667
+  },
+  {
+    "name": "Payyavoor Town",
+    "district": "Kannur",
+    "latitude": 12.06026019,
+    "longitude": 75.58161344
+  },
+  {
+    "name": "Keloth, Payyannur",
+    "district": "Kannur",
+    "latitude": 12.10034562,
+    "longitude": 75.19593224
+  },
+  {
+    "name": "Sumangali cinemas Payyannur",
+    "district": "Kannur",
+    "latitude": 12.11148396,
+    "longitude": 75.21037426
+  },
+  {
+    "name": "Vankulath Vayal",
+    "district": "Kannur",
+    "latitude": 11.920861,
+    "longitude": 75.334701
+  },
+  {
+    "name": "Kannur City Hospital",
+    "district": "Kannur",
+    "latitude": 11.862681,
+    "longitude": 75.36932
+  },
+  {
+    "name": "Alakode",
+    "district": "Kannur",
+    "latitude": 12.18591996,
+    "longitude": 75.46613529
+  },
+  {
+    "name": "Cherupuzha",
+    "district": "Kannur",
+    "latitude": 12.27169997,
+    "longitude": 75.36079891
+  },
+  {
+    "name": "Thrikkaripur",
+    "district": "Kasaragod",
+    "latitude": 12.14323243,
+    "longitude": 75.17746221
+  },
+  {
+    "name": "Thankayam mukk",
+    "district": "Kasaragod",
+    "latitude": 12.14394763,
+    "longitude": 75.1823616
+  },
+  {
+    "name": "Padanna",
+    "district": "Kasaragod",
+    "latitude": 12.17771466,
+    "longitude": 75.1469665
+  },
+  {
+    "name": "Kalikadavu",
+    "district": "Kasaragod",
+    "latitude": 12.19022422,
+    "longitude": 75.16905248
+  },
+  {
+    "name": "Cheruvathur",
+    "district": "Kasaragod",
+    "latitude": 12.21642417,
+    "longitude": 75.16162947
+  },
+  {
+    "name": "Cheemeni",
+    "district": "Kasaragod",
+    "latitude": 12.23568571,
+    "longitude": 75.22546336
+  },
+  {
+    "name": "Neeleshwaram",
+    "district": "Kasaragod",
+    "latitude": 12.25556016,
+    "longitude": 75.13043303
+  },
+  {
+    "name": "Panathur",
+    "district": "Kasaragod",
+    "latitude": 12.457685,
+    "longitude": 75.353556
+  },
+  {
+    "name": "Choyyomkode",
+    "district": "Kasaragod",
+    "latitude": 12.28771594,
+    "longitude": 75.19208327
+  },
+  {
+    "name": "Puthiyakotta",
+    "district": "Kasaragod",
+    "latitude": 12.3117908,
+    "longitude": 75.09394225
+  },
+  {
+    "name": "Kanjangad 1",
+    "district": "Kasaragod",
+    "latitude": 12.32124155,
+    "longitude": 75.08675158
+  },
+  {
+    "name": "Kanjangad 2",
+    "district": "Kasaragod",
+    "latitude": 12.32431464,
+    "longitude": 75.08550569
+  },
+  {
+    "name": "Athinhal",
+    "district": "Kasaragod",
+    "latitude": 12.33766228,
+    "longitude": 75.07849306
+  },
+  {
+    "name": "Kalanad Jn-1",
+    "district": "Kasaragod",
+    "latitude": 12.451513,
+    "longitude": 75.021879
+  },
+  {
+    "name": "Madiyan",
+    "district": "Kasaragod",
+    "latitude": 12.34849128,
+    "longitude": 75.07358294
+  },
+  {
+    "name": "Chithari",
+    "district": "Kasaragod",
+    "latitude": 12.35539071,
+    "longitude": 75.06967966
+  },
+  {
+    "name": "Pallikere",
+    "district": "Kasaragod",
+    "latitude": 12.38709675,
+    "longitude": 75.04457485
+  },
+  {
+    "name": "Bakel bridge",
+    "district": "Kasaragod",
+    "latitude": 12.40117665,
+    "longitude": 75.03007013
+  },
+  {
+    "name": "Odayamchal",
+    "district": "Kasaragod",
+    "latitude": 12.40159022,
+    "longitude": 75.20389069
+  },
+  {
+    "name": "Kalanad Jn-2",
+    "district": "Kasaragod",
+    "latitude": 12.449719,
+    "longitude": 75.022649
+  },
+  {
+    "name": "Palakkunnu",
+    "district": "Kasaragod",
+    "latitude": 12.42276999,
+    "longitude": 75.02257839
+  },
+  {
+    "name": "Kundamkuzhi",
+    "district": "Kasaragod",
+    "latitude": 12.4570792,
+    "longitude": 75.1404915
+  },
+  {
+    "name": "Meleparmba",
+    "district": "Kasaragod",
+    "latitude": 12.469445,
+    "longitude": 75.00856787
+  },
+  {
+    "name": "Kuttikol",
+    "district": "Kasaragod",
+    "latitude": 12.47704145,
+    "longitude": 75.21122653
+  },
+  {
+    "name": "Madiyan Jn, Madiyan-Kulom road",
+    "district": "Kasaragod",
+    "latitude": 12.350334,
+    "longitude": 75.074037
+  },
+  {
+    "name": "Old bus stand Jn, MG Road",
+    "district": "Kasaragod",
+    "latitude": 12.50090506,
+    "longitude": 74.98973675
+  },
+  {
+    "name": "Press club Jn",
+    "district": "Kasaragod",
+    "latitude": 12.50469352,
+    "longitude": 74.99376543
+  },
+  {
+    "name": "Kottacheri ROB-Beach road",
+    "district": "Kasaragod",
+    "latitude": 12.322836,
+    "longitude": 75.081675
+  },
+  {
+    "name": "Bovikanam",
+    "district": "Kasaragod",
+    "latitude": 12.50737723,
+    "longitude": 75.09518612
+  },
+  {
+    "name": "Cherkkala Jn",
+    "district": "Kasaragod",
+    "latitude": 12.50888616,
+    "longitude": 75.05508341
+  },
+  {
+    "name": "Cherkkala",
+    "district": "Kasaragod",
+    "latitude": 12.50892446,
+    "longitude": 75.05521618
+  },
+  {
+    "name": "Hosdurg(Puthyakotta)",
+    "district": "Kasaragod",
+    "latitude": 12.31446,
+    "longitude": 75.091357
+  },
+  {
+    "name": "TB road, Kanhangad",
+    "district": "Kasaragod",
+    "latitude": 12.31429,
+    "longitude": 75.091028
+  },
+  {
+    "name": "Ballath(Chammattam vayal Jn)",
+    "district": "Kasaragod",
+    "latitude": 12.320304,
+    "longitude": 75.109091
+  },
+  {
+    "name": "Kottapuram(Nileswaram Rd)",
+    "district": "Kasaragod",
+    "latitude": 12.249084,
+    "longitude": 75.126109
+  },
+  {
+    "name": "Mulleria",
+    "district": "Kasaragod",
+    "latitude": 12.54827352,
+    "longitude": 75.1652015
+  },
+  {
+    "name": "Nadakkav-Udinar Rd",
+    "district": "Kasaragod",
+    "latitude": 12.160854,
+    "longitude": 75.171329
+  },
+  {
+    "name": "Seethangoli",
+    "district": "Kasaragod",
+    "latitude": 12.58723766,
+    "longitude": 75.00167828
+  },
+  {
+    "name": "Badiadka 2",
+    "district": "Kasaragod",
+    "latitude": 12.58895489,
+    "longitude": 75.07359032
+  },
+  {
+    "name": "Badiadka 1",
+    "district": "Kasaragod",
+    "latitude": 12.59152581,
+    "longitude": 75.07275179
+  },
+  {
+    "name": "Kumbla 2",
+    "district": "Kasaragod",
+    "latitude": 12.59271359,
+    "longitude": 74.9465324
+  },
+  {
+    "name": "Kumbla 1",
+    "district": "Kasaragod",
+    "latitude": 12.59285331,
+    "longitude": 74.94579747
+  },
+  {
+    "name": "Bandiyod",
+    "district": "Kasaragod",
+    "latitude": 12.640146,
+    "longitude": 74.929356
+  },
+  {
+    "name": "Uppala-Bekur Road, Kaikumba",
+    "district": "Kasaragod",
+    "latitude": 12.664898,
+    "longitude": 74.921597
+  },
+  {
+    "name": "Perla",
+    "district": "Kasaragod",
+    "latitude": 12.637022,
+    "longitude": 75.102964
+  },
+  {
+    "name": "Hosangadi",
+    "district": "Kasaragod",
+    "latitude": 12.70589173,
+    "longitude": 74.90515564
+  },
+  {
+    "name": "Bandadka",
+    "district": "Kasaragod",
+    "latitude": 12.498763,
+    "longitude": 75.267684
+  }
+]
