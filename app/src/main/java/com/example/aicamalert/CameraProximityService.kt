@@ -227,6 +227,18 @@ class CameraProximityService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Full Screen Pay Alert Activity Intent for Lock Screen
+        val fullScreenIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
+            putExtra("camera_name", cameraName)
+            putExtra("district", district)
+            putExtra("distance", distance)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            this, 4, fullScreenIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         // Lock screen "I HAVE NOTICED THIS" 1-Hour Snooze Action
         val snoozeIntent = Intent(this, SnoozeAlertReceiver::class.java).apply {
             action = ACTION_SNOOZE_ALERTS
@@ -244,6 +256,7 @@ class CameraProximityService : Service() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+            .setFullScreenIntent(fullScreenPendingIntent, true)
             .setContentIntent(openAppPendingIntent)
             .addAction(
                 android.R.drawable.ic_lock_idle_alarm,
