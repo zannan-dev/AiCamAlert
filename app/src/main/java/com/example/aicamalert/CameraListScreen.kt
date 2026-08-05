@@ -598,6 +598,13 @@ fun CameraMapView(
                     setTileSource(tileSource)
                     setMultiTouchControls(true)
                     
+                    val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
+                    setBackgroundColor(mapBgColor)
+                    
+                    // Set tile overlay loading background and line colors to match dark surface theme, removing white flashing on zoom out
+                    overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
+                    overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
+                    
                     isTilesScaledToDpi = true
                     maxZoomLevel = 21.0
                     minZoomLevel = 3.0
@@ -624,6 +631,11 @@ fun CameraMapView(
                 if (view.tileProvider.tileSource != targetTileSource) {
                     view.setTileSource(targetTileSource)
                 }
+                
+                val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
+                view.setBackgroundColor(mapBgColor)
+                view.overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
+                view.overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
                 
                 view.overlays.removeAll { it is Marker }
 

@@ -18,9 +18,9 @@ class MainActivity : ComponentActivity() {
         osmConfig.load(this, getSharedPreferences("osm_pref", MODE_PRIVATE))
         
         // Increase performance
-        osmConfig.tileDownloadThreads = 8 // Default is 2, 8 makes loading much faster
-        osmConfig.tileDownloadMaxQueueSize = 80 // Larger download queue for fast panning
-        osmConfig.cacheMapTileCount = 128 // Increased memory cache (from 20 to 128) for smooth panning & instant tile lookup
+        osmConfig.tileDownloadThreads = 12 // Default is 2, 12 makes loading fast
+        osmConfig.tileDownloadMaxQueueSize = 120 // Large queue to avoid dropping tile requests during zoom out
+        osmConfig.cacheMapTileCount = 256 // Increased memory cache (from 128 to 256) for instant tile retention on zoom out
         osmConfig.tileFileSystemCacheMaxBytes = 500L * 1024 * 1024 // 500MB disk cache
         
         // Set User-Agent AFTER load to ensure it's not overwritten
