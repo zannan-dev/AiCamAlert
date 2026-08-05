@@ -1048,6 +1048,15 @@ fun CameraCard(
         camera.distance.contains("m") || (camera.distance.contains("km") && (camera.distance.replace(" km", "").toDoubleOrNull() ?: 999.0) < 5.0)
     }
 
+    val (distValue, distUnit) = remember(camera.distance) {
+        val parts = camera.distance.split(" ")
+        if (parts.size >= 2) {
+            Pair(parts[0], parts[1].uppercase())
+        } else {
+            Pair(camera.distance, "")
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -1064,8 +1073,7 @@ fun CameraCard(
         ) {
             // Icon with Dual Glow
             Box(
-                modifier = Modifier
-                    .size(56.dp),
+                modifier = Modifier.size(52.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -1078,7 +1086,7 @@ fun CameraCard(
                 )
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(42.dp)
                         .background(if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1086,7 +1094,7 @@ fun CameraCard(
                         Icons.Default.Videocam,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
@@ -1133,48 +1141,57 @@ fun CameraCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "• MVD Speed Cam",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontSize = 11.sp
-                    )
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-            // Distance Badge & Map Action
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
+            // Premium Distance Card / Badge UI
+            Surface(
+                modifier = Modifier.width(72.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = if (isNearby) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                ),
+                shadowElevation = if (isNearby) 3.dp else 0.dp
             ) {
-                Surface(
-                    color = if (isNearby) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                    )
+                Column(
+                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Box(
+                        modifier = Modifier
+                            .size(22.dp)
+                            .background(
+                                if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant,
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Navigation,
                             contentDescription = null,
-                            tint = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = camera.distance,
-                            color = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            tint = if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            modifier = Modifier.size(12.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = distValue,
+                        color = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = distUnit,
+                        color = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
