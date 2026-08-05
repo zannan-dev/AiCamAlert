@@ -378,7 +378,14 @@ fun CameraListScreen(
                     .fillMaxSize()
                     .padding(top = 48.dp)
             ) {
-                HeaderSection(darkTheme, isSoundAlertEnabled, onThemeToggle, onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled })
+                HeaderSection(
+                    darkTheme = darkTheme,
+                    soundEnabled = isSoundAlertEnabled,
+                    radarEnabled = isBackgroundRadarEnabled,
+                    onThemeToggle = onThemeToggle,
+                    onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled },
+                    onRadarToggle = { toggleBackgroundRadar(it) }
+                )
                 
                 AnimatedVisibility(
                     visible = activeProximityCamera != null,
@@ -494,7 +501,14 @@ fun CameraListScreen(
                     .fillMaxSize()
                     .padding(top = 48.dp)
             ) {
-                HeaderSection(darkTheme, isSoundAlertEnabled, onThemeToggle, onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled })
+                HeaderSection(
+                    darkTheme = darkTheme,
+                    soundEnabled = isSoundAlertEnabled,
+                    radarEnabled = isBackgroundRadarEnabled,
+                    onThemeToggle = onThemeToggle,
+                    onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled },
+                    onRadarToggle = { toggleBackgroundRadar(it) }
+                )
                 
                 AnimatedVisibility(
                     visible = activeProximityCamera != null,
@@ -764,8 +778,10 @@ fun ProximityAlertBanner(
 fun HeaderSection(
     darkTheme: Boolean,
     soundEnabled: Boolean,
+    radarEnabled: Boolean,
     onThemeToggle: () -> Unit,
-    onSoundToggle: () -> Unit
+    onSoundToggle: () -> Unit,
+    onRadarToggle: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -793,34 +809,72 @@ fun HeaderSection(
                     modifier = Modifier.size(22.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
                     "AiCam Alert",
                     color = Color.White,
-                    fontSize = 20.sp,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Kerala MVD Traffic Network",
+                    "Kerala MVD Network",
                     color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 11.sp
+                    fontSize = 10.sp
                 )
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onSoundToggle) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            // Master Alert ON/OFF Pill Button
+            Surface(
+                onClick = { onRadarToggle(!radarEnabled) },
+                shape = RoundedCornerShape(12.dp),
+                color = if (radarEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (radarEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (radarEnabled) Icons.Default.Radar else Icons.Default.PowerSettingsNew,
+                        contentDescription = "Radar Alert Toggle",
+                        tint = if (radarEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = if (radarEnabled) "ALERT ON" else "ALERT OFF",
+                        color = if (radarEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+            }
+
+            // Sound Mute/Unmute
+            IconButton(onClick = onSoundToggle, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = if (soundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
                     contentDescription = "Toggle Sound Alert",
-                    tint = if (soundEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (soundEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
                 )
             }
-            IconButton(onClick = onThemeToggle) {
+
+            // Dark/Light Theme
+            IconButton(onClick = onThemeToggle, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
                     contentDescription = "Toggle Theme",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
