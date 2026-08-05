@@ -61,7 +61,8 @@ data class CameraItem(
     val district: String,
     val distance: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val distanceMeters: Double = 999999.0
 )
 
 fun loadKeralaCameras(context: Context): List<CameraItem> {
@@ -222,13 +223,16 @@ fun CameraListScreen(
                 camera.latitude, camera.longitude,
                 results
             )
-            val distMeters = results[0]
+            val distMeters = results[0].toDouble()
             val distStr = if (distMeters < 1000) {
                 "${distMeters.toInt()} m"
             } else {
                 String.format(java.util.Locale.US, "%.2f km", distMeters / 1000.0)
             }
-            camera.copy(distance = distStr)
+            camera.copy(
+                distance = distStr,
+                distanceMeters = distMeters
+            )
         }
     }
 
@@ -349,6 +353,7 @@ fun CameraListScreen(
                         ) { camera ->
                             CameraCard(
                                 camera = camera,
+                                isGpsActive = userLocation != null,
                                 onFocusOnMap = {
                                     focusedCamera = camera
                                     isListView = false
@@ -1042,10 +1047,11 @@ fun SortSegmentedToggle(
 @Composable
 fun CameraCard(
     camera: CameraItem,
+    isGpsActive: Boolean = false,
     onFocusOnMap: () -> Unit
 ) {
-    val isNearby = remember(camera.distance) {
-        camera.distance.contains("m") || (camera.distance.contains("km") && (camera.distance.replace(" km", "").toDoubleOrNull() ?: 999.0) < 5.0)
+    val isNearby = remember(camera.distanceMeters, isGpsActive) {
+        isGpsActive && camera.distanceMeters <= 5000.0
     }
 
     val (distValue, distUnit) = remember(camera.distance) {
