@@ -138,6 +138,19 @@ class CameraProximityService : Service() {
 
                 playSirenSound()
                 showLockScreenHeadsUpNotification(closestCamera.name, closestCamera.district, distStr)
+
+                // Directly launch FullScreenAlertActivity over keyguard / lock screen
+                try {
+                    val alertIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
+                        putExtra("camera_name", closestCamera.name)
+                        putExtra("district", closestCamera.district)
+                        putExtra("distance", distStr)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+                    startActivity(alertIntent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

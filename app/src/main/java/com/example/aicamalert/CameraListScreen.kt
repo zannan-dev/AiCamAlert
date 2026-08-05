@@ -407,6 +407,24 @@ fun CameraListScreen(
                     onRadarToggle = { toggleBackgroundRadar(it) }
                 )
                 
+                AnimatedVisibility(
+                    visible = activeProximityCamera != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    activeProximityCamera?.let { cam ->
+                        PayAlertBanner(
+                            camera = cam,
+                            onIHaveNoticed = {
+                                val prefs = context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+                                val snoozeUntil = System.currentTimeMillis() + (60 * 60 * 1000L)
+                                prefs.edit().putLong("snooze_until_timestamp", snoozeUntil).apply()
+                                CameraProximityService.updateSnoozeState(context)
+                            }
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 ToggleRow(isListView) { isListView = it }
@@ -508,6 +526,24 @@ fun CameraListScreen(
                     onRadarToggle = { toggleBackgroundRadar(it) }
                 )
                 
+                AnimatedVisibility(
+                    visible = activeProximityCamera != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    activeProximityCamera?.let { cam ->
+                        PayAlertBanner(
+                            camera = cam,
+                            onIHaveNoticed = {
+                                val prefs = context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+                                val snoozeUntil = System.currentTimeMillis() + (60 * 60 * 1000L)
+                                prefs.edit().putLong("snooze_until_timestamp", snoozeUntil).apply()
+                                CameraProximityService.updateSnoozeState(context)
+                            }
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
                 ToggleRow(isListView) { 
                     isListView = it 
@@ -566,6 +602,104 @@ fun EmptyCameraState(onResetFilters: () -> Unit) {
                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Reset Filters", fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+fun PayAlertBanner(
+    camera: CameraItem,
+    onIHaveNoticed: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = Color(0xFF1E0000),
+        border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFF1744)),
+        shadowElevation = 8.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color(0xFFFF1744), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = "Pay Alert",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            "⚠️ PAY ALERT • SPEED CAMERA AHEAD",
+                            color = Color(0xFFFF1744),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp
+                        )
+                        Text(
+                            "${camera.name} (${camera.district})",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFF00E5FF).copy(alpha = 0.2f)
+                ) {
+                    Text(
+                        text = camera.distance,
+                        color = Color(0xFF00E5FF),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(
+                onClick = onIHaveNoticed,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00E5FF),
+                    contentColor = Color.Black
+                )
+            ) {
+                Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    "I HAVE NOTICED THIS (Snooze 1h)",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
             }
         }
     }
