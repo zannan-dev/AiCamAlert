@@ -1061,19 +1061,19 @@ fun CameraCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onFocusOnMap() },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(14.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon with Dual Glow in Theme Colors
+            // Compact Icon with Dual Glow
             Box(
-                modifier = Modifier.size(52.dp),
+                modifier = Modifier.size(42.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -1081,15 +1081,15 @@ fun CameraCard(
                         .fillMaxSize()
                         .background(
                             if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
-                            RoundedCornerShape(16.dp)
+                            RoundedCornerShape(12.dp)
                         )
                 )
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(34.dp)
                         .background(
                             if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
-                            RoundedCornerShape(12.dp)
+                            RoundedCornerShape(10.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1097,12 +1097,12 @@ fun CameraCard(
                         Icons.Default.Videocam,
                         contentDescription = null,
                         tint = if (isNearby) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1110,7 +1110,7 @@ fun CameraCard(
                         text = camera.name,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
@@ -1119,56 +1119,55 @@ fun CameraCard(
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(6.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                            shape = RoundedCornerShape(4.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                         ) {
                             Text(
                                 "NEARBY",
                                 color = MaterialTheme.colorScheme.primary,
-                                fontSize = 9.sp,
+                                fontSize = 8.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                             )
                         }
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
                     Icon(
                         Icons.Default.LocationOn,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(15.dp)
+                        modifier = Modifier.size(13.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     Text(
                         text = camera.district,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp
+                        fontSize = 12.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-            // Premium Distance HUD Box matched to Cyan Theme
+            // Compact Distance HUD Badge
             Surface(
-                modifier = Modifier.width(72.dp),
-                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.width(60.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = if (isNearby) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                 border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                ),
-                shadowElevation = if (isNearby) 3.dp else 0.dp
+                    if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+                )
             ) {
                 Column(
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 2.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(16.dp)
                             .background(
                                 if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant,
                                 CircleShape
@@ -1179,21 +1178,21 @@ fun CameraCard(
                             Icons.Default.Navigation,
                             contentDescription = null,
                             tint = if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                            modifier = Modifier.size(12.dp)
+                            modifier = Modifier.size(10.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = distValue,
                         color = if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 1
                     )
                     Text(
                         text = distUnit,
                         color = if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
