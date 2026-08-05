@@ -8,6 +8,9 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.location.LocationManager
+import android.media.AudioManager
+import android.media.RingtoneManager
+import android.media.ToneGenerator
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -118,6 +121,34 @@ fun fetchBestLocation(
     }
 }
 
+object ProximitySoundAlertManager {
+    private var toneGenerator: ToneGenerator? = null
+    private var lastAlertTime = 0L
+
+    fun playProximityAlarm(context: Context) {
+        val now = System.currentTimeMillis()
+        if (now - lastAlertTime < 6000) return // 6 second cooldown between sound alerts
+        lastAlertTime = now
+
+        try {
+            if (toneGenerator == null) {
+                toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 95)
+            }
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 700)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                val alertUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val ringtone = RingtoneManager.getRingtone(context, alertUri)
+                ringtone?.play()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraListScreen(
@@ -130,6 +161,7 @@ fun CameraListScreen(
     var selectedDistance by remember { mutableStateOf("All") }
     var sortByDistance by remember { mutableStateOf(true) }
     var isListView by remember { mutableStateOf(false) }
+    var isSoundAlertEnabled by remember { mutableStateOf(true) }
 
     // Camera focused from list item tap
     var focusedCamera by remember { mutableStateOf<CameraItem?>(null) }
@@ -279,6 +311,23 @@ fun CameraListScreen(
         list
     }
 
+    // Active proximity camera within 500 meters
+    val activeProximityCamera = remember(camerasWithDistance, userLocation) {
+        if (userLocation != null) {
+            val closest = camerasWithDistance.minByOrNull { it.distanceMeters }
+            if (closest != null && closest.distanceMeters <= 500.0) {
+                closest
+            } else null
+        } else null
+    }
+
+    // Play proximity alarm tone when user gets within 500 meters of a speed camera
+    LaunchedEffect(activeProximityCamera, isSoundAlertEnabled) {
+        if (activeProximityCamera != null && isSoundAlertEnabled) {
+            ProximitySoundAlertManager.playProximityAlarm(context)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -291,8 +340,22 @@ fun CameraListScreen(
                     .fillMaxSize()
                     .padding(top = 48.dp)
             ) {
-                HeaderSection(darkTheme, onThemeToggle)
+                HeaderSection(darkTheme, isSoundAlertEnabled, onThemeToggle, onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled })
                 
+                AnimatedVisibility(
+                    visible = activeProximityCamera != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    activeProximityCamera?.let { cam ->
+                        ProximityAlertBanner(
+                            camera = cam,
+                            soundEnabled = isSoundAlertEnabled,
+                            onToggleSound = { isSoundAlertEnabled = !isSoundAlertEnabled }
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 ToggleRow(isListView) { isListView = it }
@@ -386,7 +449,22 @@ fun CameraListScreen(
                     .fillMaxSize()
                     .padding(top = 48.dp)
             ) {
-                HeaderSection(darkTheme, onThemeToggle)
+                HeaderSection(darkTheme, isSoundAlertEnabled, onThemeToggle, onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled })
+                
+                AnimatedVisibility(
+                    visible = activeProximityCamera != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    activeProximityCamera?.let { cam ->
+                        ProximityAlertBanner(
+                            camera = cam,
+                            soundEnabled = isSoundAlertEnabled,
+                            onToggleSound = { isSoundAlertEnabled = !isSoundAlertEnabled }
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
                 ToggleRow(isListView) { 
                     isListView = it 
@@ -502,7 +580,78 @@ fun LocationStatusBar(
 }
 
 @Composable
-fun HeaderSection(darkTheme: Boolean, onThemeToggle: () -> Unit) {
+fun ProximityAlertBanner(
+    camera: CameraItem,
+    soundEnabled: Boolean,
+    onToggleSound: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.errorContainer,
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.error),
+        shadowElevation = 6.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .background(MaterialTheme.colorScheme.error, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = "Camera Warning",
+                        tint = MaterialTheme.colorScheme.onError,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(
+                        "⚠️ AI SPEED CAMERA AHEAD",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Text(
+                        "${camera.name} • ${camera.distance} away",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            IconButton(onClick = onToggleSound) {
+                Icon(
+                    imageVector = if (soundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                    contentDescription = "Toggle Sound",
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun HeaderSection(
+    darkTheme: Boolean,
+    soundEnabled: Boolean,
+    onThemeToggle: () -> Unit,
+    onSoundToggle: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -544,12 +693,21 @@ fun HeaderSection(darkTheme: Boolean, onThemeToggle: () -> Unit) {
                 )
             }
         }
-        IconButton(onClick = onThemeToggle) {
-            Icon(
-                imageVector = if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                contentDescription = "Toggle Theme",
-                tint = MaterialTheme.colorScheme.primary
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onSoundToggle) {
+                Icon(
+                    imageVector = if (soundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                    contentDescription = "Toggle Sound Alert",
+                    tint = if (soundEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(onClick = onThemeToggle) {
+                Icon(
+                    imageVector = if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = "Toggle Theme",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
