@@ -10,25 +10,32 @@ import android.location.Location
 import android.location.LocationManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -123,6 +130,9 @@ fun CameraListScreen(
     var sortByDistance by remember { mutableStateOf(true) }
     var isListView by remember { mutableStateOf(false) }
 
+    // Camera focused from list item tap
+    var focusedCamera by remember { mutableStateOf<CameraItem?>(null) }
+
     // User Location state
     var userLocation by remember { mutableStateOf<Location?>(null) }
     
@@ -138,9 +148,13 @@ fun CameraListScreen(
         )
     }
 
-    // Dynamic list of unique districts
-    val districtsList = remember(allCameras) {
-        listOf("All Districts") + allCameras.map { it.district }.distinct().sorted()
+    // Dynamic list of unique districts with counts
+    val districtCounts = remember(allCameras) {
+        allCameras.groupingBy { it.district }.eachCount()
+    }
+
+    val districtsList = remember(districtCounts) {
+        listOf("All Districts") + districtCounts.keys.sorted()
     }
 
     // Fused Location Provider Setup
@@ -198,7 +212,7 @@ fun CameraListScreen(
         }
     }
 
-    // Compute distance for all cameras relative to user location (or fallback Kozhikode location)
+    // Compute distance for all cameras relative to user location (or fallback location)
     val camerasWithDistance = remember(allCameras, userLocation) {
         val refLoc = effectiveLocation
         allCameras.map { camera ->
@@ -219,13 +233,30 @@ fun CameraListScreen(
     }
 
     // Filter and Sort strictly by proximity (nearest camera first)
-    val filteredCameras = remember(searchQuery, selectedDistrict, camerasWithDistance, effectiveLocation, sortByDistance) {
+    val filteredCameras = remember(searchQuery, selectedDistrict, selectedDistance, camerasWithDistance, effectiveLocation, sortByDistance) {
         var list = camerasWithDistance.filter { camera ->
             val matchesSearch = searchQuery.isEmpty() ||
                 camera.name.contains(searchQuery, ignoreCase = true) ||
                 camera.district.contains(searchQuery, ignoreCase = true)
             val matchesDistrict = selectedDistrict == "All Districts" || camera.district.equals(selectedDistrict, ignoreCase = true)
-            matchesSearch && matchesDistrict
+
+            val results = FloatArray(1)
+            Location.distanceBetween(
+                effectiveLocation.latitude, effectiveLocation.longitude,
+                camera.latitude, camera.longitude,
+                results
+            )
+            val distKm = results[0] / 1000.0
+
+            val matchesDistance = when (selectedDistance) {
+                "< 5 km" -> distKm <= 5.0
+                "< 10 km" -> distKm <= 10.0
+                "< 25 km" -> distKm <= 25.0
+                "< 50 km" -> distKm <= 50.0
+                else -> true
+            }
+
+            matchesSearch && matchesDistrict && matchesDistance
         }
         
         if (sortByDistance) {
@@ -270,7 +301,9 @@ fun CameraListScreen(
                     selectedDistrict = selectedDistrict,
                     onDistrictChange = { selectedDistrict = it },
                     districts = districtsList,
+                    districtCounts = districtCounts,
                     selectedDistance = selectedDistance,
+                    onDistanceChange = { selectedDistance = it },
                     sortByDistance = sortByDistance,
                     onSortChange = { sortByDistance = it }
                 )
@@ -293,16 +326,35 @@ fun CameraListScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Camera List
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    items(filteredCameras) { camera ->
-                        CameraCard(camera)
+                // Camera List with key optimization and empty state UI
+                if (filteredCameras.isEmpty()) {
+                    EmptyCameraState(
+                        onResetFilters = {
+                            searchQuery = ""
+                            selectedDistrict = "All Districts"
+                            selectedDistance = "All"
+                        }
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        items(
+                            items = filteredCameras,
+                            key = { "${it.latitude}_${it.longitude}_${it.name}" }
+                        ) { camera ->
+                            CameraCard(
+                                camera = camera,
+                                onFocusOnMap = {
+                                    focusedCamera = camera
+                                    isListView = false
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -310,6 +362,7 @@ fun CameraListScreen(
             // Map View fills the screen
             CameraMapView(
                 cameras = filteredCameras,
+                focusedCamera = focusedCamera,
                 userLocation = userLocation,
                 darkTheme = darkTheme,
                 onRequestLocation = {
@@ -330,7 +383,63 @@ fun CameraListScreen(
             ) {
                 HeaderSection(darkTheme, onThemeToggle)
                 Spacer(modifier = Modifier.height(8.dp))
-                ToggleRow(isListView) { isListView = it }
+                ToggleRow(isListView) { 
+                    isListView = it 
+                    if (it) focusedCamera = null
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyCameraState(onResetFilters: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.VideocamOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "No AI Cameras Found",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                "Try searching for another place or clear your district/distance filters.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp,
+                maxLines = 2
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = onResetFilters,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Reset Filters", fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -347,35 +456,43 @@ fun LocationStatusBar(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .background(
-                if (userLocation != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f) else MaterialTheme.colorScheme.surfaceVariant,
+                if (userLocation != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant,
                 RoundedCornerShape(12.dp)
             )
             .clickable { if (userLocation == null) onRequestPermission() }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = if (userLocation != null) Icons.Default.MyLocation else Icons.Default.LocationOff,
-                contentDescription = null,
-                tint = if (userLocation != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(16.dp)
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        if (userLocation != null) MaterialTheme.colorScheme.primary else Color.Gray,
+                        CircleShape
+                    )
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = if (userLocation != null) "Sorted by distance to your location" else "GPS offline • Showing relative distances (Tap to acquire)",
+                text = if (userLocation != null) "Sorted by distance to your location" else "GPS offline • Showing relative distance (Tap to connect)",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium
             )
         }
-        Text(
-            text = "$cameraCount cams",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Surface(
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = "$cameraCount items",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+            )
+        }
     }
 }
 
@@ -388,12 +505,40 @@ fun HeaderSection(darkTheme: Boolean, onThemeToggle: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            "AiCam Alert (Kerala)",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(
+                        Brush.linearGradient(
+                            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
+                        ),
+                        RoundedCornerShape(10.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Shield,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    "AiCam Alert",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Kerala MVD Traffic Network",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 11.sp
+                )
+            }
+        }
         IconButton(onClick = onThemeToggle) {
             Icon(
                 imageVector = if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
@@ -413,7 +558,7 @@ fun ToggleRow(isListView: Boolean, onToggle: (Boolean) -> Unit) {
         horizontalArrangement = Arrangement.Center
     ) {
         SegmentedToggle(
-            options = listOf("Map" to Icons.Default.Map, "List" to Icons.Default.FormatListBulleted),
+            options = listOf("Map" to Icons.Default.Map, "List" to Icons.AutoMirrored.Filled.FormatListBulleted),
             selectedOption = if (isListView) "List" else "Map",
             onOptionSelected = { onToggle(it == "List") }
         )
@@ -427,7 +572,9 @@ fun SearchAndFilters(
     selectedDistrict: String,
     onDistrictChange: (String) -> Unit,
     districts: List<String>,
+    districtCounts: Map<String, Int>,
     selectedDistance: String,
+    onDistanceChange: (String) -> Unit,
     sortByDistance: Boolean,
     onSortChange: (Boolean) -> Unit
 ) {
@@ -439,9 +586,16 @@ fun SearchAndFilters(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(12.dp)),
+                .clip(RoundedCornerShape(14.dp)),
             placeholder = { Text("Search by camera or district", color = MaterialTheme.colorScheme.onSurfaceVariant) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { onSearchChange("") }) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -449,7 +603,8 @@ fun SearchAndFilters(
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
                 unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-            )
+            ),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -465,19 +620,21 @@ fun SearchAndFilters(
                 label = "District",
                 selectedOption = selectedDistrict,
                 options = districts,
+                counts = districtCounts,
                 onOptionSelected = onDistrictChange,
                 modifier = Modifier.weight(1f)
             )
             FilterDropdown(
-                label = "Distance",
+                label = "Distance Filter",
                 selectedOption = selectedDistance,
-                options = listOf("All", "< 5 km", "< 10 km", "< 25 km"),
-                onOptionSelected = { /* Distance filter */ },
+                options = listOf("All", "< 5 km", "< 10 km", "< 25 km", "< 50 km"),
+                counts = emptyMap(),
+                onOptionSelected = onDistanceChange,
                 modifier = Modifier.weight(1f)
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Sort Toggle
         Row(
@@ -497,6 +654,7 @@ fun SearchAndFilters(
 @Composable
 fun CameraMapView(
     cameras: List<CameraItem>,
+    focusedCamera: CameraItem?,
     userLocation: Location?,
     darkTheme: Boolean,
     onRequestLocation: () -> Unit
@@ -588,6 +746,17 @@ fun CameraMapView(
         BitmapDrawable(context.resources, bitmap)
     }
 
+    // Handle map camera animate when focusedCamera changes
+    LaunchedEffect(focusedCamera) {
+        if (focusedCamera != null && mapViewRef != null) {
+            mapViewRef?.controller?.animateTo(
+                GeoPoint(focusedCamera.latitude, focusedCamera.longitude),
+                16.0,
+                800L
+            )
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -601,7 +770,6 @@ fun CameraMapView(
                     val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
                     setBackgroundColor(mapBgColor)
                     
-                    // Set tile overlay loading background and line colors to match dark surface theme, removing white flashing on zoom out
                     overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
                     overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
                     
@@ -613,14 +781,16 @@ fun CameraMapView(
                     
                     zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
                     
-                    val initialCenter = if (userLocation != null) {
+                    val initialCenter = if (focusedCamera != null) {
+                        GeoPoint(focusedCamera.latitude, focusedCamera.longitude)
+                    } else if (userLocation != null) {
                         GeoPoint(userLocation.latitude, userLocation.longitude)
                     } else if (cameras.isNotEmpty()) {
                         GeoPoint(cameras[0].latitude, cameras[0].longitude)
                     } else {
                         GeoPoint(10.8505, 76.2711)
                     }
-                    controller.setZoom(13.5)
+                    controller.setZoom(if (focusedCamera != null) 16.0 else 13.5)
                     controller.setCenter(initialCenter)
                     
                     mapViewRef = this
@@ -661,6 +831,14 @@ fun CameraMapView(
                         snippet = "${camera.district} • ${camera.distance}"
                     }
                     view.overlays.add(marker)
+                }
+
+                if (focusedCamera != null) {
+                    view.controller.animateTo(
+                        GeoPoint(focusedCamera.latitude, focusedCamera.longitude),
+                        16.0,
+                        500L
+                    )
                 }
                 view.invalidate()
             },
@@ -732,7 +910,7 @@ fun SegmentedToggle(
 ) {
     Row(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp))
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -740,10 +918,10 @@ fun SegmentedToggle(
             val isSelected = selectedOption == text
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .background(if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
                     .clickable { onOptionSelected(text) }
-                    .padding(vertical = 8.dp, horizontal = 24.dp),
+                    .padding(vertical = 8.dp, horizontal = 26.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -770,6 +948,7 @@ fun FilterDropdown(
     label: String,
     selectedOption: String,
     options: List<String>,
+    counts: Map<String, Int>,
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -781,23 +960,35 @@ fun FilterDropdown(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp))
                     .clickable { expanded = true }
-                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                    .padding(horizontal = 14.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(selectedOption, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, maxLines = 1)
+                Text(selectedOption, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.heightIn(max = 320.dp)
+                modifier = Modifier.heightIn(max = 340.dp)
             ) {
                 options.forEach { option ->
+                    val count = counts[option]
                     DropdownMenuItem(
-                        text = { Text(option) },
+                        text = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(option, fontWeight = if (option == selectedOption) FontWeight.Bold else FontWeight.Normal)
+                                if (count != null) {
+                                    Text("($count)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                                }
+                            }
+                        },
                         onClick = {
                             onOptionSelected(option)
                             expanded = false
@@ -849,40 +1040,45 @@ fun SortSegmentedToggle(
 }
 
 @Composable
-fun CameraCard(camera: CameraItem) {
+fun CameraCard(
+    camera: CameraItem,
+    onFocusOnMap: () -> Unit
+) {
     val isNearby = remember(camera.distance) {
         camera.distance.contains("m") || (camera.distance.contains("km") && (camera.distance.replace(" km", "").toDoubleOrNull() ?: 999.0) < 5.0)
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onFocusOnMap() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(14.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon with Glow
+            // Icon with Dual Glow
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .padding(4.dp),
+                    .size(56.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            RoundedCornerShape(14.dp)
+                            if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                            RoundedCornerShape(16.dp)
                         )
                 )
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(44.dp)
                         .background(if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -890,12 +1086,12 @@ fun CameraCard(camera: CameraItem) {
                         Icons.Default.Videocam,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -903,7 +1099,9 @@ fun CameraCard(camera: CameraItem) {
                         text = camera.name,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     if (isNearby) {
@@ -927,47 +1125,57 @@ fun CameraCard(camera: CameraItem) {
                         Icons.Default.LocationOn,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = camera.district,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp
+                        fontSize = 13.sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "• MVD Speed Cam",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        fontSize = 11.sp
                     )
                 }
             }
 
-            // Distance Badge
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Distance Badge & Map Action
             Column(
-                modifier = Modifier
-                    .width(84.dp)
-                    .background(
-                        if (isNearby) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
-                        RoundedCornerShape(12.dp)
-                    )
-                    .border(
-                        1.dp,
-                        if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                        RoundedCornerShape(12.dp)
-                    )
-                    .padding(vertical = 10.dp, horizontal = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    Icons.Default.Navigation,
-                    contentDescription = null,
-                    tint = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = camera.distance,
-                    color = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Surface(
+                    color = if (isNearby) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Navigation,
+                            contentDescription = null,
+                            tint = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = camera.distance,
+                            color = if (isNearby) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
