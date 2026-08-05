@@ -114,6 +114,11 @@ fun fetchBestLocation(
                 val best = gpsLoc ?: netLoc
                 if (best != null) {
                     onLocationFound(best)
+                } else {
+                    fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                        .addOnSuccessListener { curLoc ->
+                            if (curLoc != null) onLocationFound(curLoc)
+                        }
                 }
             }
         }
@@ -164,7 +169,7 @@ fun CameraListScreen(
     var isListView by remember { mutableStateOf(false) }
 
     val prefs = remember(context) { context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE) }
-    var isBackgroundRadarEnabled by remember { mutableStateOf(prefs.getBoolean("bg_radar_enabled", false)) }
+    var isBackgroundRadarEnabled by remember { mutableStateOf(prefs.getBoolean("bg_radar_enabled", true)) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -420,6 +425,7 @@ fun CameraListScreen(
 
                 // Location Status Bar
                 LocationStatusBar(
+                    radarEnabled = isBackgroundRadarEnabled,
                     userLocation = userLocation,
                     cameraCount = filteredCameras.size,
                     onRequestPermission = {
@@ -562,38 +568,59 @@ fun EmptyCameraState(onResetFilters: () -> Unit) {
 
 @Composable
 fun LocationStatusBar(
+    radarEnabled: Boolean,
     userLocation: Location?,
     cameraCount: Int,
     onRequestPermission: () -> Unit
 ) {
+    val (dotColor, statusText) = remember(radarEnabled, userLocation) {
+        when {
+            !radarEnabled -> Pair(
+                Color.Gray,
+                "Radar Paused • Tap ALERT ON to activate"
+            )
+            userLocation != null -> Pair(
+                Color(0xFF00E5FF),
+                "Live Radar Active • Sorted by nearest camera"
+            )
+            else -> Pair(
+                Color(0xFFFFB300),
+                "Connecting GPS • Acquiring location fix..."
+            )
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .background(
-                if (userLocation != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant,
+                if (radarEnabled && userLocation != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                else MaterialTheme.colorScheme.surfaceVariant,
                 RoundedCornerShape(12.dp)
             )
-            .clickable { if (userLocation == null) onRequestPermission() }
+            .clickable { onRequestPermission() }
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
                     .size(8.dp)
-                    .background(
-                        if (userLocation != null) MaterialTheme.colorScheme.primary else Color.Gray,
-                        CircleShape
-                    )
+                    .background(dotColor, CircleShape)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = if (userLocation != null) "Sorted by distance to your location" else "GPS offline • Showing relative distance (Tap to connect)",
+                text = statusText,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
         Surface(
