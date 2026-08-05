@@ -11,6 +11,7 @@ import android.location.LocationManager
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.media.ToneGenerator
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -163,6 +164,36 @@ fun CameraListScreen(
     var isListView by remember { mutableStateOf(false) }
     var isSoundAlertEnabled by remember { mutableStateOf(true) }
 
+    val prefs = remember(context) { context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE) }
+    var isBackgroundRadarEnabled by remember { mutableStateOf(prefs.getBoolean("bg_radar_enabled", false)) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            CameraProximityService.startService(context)
+        }
+    }
+
+    fun toggleBackgroundRadar(enabled: Boolean) {
+        isBackgroundRadarEnabled = enabled
+        prefs.edit().putBoolean("bg_radar_enabled", enabled).apply()
+        if (enabled) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val hasNotifPermission = ContextCompat.checkSelfPermission(
+                    context, android.Manifest.permission.POST_NOTIFICATIONS
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                if (!hasNotifPermission) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    return
+                }
+            }
+            CameraProximityService.startService(context)
+        } else {
+            CameraProximityService.stopService(context)
+        }
+    }
+
     // Camera focused from list item tap
     var focusedCamera by remember { mutableStateOf<CameraItem?>(null) }
 
@@ -204,8 +235,15 @@ fun CameraListScreen(
         }
     }
 
-    // Request Continuous Location Updates
+    // Request Continuous Location Updates & Sync Background Radar Service
     LaunchedEffect(Unit) {
+        if (isBackgroundRadarEnabled) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                CameraProximityService.startService(context)
+            }
+        }
         val hasFine = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val hasCoarse = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
         if (hasFine || hasCoarse) {
@@ -375,7 +413,14 @@ fun CameraListScreen(
                     onSortChange = { sortByDistance = it }
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                BackgroundRadarToggleCard(
+                    isEnabled = isBackgroundRadarEnabled,
+                    onToggle = { toggleBackgroundRadar(it) }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Location Status Bar
                 LocationStatusBar(
@@ -524,6 +569,76 @@ fun EmptyCameraState(onResetFilters: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Reset Filters", fontWeight = FontWeight.Bold)
             }
+        }
+    }
+}
+
+@Composable
+fun BackgroundRadarToggleCard(
+    isEnabled: Boolean,
+    onToggle: (Boolean) -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .background(
+                            if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Radar,
+                        contentDescription = null,
+                        tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(
+                        "Background Radar Alert",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        if (isEnabled) "Active • Alerts even when app is closed" else "Off • Enable background notification alerts",
+                        color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 11.sp
+                    )
+                }
+            }
+            Switch(
+                checked = isEnabled,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surface
+                )
+            )
         }
     }
 }
