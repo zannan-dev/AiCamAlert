@@ -162,7 +162,6 @@ fun CameraListScreen(
     var selectedDistance by remember { mutableStateOf("All") }
     var sortByDistance by remember { mutableStateOf(true) }
     var isListView by remember { mutableStateOf(false) }
-    var isSoundAlertEnabled by remember { mutableStateOf(true) }
 
     val prefs = remember(context) { context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE) }
     var isBackgroundRadarEnabled by remember { mutableStateOf(prefs.getBoolean("bg_radar_enabled", false)) }
@@ -235,43 +234,56 @@ fun CameraListScreen(
         }
     }
 
-    // Request Continuous Location Updates & Sync Background Radar Service
-    LaunchedEffect(Unit) {
+    val locationCallback = remember {
+        object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                result.lastLocation?.let { userLocation = it }
+            }
+        }
+    }
+
+    // Dynamic Location Update Control tied to isBackgroundRadarEnabled
+    DisposableEffect(isBackgroundRadarEnabled) {
         if (isBackgroundRadarEnabled) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
             ) {
                 CameraProximityService.startService(context)
             }
-        }
-        val hasFine = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        val hasCoarse = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        if (hasFine || hasCoarse) {
-            fetchBestLocation(context, fusedLocationClient) { loc -> userLocation = loc }
-            try {
-                val locationRequest = LocationRequest.Builder(
-                    Priority.PRIORITY_HIGH_ACCURACY, 4000L
-                ).setMinUpdateIntervalMillis(2000L).build()
+            val hasFine = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            val hasCoarse = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (hasFine || hasCoarse) {
+                fetchBestLocation(context, fusedLocationClient) { loc -> userLocation = loc }
+                try {
+                    val locationRequest = LocationRequest.Builder(
+                        Priority.PRIORITY_HIGH_ACCURACY, 4000L
+                    ).setMinUpdateIntervalMillis(2000L).build()
 
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    object : LocationCallback() {
-                        override fun onLocationResult(result: LocationResult) {
-                            result.lastLocation?.let { userLocation = it }
-                        }
-                    },
-                    android.os.Looper.getMainLooper()
+                    fusedLocationClient.requestLocationUpdates(
+                        locationRequest,
+                        locationCallback,
+                        android.os.Looper.getMainLooper()
+                    )
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
+                }
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
                 )
-            } catch (e: SecurityException) {
-                e.printStackTrace()
             }
         } else {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
+            // STOP location updates, stop background service, and clear userLocation when ALERT OFF
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            CameraProximityService.stopService(context)
+            userLocation = null
+        }
+
+        onDispose {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
         }
     }
 
@@ -349,9 +361,9 @@ fun CameraListScreen(
         list
     }
 
-    // Active proximity camera within 500 meters
-    val activeProximityCamera = remember(camerasWithDistance, userLocation) {
-        if (userLocation != null) {
+    // Active proximity camera within 500 meters (only evaluated when ALERT IS ON)
+    val activeProximityCamera = remember(camerasWithDistance, userLocation, isBackgroundRadarEnabled) {
+        if (isBackgroundRadarEnabled && userLocation != null) {
             val closest = camerasWithDistance.minByOrNull { it.distanceMeters }
             if (closest != null && closest.distanceMeters <= 500.0) {
                 closest
@@ -359,9 +371,9 @@ fun CameraListScreen(
         } else null
     }
 
-    // Play proximity alarm tone when user gets within 500 meters of a speed camera
-    LaunchedEffect(activeProximityCamera, isSoundAlertEnabled) {
-        if (activeProximityCamera != null && isSoundAlertEnabled) {
+    // Play proximity alarm tone when user gets within 500 meters of a speed camera (ALERT ON only)
+    LaunchedEffect(activeProximityCamera, isBackgroundRadarEnabled) {
+        if (isBackgroundRadarEnabled && activeProximityCamera != null) {
             ProximitySoundAlertManager.playProximityAlarm(context)
         }
     }
@@ -380,27 +392,11 @@ fun CameraListScreen(
             ) {
                 HeaderSection(
                     darkTheme = darkTheme,
-                    soundEnabled = isSoundAlertEnabled,
                     radarEnabled = isBackgroundRadarEnabled,
                     onThemeToggle = onThemeToggle,
-                    onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled },
                     onRadarToggle = { toggleBackgroundRadar(it) }
                 )
                 
-                AnimatedVisibility(
-                    visible = activeProximityCamera != null,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    activeProximityCamera?.let { cam ->
-                        ProximityAlertBanner(
-                            camera = cam,
-                            soundEnabled = isSoundAlertEnabled,
-                            onToggleSound = { isSoundAlertEnabled = !isSoundAlertEnabled }
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 ToggleRow(isListView) { isListView = it }
@@ -420,14 +416,7 @@ fun CameraListScreen(
                     onSortChange = { sortByDistance = it }
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                BackgroundRadarToggleCard(
-                    isEnabled = isBackgroundRadarEnabled,
-                    onToggle = { toggleBackgroundRadar(it) }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Location Status Bar
                 LocationStatusBar(
@@ -503,27 +492,11 @@ fun CameraListScreen(
             ) {
                 HeaderSection(
                     darkTheme = darkTheme,
-                    soundEnabled = isSoundAlertEnabled,
                     radarEnabled = isBackgroundRadarEnabled,
                     onThemeToggle = onThemeToggle,
-                    onSoundToggle = { isSoundAlertEnabled = !isSoundAlertEnabled },
                     onRadarToggle = { toggleBackgroundRadar(it) }
                 )
                 
-                AnimatedVisibility(
-                    visible = activeProximityCamera != null,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    activeProximityCamera?.let { cam ->
-                        ProximityAlertBanner(
-                            camera = cam,
-                            soundEnabled = isSoundAlertEnabled,
-                            onToggleSound = { isSoundAlertEnabled = !isSoundAlertEnabled }
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(8.dp))
                 ToggleRow(isListView) { 
                     isListView = it 
@@ -588,76 +561,6 @@ fun EmptyCameraState(onResetFilters: () -> Unit) {
 }
 
 @Composable
-fun BackgroundRadarToggleCard(
-    isEnabled: Boolean,
-    onToggle: (Boolean) -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .background(
-                            if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Radar,
-                        contentDescription = null,
-                        tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text(
-                        "Background Radar Alert",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        if (isEnabled) "Active • Alerts even when app is closed" else "Off • Enable background notification alerts",
-                        color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 11.sp
-                    )
-                }
-            }
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = onToggle,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        }
-    }
-}
-
-@Composable
 fun LocationStatusBar(
     userLocation: Location?,
     cameraCount: Int,
@@ -709,78 +612,10 @@ fun LocationStatusBar(
 }
 
 @Composable
-fun ProximityAlertBanner(
-    camera: CameraItem,
-    soundEnabled: Boolean,
-    onToggleSound: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.errorContainer,
-        border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.error),
-        shadowElevation = 6.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .background(MaterialTheme.colorScheme.error, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Warning,
-                        contentDescription = "Camera Warning",
-                        tint = MaterialTheme.colorScheme.onError,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text(
-                        "⚠️ AI SPEED CAMERA AHEAD",
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Text(
-                        "${camera.name} • ${camera.distance} away",
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-            IconButton(onClick = onToggleSound) {
-                Icon(
-                    imageVector = if (soundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                    contentDescription = "Toggle Sound",
-                    tint = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun HeaderSection(
     darkTheme: Boolean,
-    soundEnabled: Boolean,
     radarEnabled: Boolean,
     onThemeToggle: () -> Unit,
-    onSoundToggle: () -> Unit,
     onRadarToggle: (Boolean) -> Unit
 ) {
     Row(
@@ -826,7 +661,7 @@ fun HeaderSection(
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // Master Alert ON/OFF Pill Button
             Surface(
@@ -839,7 +674,7 @@ fun HeaderSection(
                 )
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -856,16 +691,6 @@ fun HeaderSection(
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
-            }
-
-            // Sound Mute/Unmute
-            IconButton(onClick = onSoundToggle, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    imageVector = if (soundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                    contentDescription = "Toggle Sound Alert",
-                    tint = if (soundEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
-                )
             }
 
             // Dark/Light Theme
