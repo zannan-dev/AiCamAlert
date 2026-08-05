@@ -1,6 +1,7 @@
 package com.example.aicamalert
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -191,6 +192,17 @@ fun CameraListScreen(
         isBackgroundRadarEnabled = enabled
         prefs.edit().putBoolean("bg_radar_enabled", enabled).apply()
         if (enabled) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(context)) {
+                try {
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        android.net.Uri.parse("package:${context.packageName}")
+                    )
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val hasNotifPermission = ContextCompat.checkSelfPermission(
                     context, android.Manifest.permission.POST_NOTIFICATIONS

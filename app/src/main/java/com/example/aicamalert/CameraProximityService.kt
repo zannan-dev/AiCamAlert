@@ -139,17 +139,32 @@ class CameraProximityService : Service() {
                 playSirenSound()
                 showLockScreenHeadsUpNotification(closestCamera.name, closestCamera.district, distStr)
 
-                // Directly launch FullScreenAlertActivity over keyguard / lock screen
+                // Launch FullScreenAlertActivity over keyguard / lock screen
                 try {
                     val alertIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
                         putExtra("camera_name", closestCamera.name)
                         putExtra("district", closestCamera.district)
                         putExtra("distance", distStr)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                     }
-                    startActivity(alertIntent)
+                    val pi = PendingIntent.getActivity(
+                        this, System.currentTimeMillis().toInt(), alertIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    pi.send()
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    try {
+                        val alertIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
+                            putExtra("camera_name", closestCamera.name)
+                            putExtra("district", closestCamera.district)
+                            putExtra("distance", distStr)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                        }
+                        startActivity(alertIntent)
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
                 }
             }
         }
