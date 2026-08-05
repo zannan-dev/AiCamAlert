@@ -132,15 +132,20 @@ object ProximitySoundAlertManager {
     private var lastAlertTime = 0L
 
     fun playProximityAlarm(context: Context) {
+        val prefs = context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+        val snoozeUntil = prefs.getLong("snooze_until_timestamp", 0L)
         val now = System.currentTimeMillis()
-        if (now - lastAlertTime < 6000) return // 6 second cooldown between sound alerts
+
+        if (now < snoozeUntil) return // Alerts snoozed for 1 hour
+
+        if (now - lastAlertTime < 15000) return // 15 second cooldown between sound alerts
         lastAlertTime = now
 
         try {
             if (toneGenerator == null) {
-                toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 95)
+                toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
             }
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 700)
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 1000)
         } catch (e: Exception) {
             e.printStackTrace()
             try {

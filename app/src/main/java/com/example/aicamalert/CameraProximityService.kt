@@ -47,16 +47,41 @@ class CameraProximityService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = createForegroundNotification("Monitoring 704 Kerala MVD speed cameras in background")
-        startForeground(NOTIFICATION_ID, notification)
+        val action = intent?.action
+        if (action == ACTION_UPDATE_SNOOZE) {
+            updateForegroundNotification()
+            return START_STICKY
+        }
+
+        updateForegroundNotification()
         return START_STICKY
+    }
+
+    private fun updateForegroundNotification() {
+        val prefs = getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+        val snoozeUntil = prefs.getLong("snooze_until_timestamp", 0L)
+        val now = System.currentTimeMillis()
+
+        val notificationText = if (now < snoozeUntil) {
+            val remainingMins = ((snoozeUntil - now) / 60000L).coerceAtLeast(1)
+            "Radar Snoozed • Alerts paused for ${remainingMins} mins (Tap Resume to re-enable)"
+        } else {
+            "AiCam Radar Active • Monitoring 704 Kerala MVD speed cameras"
+        }
+
+        val notification = createForegroundNotification(notificationText, isSnoozed = now < snoozeUntil)
+        startForeground(NOTIFICATION_ID, notification)
     }
 
     private fun startLocationUpdates() {
         try {
+            // Swiggy-style battery optimized location updates: 5s interval, 20m distance threshold
             val locationRequest = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, 3000L
-            ).setMinUpdateIntervalMillis(1500L).build()
+                Priority.PRIORITY_HIGH_ACCURACY, 5000L
+            )
+                .setMinUpdateIntervalMillis(3000L)
+                .setMinUpdateDistanceMeters(20f)
+                .build()
 
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
@@ -70,6 +95,17 @@ class CameraProximityService : Service() {
 
     private fun checkCameraProximity(userLocation: Location) {
         if (cameras.isEmpty()) return
+
+        // Check if alerts are snoozed by the user ("I HAVE NOTICED THIS")
+        val prefs = getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+        val snoozeUntil = prefs.getLong("snooze_until_timestamp", 0L)
+        val now = System.currentTimeMillis()
+
+        if (now < snoozeUntil) {
+            // Alerts are snoozed for 1 hour
+            updateForegroundNotification()
+            return
+        }
 
         var closestCamera: CameraItem? = null
         var minDistanceMeters = Double.MAX_VALUE
@@ -89,9 +125,8 @@ class CameraProximityService : Service() {
         }
 
         if (closestCamera != null && minDistanceMeters <= 500.0) {
-            val now = System.currentTimeMillis()
-            // Alert if new camera or 10 seconds elapsed since last alert
-            if (now - lastAlertTime > 10000 || lastAlertCameraName != closestCamera.name) {
+            // Alert if new camera zone entered or 15 seconds elapsed
+            if (now - lastAlertTime > 15000 || lastAlertCameraName != closestCamera.name) {
                 lastAlertTime = now
                 lastAlertCameraName = closestCamera.name
 
@@ -101,18 +136,19 @@ class CameraProximityService : Service() {
                     String.format(java.util.Locale.US, "%.2f km", minDistanceMeters / 1000.0)
                 }
 
-                playAlarmSound()
-                showHeadsUpProximityNotification(closestCamera.name, closestCamera.district, distStr)
+                playSirenSound()
+                showLockScreenHeadsUpNotification(closestCamera.name, closestCamera.district, distStr)
             }
         }
     }
 
-    private fun playAlarmSound() {
+    private fun playSirenSound() {
         try {
             if (toneGenerator == null) {
                 toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
             }
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 800)
+            // Loud siren alarm type sound
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 1200)
         } catch (e: Exception) {
             e.printStackTrace()
             try {
@@ -139,15 +175,16 @@ class CameraProximityService : Service() {
                 description = "Shows active background camera proximity monitoring status"
             }
 
-            // High Priority Proximity Alert Channel
+            // High Priority Proximity Alert Channel with Lock Screen Heads-Up Banner
             val alertChannel = NotificationChannel(
                 CHANNEL_ID_ALERT,
                 "AiCam Speed Camera Proximity Warning",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Triggers sound and heads-up alert when approaching speed cameras"
+                description = "Triggers lock screen heads-up siren alert when approaching speed cameras"
                 enableVibration(true)
-                vibrationPattern = longArrayOf(0, 400, 200, 400)
+                vibrationPattern = longArrayOf(0, 500, 200, 500)
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
             }
 
             manager?.createNotificationChannel(serviceChannel)
@@ -155,26 +192,47 @@ class CameraProximityService : Service() {
         }
     }
 
-    private fun createForegroundNotification(contentText: String): android.app.Notification {
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
+    private fun createForegroundNotification(contentText: String, isSnoozed: Boolean): android.app.Notification {
+        val openAppIntent = Intent(this, MainActivity::class.java)
+        val openAppPendingIntent = PendingIntent.getActivity(
+            this, 0, openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID_SERVICE)
-            .setContentTitle("AiCam Radar Active")
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID_SERVICE)
+            .setContentTitle(if (isSnoozed) "AiCam Radar Snoozed" else "AiCam Radar Active")
             .setContentText(contentText)
             .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(openAppPendingIntent)
             .setOngoing(true)
-            .build()
+
+        if (isSnoozed) {
+            val resumeIntent = Intent(this, SnoozeAlertReceiver::class.java).apply {
+                action = ACTION_RESUME_ALERTS
+            }
+            val resumePendingIntent = PendingIntent.getBroadcast(
+                this, 1, resumeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.addAction(android.R.drawable.ic_media_play, "RESUME RADAR", resumePendingIntent)
+        }
+
+        return builder.build()
     }
 
-    private fun showHeadsUpProximityNotification(cameraName: String, district: String, distance: String) {
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 1, intent,
+    private fun showLockScreenHeadsUpNotification(cameraName: String, district: String, distance: String) {
+        val openAppIntent = Intent(this, MainActivity::class.java)
+        val openAppPendingIntent = PendingIntent.getActivity(
+            this, 2, openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Lock screen "I HAVE NOTICED THIS" 1-Hour Snooze Action
+        val snoozeIntent = Intent(this, SnoozeAlertReceiver::class.java).apply {
+            action = ACTION_SNOOZE_ALERTS
+        }
+        val snoozePendingIntent = PendingIntent.getBroadcast(
+            this, 3, snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -182,10 +240,16 @@ class CameraProximityService : Service() {
             .setContentTitle("⚠️ AI SPEED CAMERA AHEAD!")
             .setContentText("$cameraName ($district) is $distance away. Slow down!")
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(pendingIntent)
+            .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+            .setContentIntent(openAppPendingIntent)
+            .addAction(
+                android.R.drawable.ic_lock_idle_alarm,
+                "I HAVE NOTICED THIS (Snooze 1h)",
+                snoozePendingIntent
+            )
             .setAutoCancel(true)
             .build()
 
@@ -208,8 +272,23 @@ class CameraProximityService : Service() {
         const val NOTIFICATION_ID = 1001
         const val ALERT_NOTIFICATION_ID = 2002
 
+        const val ACTION_SNOOZE_ALERTS = "com.example.aicamalert.ACTION_SNOOZE_ALERTS"
+        const val ACTION_RESUME_ALERTS = "com.example.aicamalert.ACTION_RESUME_ALERTS"
+        const val ACTION_UPDATE_SNOOZE = "com.example.aicamalert.ACTION_UPDATE_SNOOZE"
+
         fun startService(context: Context) {
             val intent = Intent(context, CameraProximityService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        fun updateSnoozeState(context: Context) {
+            val intent = Intent(context, CameraProximityService::class.java).apply {
+                action = ACTION_UPDATE_SNOOZE
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
