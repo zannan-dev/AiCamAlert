@@ -24,7 +24,9 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = Color.White,
     surfaceVariant = CardBackground,
     onSurfaceVariant = TextSecondary,
-    secondaryContainer = AccentCyanDim,
+    primaryContainer = Color(0xFF00363D),
+    onPrimaryContainer = AccentCyan,
+    secondaryContainer = Color(0xFF002B30),
     onSecondaryContainer = AccentCyan
 )
 
