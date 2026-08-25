@@ -7,54 +7,82 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.location.Location
-import android.media.AudioManager
-import android.media.RingtoneManager
-import android.media.ToneGenerator
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.example.aicamalert.alert.AlertSoundManager
+import com.example.aicamalert.data.CameraRepository
+import com.example.aicamalert.location.AppForegroundTracker
+import com.example.aicamalert.location.AppLocationManager
+import com.example.aicamalert.location.ProximityEngine
+import com.example.aicamalert.util.PermissionUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
+/**
+ * Foreground service for background camera proximity detection.
+ *
+ * Shares [CameraRepository] and [AppLocationManager] with the UI via
+ * [AiCamApplication] — no duplicate GPS or JSON parsing.
+ *
+ * Suppresses sound/notification/full-screen alerts when the app is in foreground
+ * (the ViewModel handles in-app alerts in that case).
+ */
 class CameraProximityService : Service() {
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
-    private var cameras: List<CameraItem> = emptyList()
+    private lateinit var app: AiCamApplication
+    private lateinit var repository: CameraRepository
+    private lateinit var proximityEngine: ProximityEngine
+    private lateinit var locationManager: AppLocationManager
+    private lateinit var foregroundTracker: AppForegroundTracker
 
-    private var toneGenerator: ToneGenerator? = null
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var locationCollectJob: Job? = null
+
     private var lastAlertTime = 0L
     private var lastAlertCameraName = ""
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
-        cameras = loadKeralaCameras(this)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                locationResult.lastLocation?.let { location ->
-                    checkCameraProximity(location)
-                }
-            }
+        app = AiCamApplication.get(this)
+        repository = app.repository
+        proximityEngine = app.proximityEngine
+        locationManager = app.locationManager
+        foregroundTracker = app.foregroundTracker
+
+        serviceScope.launch {
+            repository.loadCameras()
         }
-        startLocationUpdates()
+
+        if (PermissionUtils.hasLocationPermission(this)) {
+            locationManager.setRadarLocationEnabled(true)
+            startCollectingLocation()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val action = intent?.action
-        if (action == ACTION_UPDATE_SNOOZE) {
+        if (intent?.action == ACTION_UPDATE_SNOOZE) {
             updateForegroundNotification()
             return START_STICKY
         }
 
         updateForegroundNotification()
         return START_STICKY
+    }
+
+    private fun startCollectingLocation() {
+        locationCollectJob?.cancel()
+        locationCollectJob = serviceScope.launch {
+            locationManager.location.collect { location ->
+                location?.let { checkCameraProximity(it) }
+            }
+        }
     }
 
     private fun updateForegroundNotification() {
@@ -73,117 +101,75 @@ class CameraProximityService : Service() {
         startForeground(NOTIFICATION_ID, notification)
     }
 
-    private fun startLocationUpdates() {
-        try {
-            // Swiggy-style battery optimized location updates: 5s interval, 20m distance threshold
-            val locationRequest = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, 5000L
-            )
-                .setMinUpdateIntervalMillis(3000L)
-                .setMinUpdateDistanceMeters(20f)
-                .build()
-
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                mainLooper
-            )
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        }
-    }
-
+    /**
+     * Proximity check using spatial grid — O(5–15) instead of O(704).
+     * Skips UI alerts when the app is in the foreground.
+     */
     private fun checkCameraProximity(userLocation: Location) {
-        if (cameras.isEmpty()) return
+        if (!repository.isLoaded) return
 
-        // Check if alerts are snoozed by the user ("I HAVE NOTICED THIS")
         val prefs = getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
         val snoozeUntil = prefs.getLong("snooze_until_timestamp", 0L)
         val now = System.currentTimeMillis()
 
         if (now < snoozeUntil) {
-            // Alerts are snoozed for 1 hour
             updateForegroundNotification()
             return
         }
 
-        var closestCamera: CameraItem? = null
-        var minDistanceMeters = Double.MAX_VALUE
+        // App is open — ViewModel handles in-app alerts; avoid duplicate sirens
+        if (foregroundTracker.isInForeground.value) return
 
-        val results = FloatArray(1)
-        for (camera in cameras) {
-            Location.distanceBetween(
-                userLocation.latitude, userLocation.longitude,
-                camera.latitude, camera.longitude,
-                results
-            )
-            val dist = results[0].toDouble()
-            if (dist < minDistanceMeters) {
-                minDistanceMeters = dist
-                closestCamera = camera
-            }
-        }
+        val result = proximityEngine.findApproachingInRange(userLocation) ?: return
+        val (closestCamera, minDistanceMeters) = result
 
-        if (closestCamera != null && minDistanceMeters <= 500.0) {
-            // Alert if new camera zone entered or 15 seconds elapsed
-            if (now - lastAlertTime > 15000 || lastAlertCameraName != closestCamera.name) {
-                lastAlertTime = now
-                lastAlertCameraName = closestCamera.name
+        if (now - lastAlertTime > 15000 || lastAlertCameraName != closestCamera.name) {
+            lastAlertTime = now
+            lastAlertCameraName = closestCamera.name
 
-                val distStr = if (minDistanceMeters < 1000) {
-                    "${minDistanceMeters.toInt()} m"
-                } else {
-                    String.format(java.util.Locale.US, "%.2f km", minDistanceMeters / 1000.0)
-                }
+            val distStr = formatDistance(minDistanceMeters)
 
-                playSirenSound()
-                showLockScreenHeadsUpNotification(closestCamera.name, closestCamera.district, distStr)
-
-                // Launch FullScreenAlertActivity over keyguard / lock screen
-                try {
-                    val alertIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
-                        putExtra("camera_name", closestCamera.name)
-                        putExtra("district", closestCamera.district)
-                        putExtra("distance", distStr)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    }
-                    val pi = PendingIntent.getActivity(
-                        this, System.currentTimeMillis().toInt(), alertIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    pi.send()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    try {
-                        val alertIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
-                            putExtra("camera_name", closestCamera.name)
-                            putExtra("district", closestCamera.district)
-                            putExtra("distance", distStr)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                        }
-                        startActivity(alertIntent)
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
-            }
+            AlertSoundManager.playSiren(this)
+            showLockScreenHeadsUpNotification(closestCamera.name, closestCamera.district, distStr)
+            launchFullScreenAlert(closestCamera.name, closestCamera.district, distStr)
         }
     }
 
-    private fun playSirenSound() {
+    private fun formatDistance(distMeters: Double): String {
+        return if (distMeters < 1000) {
+            "${distMeters.toInt()} m"
+        } else {
+            String.format(java.util.Locale.US, "%.2f km", distMeters / 1000.0)
+        }
+    }
+
+    private fun launchFullScreenAlert(cameraName: String, district: String, distance: String) {
         try {
-            if (toneGenerator == null) {
-                toneGenerator = ToneGenerator(AudioManager.STREAM_ALARM, 100)
+            val alertIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
+                putExtra("camera_name", cameraName)
+                putExtra("district", district)
+                putExtra("distance", distance)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             }
-            // Loud siren alarm type sound
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 1200)
+            val pi = PendingIntent.getActivity(
+                this, System.currentTimeMillis().toInt(), alertIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            pi.send()
         } catch (e: Exception) {
             e.printStackTrace()
             try {
-                val alertUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val ringtone = RingtoneManager.getRingtone(this, alertUri)
-                ringtone?.play()
+                startActivity(
+                    Intent(this, FullScreenAlertActivity::class.java).apply {
+                        putExtra("camera_name", cameraName)
+                        putExtra("district", district)
+                        putExtra("distance", distance)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+                )
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
@@ -194,7 +180,6 @@ class CameraProximityService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NotificationManager::class.java)
 
-            // Foreground Service Channel (Low importance for persistent status bar)
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID_SERVICE,
                 "AiCam Background Radar Status",
@@ -203,7 +188,6 @@ class CameraProximityService : Service() {
                 description = "Shows active background camera proximity monitoring status"
             }
 
-            // High Priority Proximity Alert Channel with Lock Screen Heads-Up Banner
             val alertChannel = NotificationChannel(
                 CHANNEL_ID_ALERT,
                 "AiCam Speed Camera Proximity Warning",
@@ -255,7 +239,6 @@ class CameraProximityService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Full Screen Pay Alert Activity Intent for Lock Screen
         val fullScreenIntent = Intent(this, FullScreenAlertActivity::class.java).apply {
             putExtra("camera_name", cameraName)
             putExtra("district", district)
@@ -267,7 +250,6 @@ class CameraProximityService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Lock screen "I HAVE NOTICED THIS" 1-Hour Snooze Action
         val snoozeIntent = Intent(this, SnoozeAlertReceiver::class.java).apply {
             action = ACTION_SNOOZE_ALERTS
         }
@@ -300,9 +282,9 @@ class CameraProximityService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-        toneGenerator?.release()
-        toneGenerator = null
+        locationCollectJob?.cancel()
+        locationManager.setRadarLocationEnabled(false)
+        serviceScope.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -318,6 +300,8 @@ class CameraProximityService : Service() {
         const val ACTION_UPDATE_SNOOZE = "com.example.aicamalert.ACTION_UPDATE_SNOOZE"
 
         fun startService(context: Context) {
+            if (!PermissionUtils.hasNotificationPermission(context)) return
+
             val intent = Intent(context, CameraProximityService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -327,6 +311,11 @@ class CameraProximityService : Service() {
         }
 
         fun updateSnoozeState(context: Context) {
+            val activeClusters = context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+                .getStringSet("active_camera_cluster_ids", emptySet())
+                .orEmpty()
+            if (activeClusters.isEmpty()) return
+
             val intent = Intent(context, CameraProximityService::class.java).apply {
                 action = ACTION_UPDATE_SNOOZE
             }

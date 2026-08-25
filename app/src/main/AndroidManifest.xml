@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -15,6 +16,7 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
+        android:name=".AiCamApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -37,6 +39,15 @@
             <intent-filter>
                 <action android:name="com.example.aicamalert.ACTION_SNOOZE_ALERTS" />
                 <action android:name="com.example.aicamalert.ACTION_RESUME_ALERTS" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".CameraGeofenceReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.aicamalert.ACTION_GEOFENCE_TRANSITION" />
             </intent-filter>
         </receiver>
 
