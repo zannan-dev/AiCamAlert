@@ -8,7 +8,7 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
 
 - **Browse cameras**
   - List view with search (name / district), district filter with counts, distance filter (`< 5/10/25/50 km`), and sort by distance or district.
-  - Map view powered by **OSMdroid** (OpenStreetMap) with clustered markers, user location, and tap-to-focus. Tile cache tuned for performance (12 download threads, 500 MB disk cache).
+  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Tile cache tuned for performance (12 download threads, 500 MB disk cache). Geofence regions are clustered; map markers are not.
   - Distance to each camera computed on-device via `Location.distanceBetween`, throttled to every 12 s / 100 m in `CameraViewModel:242`.
 
 - **Proactive proximity alerts**
@@ -24,6 +24,7 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
   - Shared `AppLocationManager` / `CameraRepository` / `ProximityEngine` via `AiCamApplication` — no duplicate GPS or JSON parsing between UI and service.
 
 - **Background Radar toggle**
+  - Restores geofences after reboot or app update when radar was enabled and its required permissions remain granted.
   - Handles the full Android permission chain: foreground location → background location (`Allow all the time`) → `POST_NOTIFICATIONS` (Android 13+) → optional overlay & battery-optimization exemption cards.
   - Auto-disables radar if required permissions are revoked (`CameraViewModel:121`).
 
@@ -87,7 +88,7 @@ Declared in `app/src/main/AndroidManifest.xml:5`:
 ```xml
 ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION, ACCESS_BACKGROUND_LOCATION
 FOREGROUND_SERVICE, FOREGROUND_SERVICE_LOCATION
-POST_NOTIFICATIONS, USE_FULL_SCREEN_INTENT
+POST_NOTIFICATIONS, USE_FULL_SCREEN_INTENT, RECEIVE_BOOT_COMPLETED
 WAKE_LOCK, SYSTEM_ALERT_WINDOW, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 INTERNET, ACCESS_NETWORK_STATE   <!-- OSMdroid tile loading -->
 ```
@@ -130,7 +131,7 @@ To update camera data, replace `app/src/main/assets/kerala_ai_cameras.json` (arr
 1. **Load:** `CameraRepository:34` parses the bundled JSON on `Dispatchers.IO` and builds a `HashMap<Long, List<CameraItem>>` grid.
 2. **Locate:** `AppLocationManager` emits `StateFlow<Location?>` — foreground updates when the app is visible, continuous updates only when radar geofences are active.
 3. **Geofence:** `CameraGeofenceManager:49` groups cameras into ~0.2° cells (`CameraClusterer:134`), expanding the cell size until ≤100 geofences. OS wakes the app on enter/exit.
-4. **Alert:** `ProximityEngine:33` queries the 3×3 grid neighbourhood, picks the nearest camera within the dynamic radius, checks bearing, and triggers sound + notification + full-screen intent (background) or in-app banner (foreground).
+4. **Alert:** `ProximityEngine:33` queries the 3×3 grid neighbourhood, filters by bearing, picks the nearest qualifying camera within the dynamic radius, and triggers sound + notification + full-screen intent (background) or in-app banner (foreground).
 
 ## Build Variants
 

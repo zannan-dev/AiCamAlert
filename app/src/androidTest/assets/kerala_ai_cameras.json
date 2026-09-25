@@ -1,0 +1,6 @@
+[
+  {"name":"Behind","district":"Test","latitude":10.001,"longitude":76.0},
+  {"name":"Ahead","district":"Test","latitude":10.004,"longitude":76.0},
+  {"name":"Further ahead","district":"Test","latitude":10.006,"longitude":76.0},
+  {"name":"Out of range","district":"Test","latitude":10.010,"longitude":76.0}
+]

@@ -32,13 +32,9 @@ class ProximityEngine(private val repository: CameraRepository) {
      */
     fun findApproachingInRange(location: Location): Pair<CameraItem, Double>? {
         val radius = computeDynamicAlertRadius(location.speed)
-        val result = repository.findNearestCamera(
+        return repository.findNearestCamera(
             location.latitude, location.longitude, radius
-        ) ?: return null
-
-        val (camera, dist) = result
-        if (!isApproaching(location, camera)) return null
-        return Pair(camera, dist)
+        ) { camera -> isApproaching(location, camera) }
     }
 
     /**

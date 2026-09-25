@@ -93,7 +93,12 @@ class CameraRepository(private val context: Context) {
      * Find the nearest camera within [radiusMeters] using the spatial grid.
      * Returns null if no camera is within range.
      */
-    fun findNearestCamera(lat: Double, lon: Double, radiusMeters: Double): Pair<CameraItem, Double>? {
+    fun findNearestCamera(
+        lat: Double,
+        lon: Double,
+        radiusMeters: Double,
+        qualifies: (CameraItem) -> Boolean = { true },
+    ): Pair<CameraItem, Double>? {
         val nearby = getCamerasNear(lat, lon)
         if (nearby.isEmpty()) return null
 
@@ -104,7 +109,7 @@ class CameraRepository(private val context: Context) {
         for (camera in nearby) {
             Location.distanceBetween(lat, lon, camera.latitude, camera.longitude, results)
             val dist = results[0].toDouble()
-            if (dist < minDist) {
+            if (dist <= radiusMeters && dist < minDist && qualifies(camera)) {
                 minDist = dist
                 closest = camera
             }

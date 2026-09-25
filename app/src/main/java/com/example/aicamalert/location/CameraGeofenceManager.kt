@@ -4,6 +4,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.aicamalert.CameraGeofenceReceiver
@@ -14,6 +16,11 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.math.cos
 
 /**
@@ -38,7 +45,8 @@ class CameraGeofenceManager(
             Intent(context, CameraGeofenceReceiver::class.java).apply {
                 action = CameraGeofenceReceiver.ACTION_GEOFENCE_TRANSITION
             },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0,
         )
     }
 
@@ -47,7 +55,7 @@ class CameraGeofenceManager(
      * the user's "Allow all the time" location grant on Android 10+.
      */
     suspend fun register() {
-        if (!hasGeofencingPermission()) return
+        if (!hasGeofencingPermission() || !isRadarEnabled()) return
 
         repository.loadCameras()
         val geofences = CameraClusterer.create(repository.cameras).map { cluster ->
@@ -72,21 +80,40 @@ class CameraGeofenceManager(
             remove(KEY_ACTIVE_CLUSTER_IDS)
         }
 
-        geofencingClient.removeGeofences(geofencePendingIntent)
-            .addOnCompleteListener {
-                if (!hasGeofencingPermission()) return@addOnCompleteListener
-                try {
-                    geofencingClient.addGeofences(
-                        GeofencingRequest.Builder()
-                            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                            .addGeofences(geofences)
-                            .build(),
-                        geofencePendingIntent,
-                    )
-                } catch (_: SecurityException) {
-                    // The user may revoke location in the short interval after the check.
-                }
+        try {
+            geofencingClient.removeGeofences(geofencePendingIntent).awaitCompletion()
+            // The user may turn radar off or revoke a grant while removal is pending.
+            if (!hasGeofencingPermission() || !isRadarEnabled()) return
+            geofencingClient.addGeofences(
+                GeofencingRequest.Builder()
+                    .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                    .addGeofences(geofences)
+                    .build(),
+                geofencePendingIntent,
+            ).awaitCompletion()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("CameraGeofenceManager", "Unable to register camera geofences", e)
+        }
+    }
+
+    private fun isRadarEnabled(): Boolean =
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+            .getBoolean("bg_radar_enabled", false)
+
+    // Await the actual Play services operation so a boot receiver can keep its
+    // asynchronous broadcast alive until registration finishes.
+    private suspend fun Task<Void>.awaitCompletion(): Unit = suspendCancellableCoroutine { continuation ->
+        addOnCompleteListener { task ->
+            when {
+                task.isCanceled -> continuation.cancel()
+                task.isSuccessful -> continuation.resume(Unit)
+                else -> continuation.resumeWithException(
+                    task.exception ?: IllegalStateException("Geofence operation failed"),
+                )
             }
+        }
     }
 
     /** Remove all geofences and clear any remembered in-zone state. */
@@ -98,16 +125,12 @@ class CameraGeofenceManager(
     }
 
     private fun hasGeofencingPermission(): Boolean {
-        val hasForegroundLocation =
+        val hasFineLocation =
             ContextCompat.checkSelfPermission(
                 context,
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
-            ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                ) == PackageManager.PERMISSION_GRANTED
-        return hasForegroundLocation && PermissionUtils.hasBackgroundLocationPermission(context)
+            ) == PackageManager.PERMISSION_GRANTED
+        return hasFineLocation && PermissionUtils.hasBackgroundLocationPermission(context)
     }
 
     companion object {
