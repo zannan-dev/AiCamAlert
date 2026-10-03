@@ -41,9 +41,13 @@ class CameraGeofenceReceiver : BroadcastReceiver() {
             putStringSet(CameraGeofenceManager.KEY_ACTIVE_CLUSTER_IDS, activeIds)
         }
 
-        if (activeIds.isNotEmpty() && preferences.getBoolean("bg_radar_enabled", true)) {
+        if (activeIds.isNotEmpty() && preferences.getBoolean("bg_radar_enabled", false)) {
             CameraProximityService.startService(context)
-        } else if (activeIds.isEmpty()) {
+        } else if (preferences.getBoolean("bg_radar_enabled", false)) {
+            // Keep the user-started foreground service available for background audio;
+            // only GPS tracking pauses outside camera zones. An active alarm keeps ringing.
+            CameraProximityService.pauseRadarLocation(context)
+        } else {
             CameraProximityService.stopService(context)
         }
     }

@@ -74,4 +74,23 @@ class ProximityEngineTest {
         assertEquals(740.0, engine.computeDynamicAlertRadius(30f), 0.01)
         assertEquals(1200.0, engine.computeDynamicAlertRadius(100f), 0.01)
     }
+    @Test
+    fun maximumRadiusSearchIncludesCameraTwoGridCellsAway() {
+        val location = location().apply { latitude = 9.9999; speed = 100f }
+        val result = engine.findApproachingInRange(location) { it.name == "Out of range" }
+        assertEquals("Out of range", result?.first?.name)
+    }
+
+    @Test
+    fun nearestDisplaySearchWorksOutsideNeighbouringGrid() {
+        assertEquals("Out of range", engine.findNearest(10.1, 76.0)?.first?.name)
+    }
+
+    @Test
+    fun unreliableBearingDoesNotHideCamera() {
+        if (android.os.Build.VERSION.SDK_INT < 26) return
+        val location = location().apply { bearing = 180f; bearingAccuracyDegrees = 80f }
+        assertEquals("Ahead", engine.findApproachingInRange(location) { it.name == "Ahead" }?.first?.name)
+    }
+
 }

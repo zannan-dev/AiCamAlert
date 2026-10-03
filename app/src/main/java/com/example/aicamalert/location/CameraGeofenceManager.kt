@@ -91,6 +91,8 @@ class CameraGeofenceManager(
                     .build(),
                 geofencePendingIntent,
             ).awaitCompletion()
+        } catch (e: SecurityException) {
+            Log.w("CameraGeofenceManager", "Location permission was revoked during registration", e)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

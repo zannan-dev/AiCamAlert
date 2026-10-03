@@ -49,6 +49,7 @@ fun SearchAndFilters(
     sortByDistance: Boolean,
     onSortChange: (Boolean) -> Unit
 ) {
+    var filtersExpanded by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     Column {
         // Search Bar
         TextField(
@@ -80,44 +81,48 @@ fun SearchAndFilters(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // District and Distance Dropdowns
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FilterDropdown(
-                label = "District",
-                selectedOption = selectedDistrict,
-                options = districts,
-                counts = districtCounts,
-                onOptionSelected = onDistrictChange,
-                modifier = Modifier.weight(1f)
-            )
-            FilterDropdown(
-                label = "Distance Filter",
-                selectedOption = selectedDistance,
-                options = listOf("All", "< 5 km", "< 10 km", "< 25 km", "< 50 km"),
-                counts = emptyMap(),
-                onOptionSelected = onDistanceChange,
-                modifier = Modifier.weight(1f)
-            )
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = { filtersExpanded = !filtersExpanded }) {
+                Icon(Icons.Default.Tune, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                val count = (if (selectedDistrict != "All Districts") 1 else 0) +
+                    (if (selectedDistance != "All") 1 else 0)
+                Text(if (count > 0) "Filters ($count)" else "Filters")
+                Icon(if (filtersExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+            }
+            TextButton(onClick = { onSortChange(!sortByDistance) }) {
+                Text(if (sortByDistance) "Nearest first" else "District order")
+            }
         }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // Sort Toggle
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            SortSegmentedToggle(
-                selected = if (sortByDistance) "By Distance" else "By District",
-                onSelected = { onSortChange(it == "By Distance") }
-            )
+        androidx.compose.animation.AnimatedVisibility(visible = filtersExpanded) {
+        Column {
+            // District and Distance Dropdowns
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                FilterDropdown(
+                    label = "District",
+                    selectedOption = selectedDistrict,
+                    options = districts,
+                    counts = districtCounts,
+                    onOptionSelected = onDistrictChange,
+                    modifier = Modifier.weight(1f)
+                )
+                FilterDropdown(
+                    label = "Distance Filter",
+                    selectedOption = selectedDistance,
+                    options = listOf("All", "< 5 km", "< 10 km", "< 25 km", "< 50 km"),
+                    counts = emptyMap(),
+                    onOptionSelected = onDistanceChange,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
         }
     }
 }
@@ -215,45 +220,6 @@ fun FilterDropdown(
                         }
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun SortSegmentedToggle(
-    selected: String,
-    onSelected: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .background(Color.Transparent, RoundedCornerShape(12.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
-            .padding(4.dp)
-    ) {
-        listOf("By Distance", "By District").forEach { text ->
-            val isSelected = selected == text
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
-                    .clickable { onSelected(text) }
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (isSelected) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                } else if (text == "By District") {
-                     Icon(Icons.Default.Business, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
-                     Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text(
-                    text = text,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
             }
         }
     }

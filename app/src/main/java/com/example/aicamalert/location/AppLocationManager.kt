@@ -25,7 +25,7 @@ class AppLocationManager(private val context: Context) {
     enum class LocationProfile {
         /** Active use: high accuracy, frequent updates. */
         FOREGROUND,
-        /** Background radar: balanced power, less frequent updates. */
+        /** Active background radar: high accuracy inside camera zones. */
         BACKGROUND
     }
 
@@ -39,10 +39,18 @@ class AppLocationManager(private val context: Context) {
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
-            result.lastLocation?.let { _location.value = it }
+            result.lastLocation?.let { publishLocation(it) }
         }
     }
 
+    @Synchronized
+    private fun publishLocation(location: Location) {
+        if (location.elapsedRealtimeNanos > (_location.value?.elapsedRealtimeNanos ?: -1L)) {
+            _location.value = location
+        }
+    }
+
+    @Volatile
     private var isUpdating = false
     private var foregroundLocationEnabled = false
     private var radarLocationEnabled = false
@@ -53,20 +61,21 @@ class AppLocationManager(private val context: Context) {
      * separate from radar use so background tracking can fully stop outside a
      * camera geofence without interrupting the map when the user returns.
      */
+    @Synchronized
     fun setForegroundLocationEnabled(enabled: Boolean) {
-        if (foregroundLocationEnabled == enabled) return
         foregroundLocationEnabled = enabled
         reconcileUpdates()
     }
 
     /** Enables continuous updates while background radar is active in a cluster. */
+    @Synchronized
     fun setRadarLocationEnabled(enabled: Boolean) {
-        if (radarLocationEnabled == enabled) return
         radarLocationEnabled = enabled
         reconcileUpdates()
     }
 
     /** Switch GPS profile; restarts updates if currently enabled. */
+    @Synchronized
     fun setProfile(profile: LocationProfile) {
         if (profile == currentProfile) return
         currentProfile = profile
@@ -96,7 +105,7 @@ class AppLocationManager(private val context: Context) {
 
         try {
             fusedClient.lastLocation.addOnSuccessListener { loc ->
-                if (loc != null) _location.value = loc
+                if (loc != null) publishLocation(loc)
             }
 
             val request = when (currentProfile) {
@@ -104,14 +113,14 @@ class AppLocationManager(private val context: Context) {
                     Priority.PRIORITY_HIGH_ACCURACY, 5_000L
                 )
                     .setMinUpdateIntervalMillis(3_000L)
-                    .setMinUpdateDistanceMeters(20f)
+                    .setMinUpdateDistanceMeters(10f)
                     .build()
 
                 LocationProfile.BACKGROUND -> LocationRequest.Builder(
-                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, 12_000L
+                    Priority.PRIORITY_HIGH_ACCURACY, 5_000L
                 )
-                    .setMinUpdateIntervalMillis(10_000L)
-                    .setMinUpdateDistanceMeters(75f)
+                    .setMinUpdateIntervalMillis(3_000L)
+                    .setMinUpdateDistanceMeters(10f)
                     .build()
             }
 
@@ -119,7 +128,10 @@ class AppLocationManager(private val context: Context) {
                 request,
                 locationCallback,
                 handlerThread.looper
-            )
+            ).addOnFailureListener {
+                isUpdating = false
+                android.util.Log.e("AppLocationManager", "Location updates failed", it)
+            }
             isUpdating = true
         } catch (e: SecurityException) {
             e.printStackTrace()

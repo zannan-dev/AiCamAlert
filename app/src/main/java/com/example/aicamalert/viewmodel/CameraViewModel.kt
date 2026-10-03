@@ -11,7 +11,6 @@ import com.example.aicamalert.alert.AlertSoundManager
 import com.example.aicamalert.data.CameraRepository
 import com.example.aicamalert.data.model.CameraItem
 import com.example.aicamalert.location.AppLocationManager
-import com.example.aicamalert.location.ProximityEngine
 import com.example.aicamalert.util.PermissionUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +35,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     // Shared app-scoped dependencies (single instance)
     val repository: CameraRepository = app.repository
     val locationManager: AppLocationManager = app.locationManager
-    private val proximityEngine: ProximityEngine = app.proximityEngine
 
     // ── UI State ──
 
@@ -57,9 +55,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _focusedCamera = MutableStateFlow<CameraItem?>(null)
     val focusedCamera: StateFlow<CameraItem?> = _focusedCamera.asStateFlow()
-
-    private val _isAlertDismissedLocally = MutableStateFlow(false)
-    val isAlertDismissedLocally: StateFlow<Boolean> = _isAlertDismissedLocally.asStateFlow()
 
     // ── Radar State ──
 
@@ -83,8 +78,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _camerasWithDistance = MutableStateFlow<List<CameraItem>>(emptyList())
 
-    private val _activeProximityCamera = MutableStateFlow<CameraItem?>(null)
-    val activeProximityCamera: StateFlow<CameraItem?> = _activeProximityCamera.asStateFlow()
+    val activeProximityCamera: StateFlow<CameraItem?> = AlertSoundManager.activeAlert
 
     private val _districtCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
     val districtCounts: StateFlow<Map<String, Int>> = _districtCounts.asStateFlow()
@@ -127,6 +121,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             _districtCounts.value = counts
             _districtsList.value = listOf("All Districts") + counts.keys.sorted()
             recomputeDistances(locationManager.location.value ?: fallbackLocation)
+            locationManager.location.value?.let { checkProximity(it) }
         }
 
         viewModelScope.launch {
@@ -143,9 +138,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Background GPS is intentionally not started here. Android wakes the app
-     * when it enters a camera cluster; only then does the radar service begin
-     * continuous location updates.
+     * Geofences activate location tracking near cameras. The user-started
+     * radar service stays available for alarm audio while GPS pauses outside zones.
      */
     private fun registerCameraGeofencesIfAllowed() {
         if (!hasRequiredRadarPermissions()) return
@@ -155,13 +149,9 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun hasRequiredRadarPermissions(): Boolean {
-        return PermissionUtils.hasBackgroundLocationPermission(context) &&
+        return PermissionUtils.hasPreciseLocationPermission(context) &&
+            PermissionUtils.hasBackgroundLocationPermission(context) &&
             PermissionUtils.hasNotificationPermission(context)
-    }
-
-    private fun isSnoozed(): Boolean {
-        val snoozeUntil = prefs.getLong("snooze_until_timestamp", 0L)
-        return System.currentTimeMillis() < snoozeUntil
     }
 
     // ── Actions ──
@@ -186,14 +176,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun dismissAlertLocally() {
-        _isAlertDismissedLocally.value = true
-    }
-
-    fun snoozeAlerts() {
-        val snoozeUntil = System.currentTimeMillis() + (60 * 60 * 1000L)
-        prefs.edit().putLong("snooze_until_timestamp", snoozeUntil).apply()
-        CameraProximityService.updateSnoozeState(context)
-        _isAlertDismissedLocally.value = true
+        CameraProximityService.acknowledgeAlarm(context)
     }
 
     fun toggleBackgroundRadar(enabled: Boolean) {
@@ -201,11 +184,12 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         prefs.edit().putBoolean("bg_radar_enabled", enabled).apply()
 
         if (enabled) {
+            if (hasRequiredRadarPermissions()) CameraProximityService.startService(context)
             registerCameraGeofencesIfAllowed()
         } else {
             app.geofenceManager.unregister()
             CameraProximityService.stopService(context)
-            AlertSoundManager.release()
+            app.alertGate.reset()
         }
     }
 
@@ -218,6 +202,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
         if (_isBackgroundRadarEnabled.value) {
+            // Starting while the screen is visible keeps background audio eligible.
+            CameraProximityService.startService(context)
             registerCameraGeofencesIfAllowed()
         }
     }
@@ -272,33 +258,12 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
      * Background alerts are handled by [CameraProximityService].
      */
     private fun checkProximity(location: Location) {
-        if (!_isBackgroundRadarEnabled.value || isSnoozed()) {
-            _activeProximityCamera.value = null
-            return
-        }
+        if (!repository.isLoaded || !_isBackgroundRadarEnabled.value ||
+            !app.foregroundTracker.isInForeground.value) return
 
-        if (!app.foregroundTracker.isInForeground.value) {
-            _activeProximityCamera.value = null
-            return
-        }
-
-        val result = proximityEngine.findApproachingInRange(location)
-        val prevCamera = _activeProximityCamera.value
-
-        if (result != null) {
-            val (camera, dist) = result
-            val distStr = formatDistance(dist)
-            val alertCamera = camera.copy(distance = distStr, distanceMeters = dist)
-            _activeProximityCamera.value = alertCamera
-
-            if (prevCamera == null || prevCamera.name != camera.name) {
-                _isAlertDismissedLocally.value = false
-            }
-
-            AlertSoundManager.playProximityAlarm(context)
-        } else {
-            _activeProximityCamera.value = null
-        }
+        val (camera, distance) = app.alertGate.nextAlert(location) ?: return
+        CameraProximityService.startAlarm(context,
+            camera.copy(distance = formatDistance(distance), distanceMeters = distance))
     }
 
     private fun formatDistance(distMeters: Double): String {

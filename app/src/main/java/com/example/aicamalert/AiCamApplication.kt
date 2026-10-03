@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.example.aicamalert.data.CameraRepository
 import com.example.aicamalert.location.AppForegroundTracker
+import com.example.aicamalert.location.CameraAlertGate
 import com.example.aicamalert.location.CameraGeofenceManager
 import com.example.aicamalert.location.AppLocationManager
 import com.example.aicamalert.location.ProximityEngine
@@ -25,6 +26,9 @@ class AiCamApplication : Application() {
     lateinit var proximityEngine: ProximityEngine
         private set
 
+    lateinit var alertGate: CameraAlertGate
+        private set
+
     lateinit var geofenceManager: CameraGeofenceManager
         private set
 
@@ -36,6 +40,7 @@ class AiCamApplication : Application() {
         repository = CameraRepository(this)
         locationManager = AppLocationManager(this)
         proximityEngine = ProximityEngine(repository)
+        alertGate = CameraAlertGate(proximityEngine)
         geofenceManager = CameraGeofenceManager(this, repository)
         foregroundTracker = AppForegroundTracker()
 

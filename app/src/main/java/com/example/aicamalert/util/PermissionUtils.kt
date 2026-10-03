@@ -59,6 +59,11 @@ object PermissionUtils {
         }
     }
 
+    fun hasPreciseLocationPermission(context: Context): Boolean =
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
     fun hasLocationPermission(context: Context): Boolean {
         val fine = androidx.core.content.ContextCompat.checkSelfPermission(
             context, android.Manifest.permission.ACCESS_FINE_LOCATION

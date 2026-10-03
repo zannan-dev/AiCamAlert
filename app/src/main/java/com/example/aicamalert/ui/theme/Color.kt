@@ -10,15 +10,15 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-val DarkBackground = Color(0xFF000000)
-val SurfaceColor = Color(0xFF121212)
-val CardBackground = Color(0xFF1A1A1A)
-val AccentCyan = Color(0xFF00E5FF) // More vibrant Cyan
+val DarkBackground = Color(0xFF10191D)
+val SurfaceColor = Color(0xFF162328)
+val CardBackground = Color(0xFF223239)
+val AccentCyan = Color(0xFF79D4D0) // Teal accent
 val AccentCyanDim = Color(0xFF00363D)
-val TextSecondary = Color(0xFF9E9E9E)
+val TextSecondary = Color(0xFFB5C7CC)
 
-val LightBackground = Color(0xFFFFFBFE)
-val LightSurface = Color(0xFFFFFBFE)
-val LightPrimary = Color(0xFF006A7D) // More vibrant punchy Teal/Blue for light mode
-val LightSecondary = Color(0xFF4A6267)
-val LightTertiary = Color(0xFF525E7D)
+val LightBackground = Color(0xFFF4F8F9)
+val LightSurface = Color(0xFFFFFFFF)
+val LightPrimary = Color(0xFF006A7D)
+val LightSecondary = Color(0xFF35666F)
+val LightTertiary = Color(0xFF318A98)

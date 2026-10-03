@@ -3,6 +3,10 @@ package com.example.aicamalert.data
 import android.content.Context
 import android.location.Location
 import com.example.aicamalert.data.model.CameraItem
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.math.ceil
+import kotlin.math.cos
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -19,6 +23,8 @@ import org.json.JSONArray
  */
 class CameraRepository(private val context: Context) {
 
+    private val loadMutex = Mutex()
+    @Volatile
     private var _cameras: List<CameraItem> = emptyList()
     val cameras: List<CameraItem> get() = _cameras
 
@@ -32,8 +38,8 @@ class CameraRepository(private val context: Context) {
      * Load cameras from the bundled JSON asset on IO thread.
      * Builds the spatial grid index after parsing.
      */
-    suspend fun loadCameras() {
-        if (_cameras.isNotEmpty()) return
+    suspend fun loadCameras() = loadMutex.withLock {
+        if (_cameras.isNotEmpty()) return@withLock
 
         val loaded = withContext(Dispatchers.IO) {
             try {
@@ -59,13 +65,13 @@ class CameraRepository(private val context: Context) {
             }
         }
 
+        buildSpatialGrid(loaded)
         _cameras = loaded
-        buildSpatialGrid()
     }
 
-    private fun buildSpatialGrid() {
+    private fun buildSpatialGrid(cameras: List<CameraItem>) {
         spatialGrid.clear()
-        for (camera in _cameras) {
+        for (camera in cameras) {
             spatialGrid.getOrPut(camera.gridKey) { mutableListOf() }.add(camera)
         }
     }
@@ -75,13 +81,17 @@ class CameraRepository(private val context: Context) {
      * Returns only cameras in adjacent ~1.1km cells — typically 5–15 items
      * instead of scanning all 704.
      */
-    fun getCamerasNear(lat: Double, lon: Double): List<CameraItem> {
+    fun getCamerasNear(lat: Double, lon: Double, radiusMeters: Double = 1_200.0): List<CameraItem> {
+        // Large display queries must search the whole dataset.
+        if (!radiusMeters.isFinite() || radiusMeters > 50_000) return _cameras
+        val latSpan = ceil(radiusMeters / 1_100.0).toLong().coerceAtLeast(1)
+        val lonSpan = ceil(radiusMeters / (1_100.0 * cos(Math.toRadians(lat)).coerceAtLeast(0.01))).toLong().coerceAtLeast(1)
         val centerLatBucket = (lat * 100).toLong()
         val centerLonBucket = (lon * 100).toLong()
 
         val result = mutableListOf<CameraItem>()
-        for (dLat in -1L..1L) {
-            for (dLon in -1L..1L) {
+        for (dLat in -latSpan..latSpan) {
+            for (dLon in -lonSpan..lonSpan) {
                 val key = ((centerLatBucket + dLat) shl 32) or ((centerLonBucket + dLon) and 0xFFFFFFFFL)
                 spatialGrid[key]?.let { result.addAll(it) }
             }
@@ -99,7 +109,7 @@ class CameraRepository(private val context: Context) {
         radiusMeters: Double,
         qualifies: (CameraItem) -> Boolean = { true },
     ): Pair<CameraItem, Double>? {
-        val nearby = getCamerasNear(lat, lon)
+        val nearby = getCamerasNear(lat, lon, radiusMeters)
         if (nearby.isEmpty()) return null
 
         var closest: CameraItem? = null

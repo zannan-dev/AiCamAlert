@@ -27,16 +27,17 @@ fun LocationStatusBar(
 ) {
     val (dotColor, statusText) = when {
         !radarEnabled -> Pair(
-            Color.Gray,
-            "Radar Paused • Tap ALERT ON to activate"
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            "Camera alerts are off"
         )
-        userLocation != null -> Pair(
-            Color(0xFF00E5FF),
-            "Live Radar Active • Sorted by nearest camera"
+        userLocation != null && userLocation.hasAccuracy() && userLocation.accuracy <= 75f &&
+            android.os.SystemClock.elapsedRealtimeNanos() - userLocation.elapsedRealtimeNanos in 0..30_000_000_000L -> Pair(
+            MaterialTheme.colorScheme.primary,
+            "GPS ready · alerts on"
         )
         else -> Pair(
-            Color(0xFFFFB300),
-            "Connecting GPS • Acquiring location fix..."
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            "Waiting for precise GPS"
         )
     }
 
@@ -78,7 +79,7 @@ fun LocationStatusBar(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                text = "$cameraCount items",
+                text = "$cameraCount cameras",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
@@ -115,7 +116,7 @@ fun BackgroundPermissionSetupCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    "⚡ Background Alert Setup Required",
+                    "Background options",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
@@ -123,7 +124,7 @@ fun BackgroundPermissionSetupCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "To show full-screen alerts when app is closed or phone is locked, please enable these options:",
+                "Optional settings for background alerts:",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp
             )
@@ -138,7 +139,7 @@ fun BackgroundPermissionSetupCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text("1. Display Over Other Apps", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text("Shows full-screen pay alerts over lock screen & other apps", fontSize = 10.sp, color = Color.Gray)
+                        Text("Shows full-screen alerts over lock screen & other apps", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Button(
                         onClick = onRequestOverlay,
@@ -162,7 +163,7 @@ fun BackgroundPermissionSetupCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text("2. Turn Off Battery Restrictions", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text("Prevents Android OS from stopping background radar service", fontSize = 10.sp, color = Color.Gray)
+                        Text("Prevents Android OS from stopping background radar service", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Button(
                         onClick = onRequestBatteryExemption,

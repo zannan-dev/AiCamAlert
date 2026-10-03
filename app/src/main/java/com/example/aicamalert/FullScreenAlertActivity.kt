@@ -1,6 +1,5 @@
 package com.example.aicamalert
 
-import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -15,11 +14,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import com.example.aicamalert.alert.AlertSoundManager
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,32 +53,35 @@ class FullScreenAlertActivity : ComponentActivity() {
                     WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
         )
 
-        val cameraName = intent.getStringExtra("camera_name") ?: "AI Speed Camera"
-        val district = intent.getStringExtra("district") ?: "Kerala"
-        val distance = intent.getStringExtra("distance") ?: "Ahead"
-
         enableEdgeToEdge()
         setContent {
-            AiCamAlertTheme(darkTheme = true) {
-                FullScreenAlertContent(
-                    cameraName = cameraName,
-                    district = district,
-                    distance = distance,
-                    onIHaveNoticed = {
-                        val prefs = getSharedPreferences("aicam_prefs", MODE_PRIVATE)
-                        val snoozeUntil = System.currentTimeMillis() + (60 * 60 * 1000L)
-                        prefs.edit().putLong("snooze_until_timestamp", snoozeUntil).apply()
-
-                        val manager = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager
-                        manager?.cancel(CameraProximityService.ALERT_NOTIFICATION_ID)
-                        CameraProximityService.updateSnoozeState(this)
-
-                        finish()
-                    },
+            val camera by AlertSoundManager.activeAlert.collectAsState()
+            androidx.compose.runtime.LaunchedEffect(camera) {
+                if (camera == null) finish()
+            }
+            androidx.activity.compose.BackHandler {
+                CameraProximityService.acknowledgeAlarm(this)
+                finish()
+            }
+            val themeMode by com.example.aicamalert.ui.theme.rememberAppThemeMode()
+            val darkTheme = themeMode.isDark(androidx.compose.foundation.isSystemInDarkTheme())
+            androidx.compose.runtime.SideEffect {
+                androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
+                }
+            }
+            AiCamAlertTheme(darkTheme = darkTheme) {
+                camera?.let { alert -> FullScreenAlertContent(
+                    cameraName = alert.name,
+                    district = alert.district,
+                    distance = alert.distance,
+                    darkTheme = darkTheme,
                     onDismiss = {
+                        CameraProximityService.acknowledgeAlarm(this)
                         finish()
                     }
-                )
+                ) }
             }
         }
     }
@@ -89,9 +92,11 @@ fun FullScreenAlertContent(
     cameraName: String,
     district: String,
     distance: String,
-    onIHaveNoticed: () -> Unit,
+    darkTheme: Boolean,
     onDismiss: () -> Unit
 ) {
+    val scheme = MaterialTheme.colorScheme
+    val warningColor = if (darkTheme) Color(0xFFFF1744) else Color(0xFFB00020)
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 0.95f,
@@ -109,9 +114,9 @@ fun FullScreenAlertContent(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1E0000),
-                        Color(0xFF0F0000),
-                        Color(0xFF001F24)
+                        if (darkTheme) Color(0xFF1E0000) else Color(0xFFFFEDEE),
+                        scheme.background,
+                        if (darkTheme) Color(0xFF001F24) else Color(0xFFE4F5F7)
                     )
                 )
             )
@@ -127,8 +132,8 @@ fun FullScreenAlertContent(
             // Top Emergency Header
             Surface(
                 shape = RoundedCornerShape(30.dp),
-                color = Color(0xFFFF1744).copy(alpha = 0.2f),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFFFF1744))
+                color = warningColor.copy(alpha = 0.12f),
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, warningColor)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
@@ -137,13 +142,13 @@ fun FullScreenAlertContent(
                     Icon(
                         Icons.Default.Speed,
                         contentDescription = null,
-                        tint = Color(0xFFFF1744),
+                        tint = warningColor,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "⚠️ PAY ALERT • SPEED CAMERA AHEAD",
-                        color = Color(0xFFFF1744),
+                        "⚠️ CAMERA ALERT • SPEED CAMERA AHEAD",
+                        color = warningColor,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.sp
@@ -159,7 +164,7 @@ fun FullScreenAlertContent(
                     modifier = Modifier
                         .scale(pulseScale)
                         .size(110.dp)
-                        .background(Color(0xFFFF1744), CircleShape),
+                        .background(warningColor, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -176,8 +181,8 @@ fun FullScreenAlertContent(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFF161B22),
-                    border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF))
+                    color = scheme.surface,
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, scheme.primary)
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp),
@@ -185,7 +190,7 @@ fun FullScreenAlertContent(
                     ) {
                         Text(
                             text = cameraName,
-                            color = Color.White,
+                            color = scheme.onSurface,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
@@ -196,11 +201,11 @@ fun FullScreenAlertContent(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = Color(0xFF00E5FF).copy(alpha = 0.2f)
+                                color = scheme.primaryContainer
                             ) {
                                 Text(
                                     text = "$distance away",
-                                    color = Color(0xFF00E5FF),
+                                    color = scheme.onPrimaryContainer,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -209,7 +214,7 @@ fun FullScreenAlertContent(
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = "$district District",
-                                color = Color.White.copy(alpha = 0.7f),
+                                color = scheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -220,8 +225,15 @@ fun FullScreenAlertContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
+                    text = "Alarm repeats until you tap Stop alarm",
+                    color = scheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
                     text = "REDUCE SPEED IMMEDIATELY",
-                    color = Color(0xFFFF5252),
+                    color = warningColor,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.sp
@@ -233,45 +245,27 @@ fun FullScreenAlertContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Primary Action Button: "I HAVE NOTICED THIS"
+                // Acknowledging this camera does not pause alerts for other cameras.
                 Button(
-                    onClick = onIHaveNoticed,
+                    onClick = onDismiss,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF00E5FF),
-                        contentColor = Color.Black
+                        containerColor = scheme.primary,
+                        contentColor = scheme.onPrimary
                     )
                 ) {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(22.dp))
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        "I HAVE NOTICED THIS (Snooze 1h)",
+                        "STOP ALARM",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
 
-                // Secondary Action Button: Dismiss
-                OutlinedButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
-                ) {
-                    Icon(Icons.Default.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Dismiss Alert",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
         }
     }

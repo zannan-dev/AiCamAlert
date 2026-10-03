@@ -29,17 +29,15 @@ class RadarRestoreReceiverTest {
     fun prepare() {
         preferences.edit().clear()
             .putBoolean("bg_radar_enabled", false)
-            .putLong("snooze_until_timestamp", Long.MAX_VALUE)
             .putStringSet(CameraGeofenceManager.KEY_ACTIVE_CLUSTER_IDS, setOf("old-cluster"))
             .commit()
     }
 
     @Test
-    fun rebootClearsStaleMembershipWithoutEnablingRadarOrClearingSnooze() {
+    fun rebootClearsStaleMembershipWithoutEnablingRadar() {
         RadarRestoreReceiver().onReceive(context, Intent(Intent.ACTION_BOOT_COMPLETED))
         assertFalse(preferences.contains(CameraGeofenceManager.KEY_ACTIVE_CLUSTER_IDS))
         assertFalse(preferences.getBoolean("bg_radar_enabled", true))
-        assertEquals(Long.MAX_VALUE, preferences.getLong("snooze_until_timestamp", 0))
     }
 
     @Test

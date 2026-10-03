@@ -4,9 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import com.example.aicamalert.ui.theme.AiCamAlertTheme
+import com.example.aicamalert.ui.theme.rememberAppThemeMode
+import com.example.aicamalert.ui.theme.saveAppThemeMode
 import org.osmdroid.config.Configuration
 
 class MainActivity : ComponentActivity() {
@@ -17,23 +21,32 @@ class MainActivity : ComponentActivity() {
         val osmConfig = Configuration.getInstance()
         osmConfig.load(this, getSharedPreferences("osm_pref", MODE_PRIVATE))
         
-        // Increase performance
-        osmConfig.tileDownloadThreads = 12 // Default is 2, 12 makes loading fast
-        osmConfig.tileDownloadMaxQueueSize = 120 // Large queue to avoid dropping tile requests during zoom out
+        // Respect the tile server's modest concurrency limit.
+        osmConfig.tileDownloadThreads = 2
+        osmConfig.tileDownloadMaxQueueSize = 100
         osmConfig.cacheMapTileCount = 256 // Increased memory cache (from 128 to 256) for instant tile retention on zoom out
         osmConfig.tileFileSystemCacheMaxBytes = 500L * 1024 * 1024 // 500MB disk cache
         
-        // Set User-Agent AFTER load to ensure it's not overwritten
-        osmConfig.userAgentValue = "AiCamAlertProject/${packageName}"
+        // The custom tile source sends this value instead of OSMdroid's
+        // normalized com.example.* package ID.
+        @Suppress("DEPRECATION")
+        val version = packageManager.getPackageInfo(packageName, 0).versionName ?: "1.0"
+        osmConfig.userAgentValue =
+            "AiCamAlert/$version (+https://github.com/zannan-dev/AiCamAlert)"
         
         enableEdgeToEdge()
         setContent {
-            var darkTheme by remember { mutableStateOf(true) }
+            val themeMode by rememberAppThemeMode()
+            val darkTheme = themeMode.isDark(isSystemInDarkTheme())
+            SideEffect {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
+                }
+            }
             AiCamAlertTheme(darkTheme = darkTheme) {
-                CameraListScreen(
-                    darkTheme = darkTheme,
-                    onThemeToggle = { darkTheme = !darkTheme }
-                )
+                CameraListScreen(darkTheme = darkTheme, themeMode = themeMode,
+                    onThemeModeChange = { saveAppThemeMode(this, it) })
             }
         }
     }
@@ -43,7 +56,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DarkPreview() {
     AiCamAlertTheme(darkTheme = true) {
-        CameraListScreen(darkTheme = true, onThemeToggle = {})
+        CameraListScreen(darkTheme = true)
     }
 }
 
@@ -51,6 +64,6 @@ fun DarkPreview() {
 @Composable
 fun LightPreview() {
     AiCamAlertTheme(darkTheme = false) {
-        CameraListScreen(darkTheme = false, onThemeToggle = {})
+        CameraListScreen(darkTheme = false)
     }
 }

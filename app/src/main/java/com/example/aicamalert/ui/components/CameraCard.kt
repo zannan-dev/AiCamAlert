@@ -28,21 +28,12 @@ fun CameraCard(
         isGpsActive && camera.distanceMeters <= 5000.0
     }
 
-    val (distValue, distUnit) = remember(camera.distance) {
-        val parts = camera.distance.split(" ")
-        if (parts.size >= 2) {
-            Pair(parts[0], parts[1].uppercase())
-        } else {
-            Pair(camera.distance, "")
-        }
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onFocusOnMap() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -51,34 +42,12 @@ fun CameraCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Compact Icon with Dual Glow
-            Box(
-                modifier = Modifier.size(42.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
-                            RoundedCornerShape(12.dp)
-                        )
-                )
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .background(
-                            if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
-                            RoundedCornerShape(10.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Videocam,
-                        contentDescription = null,
-                        tint = if (isNearby) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
+            Surface(shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer) {
+                Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Videocam, null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(22.dp))
                 }
             }
 
@@ -130,53 +99,12 @@ fun CameraCard(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Compact Distance HUD Badge
-            Surface(
-                modifier = Modifier.width(60.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = if (isNearby) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 2.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(
-                                if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant,
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Navigation,
-                            contentDescription = null,
-                            tint = if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                            modifier = Modifier.size(10.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = distValue,
-                        color = if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = distUnit,
-                        color = if (isNearby) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+            Text(
+                text = if (isGpsActive) camera.distance else "—",
+                color = if (isNearby) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+            )
         }
     }
 }

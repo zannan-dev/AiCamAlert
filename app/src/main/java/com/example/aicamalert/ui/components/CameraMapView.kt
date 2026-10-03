@@ -1,7 +1,5 @@
 package com.example.aicamalert.ui.components
 
-// dev: OSMdroid tile cache tuning (12 threads, 500MB) + dark/light theme support
-
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -25,8 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.aicamalert.data.model.CameraItem
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.tileprovider.tilesource.XYTileSource
+import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -43,21 +40,6 @@ fun CameraMapView(
     val primaryColor = MaterialTheme.colorScheme.primary
     val lifecycleOwner = LocalLifecycleOwner.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
-
-    // Multi-subdomain CartoDB Dark Matter tile source for fast parallel loading & high contrast
-    val darkTileSource = remember {
-        XYTileSource(
-            "CartoDark",
-            0, 20, 256, ".png",
-            arrayOf(
-                "https://a.basemaps.cartocdn.com/dark_all/",
-                "https://b.basemaps.cartocdn.com/dark_all/",
-                "https://c.basemaps.cartocdn.com/dark_all/",
-                "https://d.basemaps.cartocdn.com/dark_all/"
-            ),
-            "© OpenStreetMap contributors © CARTO"
-        )
-    }
 
     // Handle Map Lifecycle
     DisposableEffect(lifecycleOwner) {
@@ -147,8 +129,7 @@ fun CameraMapView(
         AndroidView(
             factory = { ctx ->
                 MapView(ctx).apply {
-                    val tileSource = if (darkTheme) darkTileSource else TileSourceFactory.MAPNIK
-                    setTileSource(tileSource)
+                    setTileSource(aiCamTileSource)
                     setMultiTouchControls(true)
 
                     val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
@@ -156,9 +137,12 @@ fun CameraMapView(
 
                     overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
                     overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
+                    overlayManager.tilesOverlay.setColorFilter(
+                        if (darkTheme) TilesOverlay.INVERT_COLORS else null
+                    )
 
                     isTilesScaledToDpi = true
-                    maxZoomLevel = 21.0
+                    maxZoomLevel = 19.0
                     minZoomLevel = 3.0
 
                     setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
@@ -181,15 +165,14 @@ fun CameraMapView(
                 }
             },
             update = { view ->
-                val targetTileSource = if (darkTheme) darkTileSource else TileSourceFactory.MAPNIK
-                if (view.tileProvider.tileSource != targetTileSource) {
-                    view.setTileSource(targetTileSource)
-                }
-
                 val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
                 view.setBackgroundColor(mapBgColor)
                 view.overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
                 view.overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
+                view.overlayManager.tilesOverlay.setColorFilter(
+                    if (darkTheme) TilesOverlay.INVERT_COLORS else null
+                )
+                view.invalidate()
 
                 // Diff-based marker update: only recreate if data actually changed
                 val currentCameraKeys = cameras.map { "${it.latitude}_${it.longitude}" }.toSet()
@@ -240,6 +223,19 @@ fun CameraMapView(
             },
             modifier = Modifier.fillMaxSize()
         )
+
+        Surface(
+            modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 8.dp),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+            shape = RoundedCornerShape(4.dp),
+        ) {
+            Text(
+                "© OpenStreetMap contributors",
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+            )
+        }
 
         // Floating Action Buttons on the bottom right
         Column(

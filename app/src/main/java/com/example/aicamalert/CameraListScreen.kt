@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aicamalert.ui.components.*
+import com.example.aicamalert.ui.theme.AppThemeMode
 import com.example.aicamalert.util.PermissionUtils
 import com.example.aicamalert.viewmodel.CameraViewModel
 
@@ -41,7 +43,8 @@ import com.example.aicamalert.viewmodel.CameraViewModel
 @Composable
 fun CameraListScreen(
     darkTheme: Boolean,
-    onThemeToggle: () -> Unit
+    themeMode: AppThemeMode = AppThemeMode.SYSTEM,
+    onThemeModeChange: (AppThemeMode) -> Unit = {},
 ) {
     val context = LocalContext.current
     val viewModel: CameraViewModel = viewModel()
@@ -54,7 +57,6 @@ fun CameraListScreen(
     val isListView by viewModel.isListView.collectAsState()
     val isBackgroundRadarEnabled by viewModel.isBackgroundRadarEnabled.collectAsState()
     val focusedCamera by viewModel.focusedCamera.collectAsState()
-    val isAlertDismissedLocally by viewModel.isAlertDismissedLocally.collectAsState()
     val activeProximityCamera by viewModel.activeProximityCamera.collectAsState()
     val filteredCameras by viewModel.filteredCameras.collectAsState()
     val districtsList by viewModel.districtsList.collectAsState()
@@ -66,6 +68,7 @@ fun CameraListScreen(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     var isRadarEnablePending by rememberSaveable { mutableStateOf(false) }
+    var showAlertSettings by rememberSaveable { mutableStateOf(false) }
     var showBackgroundLocationGuidance by rememberSaveable { mutableStateOf(false) }
 
     // Refresh permissions on resume
@@ -117,7 +120,7 @@ fun CameraListScreen(
             return
         }
 
-        if (!PermissionUtils.hasLocationPermission(context)) {
+        if (!PermissionUtils.hasPreciseLocationPermission(context)) {
             isRadarEnablePending = true
             requestLocationPermission()
             return
@@ -162,6 +165,10 @@ fun CameraListScreen(
         )
     }
 
+    androidx.activity.compose.BackHandler(enabled = activeProximityCamera != null) {
+        viewModel.dismissAlertLocally()
+    }
+
     // ── UI Layout ──
 
     Box(
@@ -169,24 +176,29 @@ fun CameraListScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (isListView) {
-            // List View
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 48.dp)
-            ) {
-                HeaderSection(
-                    darkTheme = darkTheme,
-                    radarEnabled = isBackgroundRadarEnabled,
-                    onThemeToggle = onThemeToggle,
-                    onRadarToggle = { handleRadarToggle(it) }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                ToggleRow(isListView) { viewModel.setIsListView(it) }
-                Spacer(modifier = Modifier.height(16.dp))
-
+        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+            HeaderSection(
+                radarEnabled = isBackgroundRadarEnabled,
+                onRadarToggle = { handleRadarToggle(it) },
+                onSettings = { showAlertSettings = true },
+            )
+            Surface(color = MaterialTheme.colorScheme.surface) {
+                Column(Modifier.padding(bottom = 10.dp)) {
+                    ToggleRow(isListView) {
+                        viewModel.setIsListView(it)
+                        if (it) viewModel.setFocusedCamera(null)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    LocationStatusBar(
+                        radarEnabled = isBackgroundRadarEnabled,
+                        userLocation = userLocation,
+                        cameraCount = filteredCameras.size,
+                        onRequestPermission = { requestLocationPermission() },
+                    )
+                }
+            }
+            if (isListView) {
+                Spacer(Modifier.height(12.dp))
                 SearchAndFilters(
                     searchQuery = searchQuery,
                     onSearchChange = { viewModel.setSearchQuery(it) },
@@ -197,84 +209,39 @@ fun CameraListScreen(
                     selectedDistance = selectedDistance,
                     onDistanceChange = { viewModel.setSelectedDistance(it) },
                     sortByDistance = sortByDistance,
-                    onSortChange = { viewModel.setSortByDistance(it) }
+                    onSortChange = { viewModel.setSortByDistance(it) },
                 )
-
-                if (isBackgroundRadarEnabled) {
-                    BackgroundPermissionSetupCard(
-                        hasOverlayPermission = hasOverlayPermission,
-                        hasBatteryExemption = hasBatteryExemption,
-                        onRequestOverlay = { PermissionUtils.requestOverlayPermission(context) },
-                        onRequestBatteryExemption = { PermissionUtils.requestBatteryOptimizationExemption(context) }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                LocationStatusBar(
-                    radarEnabled = isBackgroundRadarEnabled,
-                    userLocation = userLocation,
-                    cameraCount = filteredCameras.size,
-                    onRequestPermission = { requestLocationPermission() }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
+                Spacer(Modifier.height(8.dp))
                 if (filteredCameras.isEmpty()) {
                     EmptyCameraState(onResetFilters = { viewModel.resetFilters() })
                 } else {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 24.dp)
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp),
                     ) {
-                        items(
-                            items = filteredCameras,
-                            key = { "${it.latitude}_${it.longitude}_${it.name}" }
-                        ) { camera ->
-                            CameraCard(
-                                camera = camera,
-                                isGpsActive = userLocation != null,
-                                onFocusOnMap = { viewModel.setFocusedCamera(camera) }
-                            )
+                        items(filteredCameras, key = { "${it.latitude}_${it.longitude}_${it.name}" }) { camera ->
+                            CameraCard(camera, isGpsActive = userLocation != null,
+                                onFocusOnMap = { viewModel.setFocusedCamera(camera) })
                         }
                     }
                 }
-            }
-        } else {
-            // Map View
-            CameraMapView(
-                cameras = filteredCameras,
-                focusedCamera = focusedCamera,
-                userLocation = userLocation,
-                darkTheme = darkTheme,
-                onRequestLocation = { requestLocationPermission() }
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 48.dp)
-            ) {
-                HeaderSection(
-                    darkTheme = darkTheme,
-                    radarEnabled = isBackgroundRadarEnabled,
-                    onThemeToggle = onThemeToggle,
-                    onRadarToggle = { handleRadarToggle(it) }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ToggleRow(isListView) {
-                    viewModel.setIsListView(it)
-                    if (it) viewModel.setFocusedCamera(null)
+            } else {
+                Box(Modifier.weight(1f)) {
+                    CameraMapView(
+                        cameras = filteredCameras,
+                        focusedCamera = focusedCamera,
+                        userLocation = userLocation,
+                        darkTheme = darkTheme,
+                        onRequestLocation = { requestLocationPermission() },
+                    )
                 }
             }
         }
 
         // In-App Full Screen Alert Overlay
         AnimatedVisibility(
-            visible = activeProximityCamera != null && !isAlertDismissedLocally,
+            visible = activeProximityCamera != null,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
         ) {
@@ -283,11 +250,35 @@ fun CameraListScreen(
                     cameraName = cam.name,
                     district = cam.district,
                     distance = cam.distance,
-                    onIHaveNoticed = { viewModel.snoozeAlerts() },
+                    darkTheme = darkTheme,
                     onDismiss = { viewModel.dismissAlertLocally() }
                 )
             }
         }
+    }
+
+    if (showAlertSettings) {
+        AlertDialog(
+            onDismissRequest = { showAlertSettings = false },
+            title = { Text("Settings") },
+            text = {
+                Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                    ThemeSettings(themeMode, onThemeModeChange)
+                    HorizontalDivider(Modifier.padding(vertical = 12.dp))
+                    Text("Camera alerts", style = MaterialTheme.typography.titleSmall)
+                    Spacer(Modifier.height(8.dp))
+                    Text("A repeating siren and vibration continue until you tap Stop alarm. Uses your phone’s alarm volume.")
+                    Spacer(Modifier.height(8.dp))
+                    Text("Camera alerts need precise location and notifications. Keep location on while travelling.")
+                    BackgroundPermissionSetupCard(
+                        hasOverlayPermission, hasBatteryExemption,
+                        { PermissionUtils.requestOverlayPermission(context) },
+                        { PermissionUtils.requestBatteryOptimizationExemption(context) },
+                    )
+                }
+            },
+            confirmButton = { TextButton(onClick = { showAlertSettings = false }) { Text("Done") } },
+        )
     }
 
     // Location disabled dialog

@@ -1,6 +1,6 @@
 # AiCam Alert
 
-Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed cameras**. It shows camera locations on a list and an offline-capable map, and triggers proactive alerts (sound, heads-up notification, full-screen overlay) when you are approaching a camera — both while the app is open and in the background.
+Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed cameras**. It shows camera locations on a list and an online map with a local tile cache, and triggers proactive alerts (sound, heads-up notification, full-screen overlay) when you are approaching a camera — both while the app is open and in the background.
 
 > **Dataset:** 704 camera locations bundled in `app/src/main/assets/kerala_ai_cameras.json`, covering 14 districts: Alappuzha, Ernakulam, Idukki, Kannur, Kasaragod, Kollam, Kottayam, Kozhikode, Malappuram, Palakkad, Pathanamthitta, Thiruvananthapuram, Thrissur, Wayanad.
 
@@ -8,19 +8,21 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
 
 - **Browse cameras**
   - List view with search (name / district), district filter with counts, distance filter (`< 5/10/25/50 km`), and sort by distance or district.
-  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Tile cache tuned for performance (12 download threads, 500 MB disk cache). Geofence regions are clustered; map markers are not.
+  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Both themes use OpenStreetMap tiles with an app-identifying User-Agent; dark mode applies a tile color filter. The tile source has a separate cache from previously blocked tiles, with 2 download threads and a 500 MB disk limit. Geofence regions are clustered; map markers are not.
   - Distance to each camera computed on-device via `Location.distanceBetween`, throttled to every 12 s / 100 m in `CameraViewModel:242`.
 
 - **Proactive proximity alerts**
-  - Foreground in-app banner (`CameraListScreen:277`) + siren via `AlertSoundManager`.
+  - A bundled two-tone siren and vibration repeat until acknowledged. Audio runs on the alarm stream through `MediaPlayer` owned by the radar foreground service. The warning stays visible after passing the camera.
+  - Tap **Stop alarm** in the in-app/full-screen warning or its ongoing notification. Acknowledgement stops sound and vibration without disabling other camera alerts; turning off radar also stops playback.
+  - No global sound cooldown: the next camera can alert immediately after acknowledgement. Pending alarms are restored if the radar service is recreated; transient system audio interruptions can pause playback.
   - Background via `CameraProximityService:35` — foreground service with lock-screen heads-up notification and full-screen `FullScreenAlertActivity`.
-  - **Snooze** — "I HAVE NOTICED" pauses alerts for 1 hour; persisted in `aicam_prefs` and reflected in the foreground notification.
+  - Each camera alerts once per approach, after movement is confirmed from fresh GPS fixes (including slow approaches). It re-arms after the user travels more than 1.4 km away (outside the largest alert radius); acknowledging the banner does not silence other cameras.
   - Direction-aware: bearing check (`ProximityEngine:72`) suppresses alerts for cameras behind you (90° cone, skipped below ~7 km/h).
   - Speed-aware radius: `500 m @ 0 m/s` → `500 + speed×8s` capped at `1200 m` (`ProximityEngine:62`).
 
 - **Efficient location handling**
-  - Spatial grid index (`CameraRepository:17`, `CameraItem:18`) — ~1.1 km cells (0.01°), proximity checks scan only the 9 adjacent cells (~5–15 cameras instead of 704).
-  - OS-level **geofencing** (`CameraGeofenceManager:26`, `CameraClusterer:134`) clusters cameras into ≤100 geofences (each ≥3 km radius + 2.5 km buffer). Entering a cluster starts the active radar; exiting stops it — no continuous GPS needed while outside clusters.
+  - Spatial grid index (`CameraRepository:17`, `CameraItem:18`) — ~1.1 km cells (0.01°), proximity checks scan only cells covering the requested radius (including grid boundaries).
+  - OS-level **geofencing** (`CameraGeofenceManager:26`, `CameraClusterer:134`) clusters cameras into ≤100 geofences (each ≥3 km radius + 2.5 km buffer). Entering a cluster starts GPS tracking; exiting pauses GPS. The user-started foreground service stays ready for background alarm audio, including while outside a zone.
   - Shared `AppLocationManager` / `CameraRepository` / `ProximityEngine` via `AiCamApplication` — no duplicate GPS or JSON parsing between UI and service.
 
 - **Background Radar toggle**
@@ -29,7 +31,8 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
   - Auto-disables radar if required permissions are revoked (`CameraViewModel:121`).
 
 - **UX**
-  - Material 3, Jetpack Compose, dark/light theme toggle.
+  - Material 3 with consistent teal light/dark themes, System, Light, and Dark appearance choices in Settings, and adaptive camera/shield launcher icon.
+  - Clear camera-alert switch and GPS status in both views; search with expandable filters; optional background settings under Settings.
   - Location-disabled dialog, permission guidance dialogs, empty-state handling.
 
 ## Tech Stack
@@ -59,8 +62,7 @@ AiCamAlert/
 │       │   ├── CameraListScreen.kt          # Main orchestration composable (list ↔ map + alert overlay)
 │       │   ├── CameraProximityService.kt    # Foreground service — background alerts
 │       │   ├── FullScreenAlertActivity.kt   # Lock-screen full-screen warning
-│       │   ├── CameraGeofenceReceiver.kt    # Geofence enter/exit → start/stop radar
-│       │   ├── SnoozeAlertReceiver.kt       # Snooze / Resume actions
+│       │   ├── CameraGeofenceReceiver.kt    # Geofence enter/exit → start/pause GPS
 │       │   ├── data/
 │       │   │   ├── CameraRepository.kt      # JSON parsing + spatial grid + findNearestCamera
 │       │   │   └── model/CameraItem.kt      # gridKey spatial hash
@@ -68,7 +70,8 @@ AiCamAlert/
 │       │   │   ├── AppLocationManager.kt
 │       │   │   ├── AppForegroundTracker.kt
 │       │   │   ├── CameraGeofenceManager.kt / CameraClusterer
-│       │   │   └── ProximityEngine.kt       # dynamic radius + bearing check
+│       │   │   ├── ProximityEngine.kt       # dynamic radius + bearing check
+│       │   │   └── CameraAlertGate.kt       # movement validation + once-per-approach alerts
 │       │   ├── alert/AlertSoundManager.kt
 │       │   ├── viewmodel/CameraViewModel.kt
 │       │   ├── ui/components/               # CameraCard, CameraMapView, SearchAndFilters, HeaderSection, LocationStatusBar
@@ -87,13 +90,13 @@ Declared in `app/src/main/AndroidManifest.xml:5`:
 
 ```xml
 ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION, ACCESS_BACKGROUND_LOCATION
-FOREGROUND_SERVICE, FOREGROUND_SERVICE_LOCATION
-POST_NOTIFICATIONS, USE_FULL_SCREEN_INTENT, RECEIVE_BOOT_COMPLETED
+FOREGROUND_SERVICE, FOREGROUND_SERVICE_LOCATION, FOREGROUND_SERVICE_MEDIA_PLAYBACK
+POST_NOTIFICATIONS, USE_FULL_SCREEN_INTENT, RECEIVE_BOOT_COMPLETED, VIBRATE
 WAKE_LOCK, SYSTEM_ALERT_WINDOW, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 INTERNET, ACCESS_NETWORK_STATE   <!-- OSMdroid tile loading -->
 ```
 
-Foreground service type is `location` (`AndroidManifest.xml:33`).
+Foreground service types are `location|mediaPlayback` (`AndroidManifest.xml:33`).
 
 ## Getting Started
 
@@ -120,7 +123,7 @@ cd AiCamAlert
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
-No API keys required — OSMdroid uses OpenStreetMap tiles with user-agent `AiCamAlertProject/<packageName>` set in `MainActivity.kt:27`.
+No API keys required. The map tile source sends an identifiable `AiCamAlert/<version>` User-Agent and shows OpenStreetMap attribution.
 
 ### Filtering / Dataset
 
@@ -129,9 +132,9 @@ To update camera data, replace `app/src/main/assets/kerala_ai_cameras.json` (arr
 ## How It Works
 
 1. **Load:** `CameraRepository:34` parses the bundled JSON on `Dispatchers.IO` and builds a `HashMap<Long, List<CameraItem>>` grid.
-2. **Locate:** `AppLocationManager` emits `StateFlow<Location?>` — foreground updates when the app is visible, continuous updates only when radar geofences are active.
+2. **Locate:** `AppLocationManager` emits `StateFlow<Location?>` — high-accuracy updates when the app is visible or radar is active.
 3. **Geofence:** `CameraGeofenceManager:49` groups cameras into ~0.2° cells (`CameraClusterer:134`), expanding the cell size until ≤100 geofences. OS wakes the app on enter/exit.
-4. **Alert:** `ProximityEngine:33` queries the 3×3 grid neighbourhood, filters by bearing, picks the nearest qualifying camera within the dynamic radius, and triggers sound + notification + full-screen intent (background) or in-app banner (foreground).
+4. **Alert:** `CameraAlertGate` confirms movement, then `ProximityEngine` queries nearby cameras, filters by bearing, and picks the nearest qualifying camera within the dynamic radius. Each camera is alerted once until the user exits its zone. Background alerts use sound, notification, and a full-screen intent; foreground alerts use the existing in-app banner.
 
 ## Build Variants
 

@@ -30,11 +30,14 @@ class ProximityEngine(private val repository: CameraRepository) {
      *
      * @return Pair of (camera, distanceMeters) or null if no qualifying camera.
      */
-    fun findApproachingInRange(location: Location): Pair<CameraItem, Double>? {
+    fun findApproachingInRange(
+        location: Location,
+        qualifies: (CameraItem) -> Boolean = { true },
+    ): Pair<CameraItem, Double>? {
         val radius = computeDynamicAlertRadius(location.speed)
         return repository.findNearestCamera(
             location.latitude, location.longitude, radius
-        ) { camera -> isApproaching(location, camera) }
+        ) { camera -> qualifies(camera) && isApproaching(location, camera) }
     }
 
     /**
@@ -57,7 +60,7 @@ class ProximityEngine(private val repository: CameraRepository) {
      * Tuned on dev branch for Kerala highway conditions (NH66, MC Road).
      */
     fun computeDynamicAlertRadius(speedMps: Float): Double {
-        if (speedMps <= 0f) return BASE_ALERT_RADIUS_METERS
+        if (!speedMps.isFinite() || speedMps <= 0f) return BASE_ALERT_RADIUS_METERS
         return (BASE_ALERT_RADIUS_METERS + speedMps * LOOKAHEAD_SECONDS)
             .coerceIn(BASE_ALERT_RADIUS_METERS, MAX_ALERT_RADIUS_METERS)
     }
@@ -70,7 +73,9 @@ class ProximityEngine(private val repository: CameraRepository) {
         if (location.speed >= 0 && location.speed < MIN_SPEED_FOR_BEARING_MPS) {
             return true
         }
-        if (!location.hasBearing()) {
+        if (!location.hasSpeed() || !location.hasBearing() ||
+            (android.os.Build.VERSION.SDK_INT >= 26 && location.hasBearingAccuracy() &&
+                location.bearingAccuracyDegrees > 45f)) {
             return true
         }
 
