@@ -61,8 +61,6 @@ fun CameraListScreen(
     val filteredCameras by viewModel.filteredCameras.collectAsState()
     val districtsList by viewModel.districtsList.collectAsState()
     val districtCounts by viewModel.districtCounts.collectAsState()
-    val hasOverlayPermission by viewModel.hasOverlayPermission.collectAsState()
-    val hasBatteryExemption by viewModel.hasBatteryExemption.collectAsState()
     val isLocationEnabled by viewModel.isLocationEnabled.collectAsState()
     val userLocation by viewModel.locationManager.location.collectAsState()
 
@@ -270,11 +268,9 @@ fun CameraListScreen(
                     Text("A repeating siren and vibration continue until you tap Stop alarm. Uses your phone’s alarm volume.")
                     Spacer(Modifier.height(8.dp))
                     Text("Camera alerts need precise location and notifications. Keep location on while travelling.")
-                    BackgroundPermissionSetupCard(
-                        hasOverlayPermission, hasBatteryExemption,
-                        { PermissionUtils.requestOverlayPermission(context) },
-                        { PermissionUtils.requestBatteryOptimizationExemption(context) },
-                    )
+                    TextButton(onClick = { PermissionUtils.openAppSettings(context) }) {
+                        Text("Manage app permissions")
+                    }
                 }
             },
             confirmButton = { TextButton(onClick = { showAlertSettings = false }) { Text("Done") } },

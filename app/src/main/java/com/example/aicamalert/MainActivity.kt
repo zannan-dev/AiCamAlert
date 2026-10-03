@@ -8,10 +8,13 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.aicamalert.viewmodel.CameraViewModel
 import com.example.aicamalert.ui.theme.AiCamAlertTheme
 import com.example.aicamalert.ui.theme.rememberAppThemeMode
 import com.example.aicamalert.ui.theme.saveAppThemeMode
 import org.osmdroid.config.Configuration
+import com.example.aicamalert.ui.components.PermissionSetupGate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +48,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
             AiCamAlertTheme(darkTheme = darkTheme) {
-                CameraListScreen(darkTheme = darkTheme, themeMode = themeMode,
-                    onThemeModeChange = { saveAppThemeMode(this, it) })
+                PermissionSetupGate(onSetupCompleted = {
+                    ViewModelProvider(this)[CameraViewModel::class.java].toggleBackgroundRadar(true)
+                }) {
+                    CameraListScreen(darkTheme = darkTheme, themeMode = themeMode,
+                        onThemeModeChange = { saveAppThemeMode(this, it) })
+                }
             }
         }
     }

@@ -25,6 +25,11 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
   - OS-level **geofencing** (`CameraGeofenceManager:26`, `CameraClusterer:134`) clusters cameras into ≤100 geofences (each ≥3 km radius + 2.5 km buffer). Entering a cluster starts GPS tracking; exiting pauses GPS. The user-started foreground service stays ready for background alarm audio, including while outside a zone.
   - Shared `AppLocationManager` / `CameraRepository` / `ProximityEngine` via `AiCamApplication` — no duplicate GPS or JSON parsing between UI and service.
 
+- **Required startup setup**
+  - Entry is blocked until precise and background location, notifications (including the alarm channel), device location, full-screen alerts, display-over-apps access, and battery optimisation exemption are enabled.
+  - One guided action at a time opens Android's permission dialog or the relevant app settings. Permanently denied permissions route to Settings, unsupported settings routes fall back to app details, and grants are checked again on resume.
+  - "Finish setup & enable alerts" enables radar. Actual grants are checked on every launch, so a saved setup flag cannot bypass revoked access. Android versions without a special grant treat it as already available.
+
 - **Background Radar toggle**
   - Restores geofences after reboot or app update when radar was enabled and its required permissions remain granted.
   - Handles the full Android permission chain: foreground location → background location (`Allow all the time`) → `POST_NOTIFICATIONS` (Android 13+) → optional overlay & battery-optimization exemption cards.
