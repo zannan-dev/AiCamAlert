@@ -4,6 +4,8 @@ import android.location.Location
 import com.example.aicamalert.data.CameraRepository
 import com.example.aicamalert.data.model.CameraItem
 import kotlin.math.abs
+import kotlin.math.sin
+import kotlin.math.cos
 
 /**
  * Proximity engine using spatial grid for efficient camera detection.
@@ -19,10 +21,13 @@ class ProximityEngine(private val repository: CameraRepository) {
         const val MAX_ALERT_RADIUS_METERS = 1_200.0
         /** Seconds of travel time used to extend alert radius at speed. */
         const val LOOKAHEAD_SECONDS = 8.0
-        /** Below this speed (m/s), bearing check is skipped (~7 km/h). */
+        /** Below this speed (m/s), use the movement-derived bearing in the gate. */
         const val MIN_SPEED_FOR_BEARING_MPS = 2f
         /** Camera must be within this angle of travel direction (degrees). */
-        const val MAX_BEARING_OFFSET_DEG = 90f
+        const val MAX_BEARING_OFFSET_DEG = 30f
+        /** Tolerance around projected travel path, including camera placement beside the road. */
+        const val PATH_HALF_WIDTH_METERS = 35f
+        const val MAX_BEARING_ACCURACY_DEG = 20f
     }
 
     /**
@@ -32,12 +37,13 @@ class ProximityEngine(private val repository: CameraRepository) {
      */
     fun findApproachingInRange(
         location: Location,
+        travelBearing: Float? = null,
         qualifies: (CameraItem) -> Boolean = { true },
     ): Pair<CameraItem, Double>? {
         val radius = computeDynamicAlertRadius(location.speed)
         return repository.findNearestCamera(
             location.latitude, location.longitude, radius
-        ) { camera -> qualifies(camera) && isApproaching(location, camera) }
+        ) { camera -> qualifies(camera) && isApproaching(location, camera, travelBearing) }
     }
 
     /**
@@ -65,29 +71,40 @@ class ProximityEngine(private val repository: CameraRepository) {
             .coerceIn(BASE_ALERT_RADIUS_METERS, MAX_ALERT_RADIUS_METERS)
     }
 
-    /**
-     * Returns true if the camera is ahead of the user's direction of travel.
-     * Falls back to true when speed/bearing are unavailable (stationary or GPS gap).
-     */
-    fun isApproaching(location: Location, camera: CameraItem): Boolean {
-        if (location.speed >= 0 && location.speed < MIN_SPEED_FOR_BEARING_MPS) {
-            return true
-        }
-        if (!location.hasSpeed() || !location.hasBearing() ||
-            (android.os.Build.VERSION.SDK_INT >= 26 && location.hasBearingAccuracy() &&
-                location.bearingAccuracyDegrees > 45f)) {
-            return true
-        }
+    /** Whether GPS provides a heading precise enough for projecting the travel path. */
+    fun hasReliableBearing(location: Location): Boolean =
+        location.hasSpeed() && location.speed.isFinite() &&
+            location.speed >= MIN_SPEED_FOR_BEARING_MPS &&
+            location.hasBearing() && location.bearing.isFinite() &&
+            (android.os.Build.VERSION.SDK_INT < 26 || !location.hasBearingAccuracy() ||
+                (location.bearingAccuracyDegrees.isFinite() &&
+                    location.bearingAccuracyDegrees in 0f..MAX_BEARING_ACCURACY_DEG))
 
+    /**
+     * Requires a camera ahead and close to the projected travel path. This is a
+     * geometric filter, not road matching: the dataset contains points, not roads.
+     * [travelBearing] can be inferred from confirmed movement when GPS heading is unavailable.
+     */
+    fun isApproaching(
+        location: Location,
+        camera: CameraItem,
+        travelBearing: Float? = null,
+    ): Boolean {
+        val heading = travelBearing ?: if (hasReliableBearing(location)) location.bearing else return false
+        if (!heading.isFinite()) return false
         val results = FloatArray(2)
         Location.distanceBetween(
             location.latitude, location.longitude,
             camera.latitude, camera.longitude,
             results
         )
-        val bearingToCamera = results[1]
-        val diff = abs(normalizeAngle(bearingToCamera - location.bearing))
-        return diff <= MAX_BEARING_OFFSET_DEG
+        val diff = abs(normalizeAngle(results[1] - heading))
+        if (diff > MAX_BEARING_OFFSET_DEG) return false
+        val radians = Math.toRadians(diff.toDouble())
+        val alongPath = results[0] * cos(radians)
+        val acrossPath = results[0] * sin(radians)
+        val gpsTolerance = if (location.hasAccuracy()) location.accuracy.coerceIn(0f, 25f) else 0f
+        return alongPath > 0 && acrossPath <= PATH_HALF_WIDTH_METERS + gpsTolerance
     }
 
     private fun normalizeAngle(angle: Float): Float {

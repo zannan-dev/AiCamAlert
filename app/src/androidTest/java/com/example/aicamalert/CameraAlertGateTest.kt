@@ -65,8 +65,8 @@ class CameraAlertGateTest {
     @Test
     fun slowApproachCanAlertBeforeTwentyMetersOfMovement() {
         assertNull(gate.nextAlert(fix(10.00188, 0, speed = 1f)))
-        // At low speed bearing is intentionally ignored; the nearest camera wins.
-        assertEquals("Behind", gate.nextAlert(fix(10.002, 15, speed = 1f))?.first?.name)
+        // Low-speed GPS bearing is replaced by the direction of confirmed movement.
+        assertEquals("Ahead", gate.nextAlert(fix(10.002, 15, speed = 1f, bearing = 180f))?.first?.name)
     }
 
     @Test
@@ -83,4 +83,32 @@ class CameraAlertGateTest {
         assertNull(gate.nextAlert(fix(10.002, 5).apply { accuracy = 100f }))
     }
 
+    @Test
+    fun parallelRoadWithinAlertRadiusNeverAlerts() {
+        assertNull(gate.nextAlert(fix(10.0017, 0).apply { longitude = 76.001 }))
+        assertNull(gate.nextAlert(fix(10.002, 5).apply { longitude = 76.001 }))
+    }
+
+    @Test
+    fun missingSpeedAndBearingUseConfirmedMovement() {
+        assertNull(gate.nextAlert(fix(10.0017, 0).apply { removeSpeed(); removeBearing() }))
+        assertEquals("Ahead", gate.nextAlert(
+            fix(10.002, 5).apply { removeSpeed(); removeBearing() },
+        )?.first?.name)
+    }
+
+    @Test
+    fun movingAwayDoesNotAlertDespiteIncorrectReportedHeading() {
+        assertNull(gate.nextAlert(fix(10.0023, 0)))
+        assertNull(gate.nextAlert(fix(10.002, 5)))
+    }
+
+    @Test
+    fun unreliableHeadingUsesMovementInstead() {
+        if (android.os.Build.VERSION.SDK_INT < 26) return
+        assertNull(gate.nextAlert(fix(10.0017, 0)))
+        assertEquals("Ahead", gate.nextAlert(
+            fix(10.002, 5, bearing = 180f).apply { bearingAccuracyDegrees = 80f },
+        )?.first?.name)
+    }
 }

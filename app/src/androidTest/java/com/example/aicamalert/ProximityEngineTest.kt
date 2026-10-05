@@ -5,9 +5,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.aicamalert.data.CameraRepository
 import com.example.aicamalert.location.ProximityEngine
+import com.example.aicamalert.data.model.CameraItem
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,15 +54,15 @@ class ProximityEngineTest {
     }
 
     @Test
-    fun missingBearingFallsBackToNearestCamera() {
+    fun missingBearingRequiresMovementDerivedHeading() {
         val location = location().apply { removeBearing() }
-        assertEquals("Behind", engine.findApproachingInRange(location)?.first?.name)
+        assertNull(engine.findApproachingInRange(location))
     }
 
     @Test
-    fun stationaryLocationDoesNotFilterByBearing() {
+    fun stationaryLocationDoesNotQualifyWithoutMovement() {
         val location = location().apply { speed = 0f }
-        assertEquals("Behind", engine.findApproachingInRange(location)?.first?.name)
+        assertNull(engine.findApproachingInRange(location))
     }
 
     @Test
@@ -87,10 +90,40 @@ class ProximityEngineTest {
     }
 
     @Test
-    fun unreliableBearingDoesNotHideCamera() {
+    fun unreliableBearingRequiresMovementDerivedHeading() {
         if (android.os.Build.VERSION.SDK_INT < 26) return
         val location = location().apply { bearing = 180f; bearingAccuracyDegrees = 80f }
-        assertEquals("Ahead", engine.findApproachingInRange(location) { it.name == "Ahead" }?.first?.name)
+        assertNull(engine.findApproachingInRange(location) { it.name == "Ahead" })
     }
 
+    @Test
+    fun cameraOnParallelRoadIsRejectedEvenWhenAhead() {
+        val camera = CameraItem("Parallel road", "Test", latitude = 10.006, longitude = 76.001)
+        assertFalse(engine.isApproaching(location(), camera))
+    }
+
+    @Test
+    fun cameraOnCrossStreetIsRejected() {
+        val camera = CameraItem("Cross street", "Test", latitude = 10.0022, longitude = 76.002)
+        assertFalse(engine.isApproaching(location(), camera))
+    }
+
+    @Test
+    fun roadsideCameraWithinPathToleranceStillQualifies() {
+        val camera = CameraItem("Roadside", "Test", latitude = 10.004, longitude = 76.0002)
+        assertTrue(engine.isApproaching(location(), camera))
+    }
+
+    @Test
+    fun derivedHeadingAllowsApproachWithoutGpsBearing() {
+        assertEquals("Ahead", engine.findApproachingInRange(
+            location().apply { removeBearing() }, travelBearing = 0f,
+        )?.first?.name)
+    }
+
+    @Test
+    fun poorBearingPrecisionRequiresDerivedHeading() {
+        if (android.os.Build.VERSION.SDK_INT < 26) return
+        assertFalse(engine.hasReliableBearing(location().apply { bearingAccuracyDegrees = 30f }))
+    }
 }

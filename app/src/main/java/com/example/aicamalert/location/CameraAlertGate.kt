@@ -46,9 +46,20 @@ class CameraAlertGate(private val engine: ProximityEngine) {
         if (!moving) return null
 
         movementAnchor = Location(location)
-        val result = engine.findApproachingInRange(location) { camera ->
-            cameraKey(camera) !in alerted
-        } ?: return null
+        val travelBearing = if (engine.hasReliableBearing(location)) location.bearing
+            else anchor.bearingTo(location)
+        val result = engine.findApproachingInRange(
+            location,
+            qualifies = { camera ->
+                val cameraLocation = Location("camera").apply {
+                    latitude = camera.latitude
+                    longitude = camera.longitude
+                }
+                cameraKey(camera) !in alerted &&
+                    anchor.distanceTo(cameraLocation) - location.distanceTo(cameraLocation) >= MIN_PROGRESS_METERS
+            },
+            travelBearing = travelBearing,
+        ) ?: return null
         alerted[cameraKey(result.first)] = result.first
         return result
     }
@@ -71,6 +82,7 @@ class CameraAlertGate(private val engine: ProximityEngine) {
     companion object {
         // Beyond the largest speed-adjusted alert radius, plus a GPS buffer.
         const val REARM_DISTANCE_METERS = 1_400f
+        private const val MIN_PROGRESS_METERS = 3f
         private const val MIN_MOVEMENT_METERS = 10f
         private const val MIN_SPEED_MPS = 0.5f
         private const val MAX_ACCURACY_METERS = 75f

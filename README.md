@@ -17,7 +17,7 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
   - No global sound cooldown: the next camera can alert immediately after acknowledgement. Pending alarms are restored if the radar service is recreated; transient system audio interruptions can pause playback.
   - Background via `CameraProximityService:35` — foreground service with lock-screen heads-up notification and full-screen `FullScreenAlertActivity`.
   - Each camera alerts once per approach, after movement is confirmed from fresh GPS fixes (including slow approaches). It re-arms after the user travels more than 1.4 km away (outside the largest alert radius); acknowledging the banner does not silence other cameras.
-  - Direction-aware: bearing check (`ProximityEngine:72`) suppresses alerts for cameras behind you (90° cone, skipped below ~7 km/h).
+  - Path-aware: requires the camera ahead within 30° of travel, within 35 m of the projected path (plus up to 25 m GPS tolerance), and at least 3 m closer after confirmed movement. Slow or unreliable GPS headings use movement-derived direction. This reduces nearby-road alerts; exact road matching is not available because the camera dataset has no road geometry.
   - Speed-aware radius: `500 m @ 0 m/s` → `500 + speed×8s` capped at `1200 m` (`ProximityEngine:62`).
 
 - **Efficient location handling**
@@ -139,7 +139,7 @@ To update camera data, replace `app/src/main/assets/kerala_ai_cameras.json` (arr
 1. **Load:** `CameraRepository:34` parses the bundled JSON on `Dispatchers.IO` and builds a `HashMap<Long, List<CameraItem>>` grid.
 2. **Locate:** `AppLocationManager` emits `StateFlow<Location?>` — high-accuracy updates when the app is visible or radar is active.
 3. **Geofence:** `CameraGeofenceManager:49` groups cameras into ~0.2° cells (`CameraClusterer:134`), expanding the cell size until ≤100 geofences. OS wakes the app on enter/exit.
-4. **Alert:** `CameraAlertGate` confirms movement, then `ProximityEngine` queries nearby cameras, filters by bearing, and picks the nearest qualifying camera within the dynamic radius. Each camera is alerted once until the user exits its zone. Background alerts use sound, notification, and a full-screen intent; foreground alerts use the existing in-app banner.
+4. **Alert:** `CameraAlertGate` confirms movement, then `ProximityEngine` queries nearby cameras, filters by projected path and decreasing distance, and picks the nearest qualifying camera within the dynamic radius. Each camera is alerted once until the user exits its zone. Background alerts use sound, notification, and a full-screen intent; foreground alerts use the existing in-app banner.
 
 ## Build Variants
 
