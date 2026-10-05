@@ -2,10 +2,19 @@ package com.example.aicamalert.ui.components
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,13 +38,15 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.aicamalert.R
 import com.example.aicamalert.data.model.CameraItem
-import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.views.overlay.infowindow.InfoWindow
+import org.osmdroid.events.MapEventsReceiver
 
 @Composable
 fun CameraMapView(
@@ -51,9 +62,16 @@ fun CameraMapView(
     val uriHandler = LocalUriHandler.current
     val primaryColor = MaterialTheme.colorScheme.primary
     val markerContentColor = MaterialTheme.colorScheme.onPrimary
-    val mapBackgroundColor = MaterialTheme.colorScheme.background.toArgb()
+    val mapBackgroundColor = if (darkTheme) NightMapStyle.backgroundColor
+        else MaterialTheme.colorScheme.background.toArgb()
+    val mapColorFilter = remember(darkTheme) {
+        if (darkTheme) ColorMatrixColorFilter(NightMapStyle.colorMatrix()) else null
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
+    var selectedCameraKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val selectedCamera = cameras.firstOrNull { "${it.latitude}_${it.longitude}" == selectedCameraKey }
+    BackHandler(enabled = selectedCamera != null) { selectedCameraKey = null }
     // Mutated by map callbacks without recomposing during pan/zoom; saved per tab.
     val viewport = rememberSaveable { doubleArrayOf(Double.NaN, Double.NaN, 13.5) }
 
@@ -133,6 +151,7 @@ fun CameraMapView(
     // Handle map camera animate when focusedCamera changes
     LaunchedEffect(focusedCamera, mapViewRef) {
         if (focusedCamera != null && mapViewRef != null) {
+            selectedCameraKey = "${focusedCamera.latitude}_${focusedCamera.longitude}"
             mapViewRef?.controller?.animateTo(
                 GeoPoint(focusedCamera.latitude, focusedCamera.longitude),
                 16.0,
@@ -141,9 +160,11 @@ fun CameraMapView(
         }
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
+        val detailsMaxHeight = (maxHeight - topOverlayPadding - bottomOverlayPadding - 32.dp)
+            .coerceAtLeast(96.dp)
         AndroidView(
             factory = { ctx ->
                 MapView(ctx).apply {
@@ -155,9 +176,7 @@ fun CameraMapView(
 
                     overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
                     overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
-                    overlayManager.tilesOverlay.setColorFilter(
-                        if (darkTheme) TilesOverlay.INVERT_COLORS else null
-                    )
+                    overlayManager.tilesOverlay.setColorFilter(mapColorFilter)
 
                     isTilesScaledToDpi = true
                     maxZoomLevel = 19.0
@@ -181,6 +200,14 @@ fun CameraMapView(
                     controller.setZoom(if (focusedCamera != null) 16.0 else viewport[2])
                     controller.setCenter(initialCenter)
                     val map = this
+                    overlays.add(MapEventsOverlay(object : MapEventsReceiver {
+                        override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                            selectedCameraKey = null
+                            InfoWindow.closeAllInfoWindowsOn(map)
+                            return false
+                        }
+                        override fun longPressHelper(p: GeoPoint?): Boolean = false
+                    }))
                     fun saveViewport() {
                         viewport[0] = map.mapCenter.latitude
                         viewport[1] = map.mapCenter.longitude
@@ -206,9 +233,7 @@ fun CameraMapView(
                 view.setBackgroundColor(mapBgColor)
                 view.overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
                 view.overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
-                view.overlayManager.tilesOverlay.setColorFilter(
-                    if (darkTheme) TilesOverlay.INVERT_COLORS else null
-                )
+                view.overlayManager.tilesOverlay.setColorFilter(mapColorFilter)
                 view.invalidate()
 
                 // Diff-based marker update: only recreate if data actually changed
@@ -238,6 +263,17 @@ fun CameraMapView(
                             icon = markerIcon
                             title = camera.name
                             snippet = "${camera.district} • ${camera.distance}"
+                            infoWindow = null
+                            setOnMarkerClickListener { _, tappedMap ->
+                                InfoWindow.closeAllInfoWindowsOn(tappedMap)
+                                selectedCameraKey = "${camera.latitude}_${camera.longitude}"
+                                tappedMap.controller.animateTo(
+                                    GeoPoint(camera.latitude, camera.longitude),
+                                    tappedMap.zoomLevelDouble,
+                                    450L,
+                                )
+                                true
+                            }
                         }
                         view.overlays.add(marker)
                     }
@@ -272,28 +308,66 @@ fun CameraMapView(
         )
 
         // Recenter control; map zoom is handled by touch gestures.
-        FloatingActionButton(
-            onClick = {
-                if (userLocation != null) {
-                    mapViewRef?.controller?.animateTo(
-                        GeoPoint(userLocation.latitude, userLocation.longitude),
-                        15.5,
-                        800L
-                    )
-                } else {
-                    onRequestLocation()
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-                .padding(bottom = bottomOverlayPadding + 16.dp, end = 20.dp)
-                .size(56.dp)
+        AnimatedVisibility(
+            visible = selectedCamera == null,
+            modifier = Modifier.align(Alignment.BottomEnd),
+            enter = fadeIn(tween(180)),
+            exit = fadeOut(tween(120)),
         ) {
-            Icon(Icons.Default.MyLocation, contentDescription = "My Location", modifier = Modifier.size(28.dp))
+            FloatingActionButton(
+                onClick = {
+                    if (userLocation != null) {
+                        mapViewRef?.controller?.animateTo(
+                            GeoPoint(userLocation.latitude, userLocation.longitude),
+                            15.5,
+                            800L
+                        )
+                    } else {
+                        onRequestLocation()
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                    .padding(bottom = bottomOverlayPadding + 16.dp, end = 20.dp)
+                    .size(56.dp)
+            ) {
+                Icon(Icons.Default.MyLocation, contentDescription = "My Location", modifier = Modifier.size(28.dp))
+            }
+        }
+
+        AnimatedVisibility(
+            visible = selectedCamera != null,
+            modifier = Modifier.align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                .padding(start = 16.dp, end = 16.dp, bottom = (bottomOverlayPadding - 28.dp).coerceAtLeast(0.dp)),
+            enter = fadeIn(tween(200)) + slideInVertically(
+                spring(dampingRatio = 1f, stiffness = 240f), initialOffsetY = { it / 3 }),
+            exit = fadeOut(tween(140)) + slideOutVertically(tween(200), targetOffsetY = { it / 4 }),
+        ) {
+            // Retain the outgoing camera while the dismissal animation completes.
+            var displayedCamera by remember { mutableStateOf(selectedCamera) }
+            if (selectedCamera != null) displayedCamera = selectedCamera
+            displayedCamera?.let { camera ->
+                MapCameraDetails(
+                    camera = camera,
+                    isGpsActive = userLocation != null,
+                    onDismiss = { selectedCameraKey = null },
+                    onCenter = {
+                        mapViewRef?.controller?.animateTo(
+                            GeoPoint(camera.latitude, camera.longitude),
+                            mapViewRef?.zoomLevelDouble,
+                            450L,
+                        )
+                    },
+                    onDirections = {
+                        uriHandler.openUri("https://www.google.com/maps/dir/?api=1&destination=${camera.latitude},${camera.longitude}")
+                    },
+                    modifier = Modifier.widthIn(max = 520.dp).fillMaxWidth().heightIn(max = detailsMaxHeight),
+                )
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
 
 - **Browse cameras**
   - List view ordered nearest first, with a floating bottom search button that expands into search (name / district), district filters with counts, and distance filters (`< 5/10/25/50 km`).
-  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Both themes use OpenStreetMap tiles with an app-identifying User-Agent; dark mode applies a tile color filter. The tile source has a separate cache from previously blocked tiles, with 2 download threads and a 500 MB disk limit. Geofence regions are clustered; map markers are not.
+  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Both themes use OpenStreetMap tiles with an app-identifying User-Agent; dark mode uses a night filter with charcoal land, blue water, green vegetation, and softer light labels. The tile source has a separate cache from previously blocked tiles, with 2 download threads and a 500 MB disk limit. Geofence regions are clustered; map markers are not.
   - Distance to each camera computed on-device via `Location.distanceBetween`, throttled to every 12 s / 100 m in `CameraViewModel:242`.
 
 - **Proactive proximity alerts**
@@ -36,8 +36,8 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
   - Auto-disables radar if required permissions are revoked (`CameraViewModel:121`).
 
 - **UX**
-  - Material 3 with black/white backgrounds, neutral theme-aware text and surfaces, blue primary controls, automatic system light/dark appearance, and an adaptive camera/shield launcher icon.
-  - Camera-alert switch in the app bar and floating search with expandable filters in the list view.
+  - Material 3 with black/white backgrounds, neutral theme-aware text and surfaces, blue primary controls, automatic system light/dark appearance, and a minimal blue video-camera launcher icon on black with a white lens and themed-icon support.
+  - Camera-alert switch in the app bar and floating search with expandable filters in the list view. Tapping a map camera opens a theme-aware details card with its name, district, live distance, recenter control, and directions.
   - Location-disabled dialog, permission guidance dialogs, empty-state handling.
 
 ## Tech Stack
