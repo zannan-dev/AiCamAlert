@@ -7,6 +7,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,7 +17,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -24,6 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.aicamalert.R
 import com.example.aicamalert.data.model.CameraItem
 import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.events.MapListener
@@ -41,9 +45,13 @@ fun CameraMapView(
     darkTheme: Boolean,
     onRequestLocation: () -> Unit,
     bottomOverlayPadding: Dp = 0.dp,
+    topOverlayPadding: Dp = 0.dp,
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val primaryColor = MaterialTheme.colorScheme.primary
+    val markerContentColor = MaterialTheme.colorScheme.onPrimary
+    val mapBackgroundColor = MaterialTheme.colorScheme.background.toArgb()
     val lifecycleOwner = LocalLifecycleOwner.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
     // Mutated by map callbacks without recomposing during pan/zoom; saved per tab.
@@ -64,13 +72,15 @@ fun CameraMapView(
         }
     }
 
-    // Camera Pin Marker Icon
-    val markerIcon = remember(primaryColor) {
+    // Keep camera pins blue with white icons in both map themes.
+    val cameraPinBackground = primaryColor
+    val cameraPinForeground = androidx.compose.ui.graphics.Color.White
+    val markerIcon = remember(cameraPinBackground, cameraPinForeground) {
         val size = 120
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint().apply {
-            color = primaryColor.toArgb()
+            color = cameraPinBackground.toArgb()
             isAntiAlias = true
         }
 
@@ -81,7 +91,7 @@ fun CameraMapView(
         canvas.drawCircle(size / 2f, size / 2f, size / 2.5f, paint)
 
         val iconSize = size / 3
-        val cameraIcon = ContextCompat.getDrawable(context, android.R.drawable.ic_menu_camera)
+        val cameraIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_videocam)
         cameraIcon?.let {
             it.setBounds(
                 (size / 2 - iconSize / 2),
@@ -89,36 +99,36 @@ fun CameraMapView(
                 (size / 2 + iconSize / 2),
                 (size / 2 + iconSize / 2)
             )
-            it.setColorFilter(android.graphics.Color.BLACK, PorterDuff.Mode.SRC_IN)
+            it.setColorFilter(cameraPinForeground.toArgb(), PorterDuff.Mode.SRC_IN)
             it.draw(canvas)
         }
         BitmapDrawable(context.resources, bitmap)
     }
 
     // User Location Indicator Dot
-    val userLocationIcon = remember {
+    val userLocationIcon = remember(primaryColor, markerContentColor) {
         val size = 96
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint().apply { isAntiAlias = true }
 
-        paint.color = android.graphics.Color.parseColor("#4285F4")
+        paint.color = primaryColor.toArgb()
         paint.alpha = 60
         canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
 
-        paint.color = android.graphics.Color.WHITE
+        paint.color = markerContentColor.toArgb()
         paint.alpha = 255
         canvas.drawCircle(size / 2f, size / 2f, size / 3f, paint)
 
-        paint.color = android.graphics.Color.parseColor("#1A73E8")
+        paint.color = primaryColor.toArgb()
         canvas.drawCircle(size / 2f, size / 2f, size / 4f, paint)
 
         BitmapDrawable(context.resources, bitmap)
     }
 
     // Track previous marker state for diff-based updates
-    var prevCameraKeys by remember { mutableStateOf(emptySet<String>()) }
-    var prevUserLocStr by remember { mutableStateOf("") }
+    var prevCameraKeys by remember(markerIcon) { mutableStateOf(emptySet<String>()) }
+    var prevUserLocStr by remember(userLocationIcon) { mutableStateOf("") }
 
     // Handle map camera animate when focusedCamera changes
     LaunchedEffect(focusedCamera, mapViewRef) {
@@ -140,7 +150,7 @@ fun CameraMapView(
                     setTileSource(aiCamTileSource)
                     setMultiTouchControls(true)
 
-                    val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
+                    val mapBgColor = mapBackgroundColor
                     setBackgroundColor(mapBgColor)
 
                     overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
@@ -192,7 +202,7 @@ fun CameraMapView(
                 }
             },
             update = { view ->
-                val mapBgColor = if (darkTheme) android.graphics.Color.parseColor("#121212") else android.graphics.Color.parseColor("#F5F5F5")
+                val mapBgColor = mapBackgroundColor
                 view.setBackgroundColor(mapBgColor)
                 view.overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
                 view.overlayManager.tilesOverlay.loadingLineColor = android.graphics.Color.TRANSPARENT
@@ -245,69 +255,45 @@ fun CameraMapView(
             modifier = Modifier.fillMaxSize()
         )
 
-        Surface(
-            modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = bottomOverlayPadding + 8.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-            shape = RoundedCornerShape(4.dp),
-        ) {
-            Text(
-                "© OpenStreetMap contributors",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-            )
-        }
+        Text(
+            "© OpenStreetMap",
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelSmall.copy(
+                shadow = Shadow(
+                    color = MaterialTheme.colorScheme.background,
+                    blurRadius = 6f,
+                ),
+            ),
+            modifier = Modifier.align(Alignment.TopEnd)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                .padding(top = topOverlayPadding + 8.dp, end = 12.dp)
+                .clickable { uriHandler.openUri("https://www.openstreetmap.org/copyright") }
+                .padding(horizontal = 6.dp, vertical = 3.dp),
+        )
 
-        // Floating Action Buttons on the bottom right
-        Column(
+        // Recenter control; map zoom is handled by touch gestures.
+        FloatingActionButton(
+            onClick = {
+                if (userLocation != null) {
+                    mapViewRef?.controller?.animateTo(
+                        GeoPoint(userLocation.latitude, userLocation.longitude),
+                        15.5,
+                        800L
+                    )
+                } else {
+                    onRequestLocation()
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = bottomOverlayPadding + 36.dp, end = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                .padding(bottom = bottomOverlayPadding + 16.dp, end = 20.dp)
+                .size(56.dp)
         ) {
-            // Zoom In (+)
-            SmallFloatingActionButton(
-                onClick = { mapViewRef?.controller?.zoomIn() },
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Zoom In")
-            }
-
-            // Zoom Out (-)
-            SmallFloatingActionButton(
-                onClick = { mapViewRef?.controller?.zoomOut() },
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(Icons.Default.Remove, contentDescription = "Zoom Out")
-            }
-
-            // My Location / Find My Location Button
-            FloatingActionButton(
-                onClick = {
-                    if (userLocation != null) {
-                        mapViewRef?.controller?.animateTo(
-                            GeoPoint(userLocation.latitude, userLocation.longitude),
-                            15.5,
-                            800L
-                        )
-                    } else {
-                        onRequestLocation()
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.size(56.dp)
-            ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "My Location", modifier = Modifier.size(28.dp))
-            }
+            Icon(Icons.Default.MyLocation, contentDescription = "My Location", modifier = Modifier.size(28.dp))
         }
     }
 }

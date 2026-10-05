@@ -11,8 +11,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.aicamalert.viewmodel.CameraViewModel
 import com.example.aicamalert.ui.theme.AiCamAlertTheme
-import com.example.aicamalert.ui.theme.rememberAppThemeMode
-import com.example.aicamalert.ui.theme.saveAppThemeMode
 import org.osmdroid.config.Configuration
 import com.example.aicamalert.ui.components.PermissionSetupGate
 
@@ -38,9 +36,11 @@ class MainActivity : ComponentActivity() {
             "AiCamAlert/$version (+https://github.com/zannan-dev/AiCamAlert)"
         
         enableEdgeToEdge()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         setContent {
-            val themeMode by rememberAppThemeMode()
-            val darkTheme = themeMode.isDark(isSystemInDarkTheme())
+            val darkTheme = isSystemInDarkTheme()
             SideEffect {
                 WindowCompat.getInsetsController(window, window.decorView).apply {
                     isAppearanceLightStatusBars = !darkTheme
@@ -51,8 +51,7 @@ class MainActivity : ComponentActivity() {
                 PermissionSetupGate(onSetupCompleted = {
                     ViewModelProvider(this)[CameraViewModel::class.java].toggleBackgroundRadar(true)
                 }) {
-                    CameraListScreen(darkTheme = darkTheme, themeMode = themeMode,
-                        onThemeModeChange = { saveAppThemeMode(this, it) })
+                    CameraListScreen(darkTheme = darkTheme)
                 }
             }
         }

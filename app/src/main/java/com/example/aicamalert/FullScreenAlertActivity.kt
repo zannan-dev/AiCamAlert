@@ -63,8 +63,7 @@ class FullScreenAlertActivity : ComponentActivity() {
                 CameraProximityService.acknowledgeAlarm(this)
                 finish()
             }
-            val themeMode by com.example.aicamalert.ui.theme.rememberAppThemeMode()
-            val darkTheme = themeMode.isDark(androidx.compose.foundation.isSystemInDarkTheme())
+            val darkTheme = androidx.compose.foundation.isSystemInDarkTheme()
             androidx.compose.runtime.SideEffect {
                 androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
                     isAppearanceLightStatusBars = !darkTheme
@@ -96,7 +95,7 @@ fun FullScreenAlertContent(
     onDismiss: () -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
-    val warningColor = if (darkTheme) Color(0xFFFF1744) else Color(0xFFB00020)
+    val warningColor = scheme.error
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 0.95f,
@@ -114,9 +113,9 @@ fun FullScreenAlertContent(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        if (darkTheme) Color(0xFF1E0000) else Color(0xFFFFEDEE),
                         scheme.background,
-                        if (darkTheme) Color(0xFF001F24) else Color(0xFFE4F5F7)
+                        scheme.background,
+                        scheme.surfaceContainer
                     )
                 )
             )
@@ -132,8 +131,7 @@ fun FullScreenAlertContent(
             // Top Emergency Header
             Surface(
                 shape = RoundedCornerShape(30.dp),
-                color = warningColor.copy(alpha = 0.12f),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, warningColor)
+                color = warningColor.copy(alpha = 0.12f)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
@@ -170,7 +168,7 @@ fun FullScreenAlertContent(
                     Icon(
                         Icons.Default.Warning,
                         contentDescription = "Alert Warning",
-                        tint = Color.White,
+                        tint = scheme.onError,
                         modifier = Modifier.size(60.dp)
                     )
                 }
@@ -181,8 +179,7 @@ fun FullScreenAlertContent(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = scheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.5.dp, scheme.primary)
+                    color = scheme.surface
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp),

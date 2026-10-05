@@ -1,93 +1,64 @@
 package com.example.aicamalert.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = AccentCyan,
-    secondary = Color(0xFFB0CCD0),
-    tertiary = Color(0xFFE4C38C),
-    background = DarkBackground,
-    surface = SurfaceColor,
-    onPrimary = Color.Black,
-    onSecondary = Color(0xFF193338),
-    onBackground = Color.White,
-    onSurface = Color.White,
-    surfaceVariant = CardBackground,
-    onSurfaceVariant = TextSecondary,
-    primaryContainer = Color(0xFF00363D),
-    onPrimaryContainer = AccentCyan,
-    secondaryContainer = Color(0xFF002B30),
-    onSecondaryContainer = AccentCyan,
-    surfaceContainerLowest = Color(0xFF0D1519),
-    surfaceContainerLow = Color(0xFF162328),
-    surfaceContainer = Color(0xFF1C2A30),
-    surfaceContainerHigh = Color(0xFF25343A),
-    surfaceContainerHighest = Color(0xFF304047),
-    outline = Color(0xFF84999F),
-    outlineVariant = Color(0xFF3C5057),
-)
+/** Neutral surfaces and text, with blue reserved for primary controls and selection. */
+private fun appColorScheme(darkTheme: Boolean): androidx.compose.material3.ColorScheme {
+    val base = if (darkTheme) PureBlack else PureWhite
+    val foreground = if (darkTheme) Color(0xFFF5F5F5) else Color(0xFF161616)
+    val secondaryText = if (darkTheme) Color(0xFFB8B8B8) else Color(0xFF616161)
+    val defaults = if (darkTheme) darkColorScheme() else lightColorScheme()
+    return defaults.copy(
+        primary = AccentBlue,
+        onPrimary = PureWhite,
+        secondary = secondaryText,
+        onSecondary = base,
+        tertiary = secondaryText,
+        onTertiary = base,
+        background = base,
+        onBackground = foreground,
+        surface = if (darkTheme) Color(0xFF0D0D0D) else PureWhite,
+        onSurface = foreground,
+        surfaceVariant = if (darkTheme) Color(0xFF1A1A1A) else Color(0xFFF1F1F1),
+        onSurfaceVariant = secondaryText,
+        primaryContainer = if (darkTheme) Color(0xFF122747) else Color(0xFFDCEAFF),
+        onPrimaryContainer = if (darkTheme) Color(0xFFADCFFF) else AccentBlue,
+        secondaryContainer = if (darkTheme) Color(0xFF242424) else Color(0xFFEEEEEE),
+        onSecondaryContainer = foreground,
+        tertiaryContainer = if (darkTheme) Color(0xFF242424) else Color(0xFFEEEEEE),
+        onTertiaryContainer = foreground,
+        surfaceContainerLowest = base,
+        surfaceContainerLow = if (darkTheme) Color(0xFF101010) else Color(0xFFFAFAFA),
+        surfaceContainer = if (darkTheme) Color(0xFF171717) else Color(0xFFF5F5F5),
+        surfaceContainerHigh = if (darkTheme) Color(0xFF222222) else Color(0xFFF1F1F1),
+        surfaceContainerHighest = if (darkTheme) Color(0xFF2C2C2C) else Color(0xFFE8E8E8),
+        surfaceBright = if (darkTheme) Color(0xFF2C2C2C) else PureWhite,
+        surfaceDim = if (darkTheme) PureBlack else Color(0xFFE8E8E8),
+        outline = if (darkTheme) Color(0xFF808080) else Color(0xFF757575),
+        outlineVariant = if (darkTheme) Color(0xFF373737) else Color(0xFFDDDDDD),
+        inverseSurface = if (darkTheme) Color(0xFFF5F5F5) else Color(0xFF222222),
+        inverseOnSurface = if (darkTheme) Color(0xFF161616) else Color(0xFFF5F5F5),
+        inversePrimary = if (darkTheme) AccentBlue else Color(0xFFADCFFF),
+        surfaceTint = base,
+    )
+}
 
-private val LightColorScheme = lightColorScheme(
-    primary = LightPrimary,
-    secondary = LightSecondary,
-    tertiary = LightTertiary,
-    background = LightBackground,
-    surface = LightSurface,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF14262A),
-    onSurface = Color(0xFF14262A),
-    surfaceVariant = Color(0xFFE8F1F3),
-    onSurfaceVariant = Color(0xFF465F65),
-    primaryContainer = Color(0xFFC9F1F7),
-    onPrimaryContainer = Color(0xFF004B58),
-    secondaryContainer = Color(0xFFD9EBEF),
-    onSecondaryContainer = Color(0xFF174C56),
-    outline = Color(0xFF71888E),
-    outlineVariant = Color(0xFFCAD8DC),
-    tertiaryContainer = Color(0xFFFFE8BE),
-    onTertiaryContainer = Color(0xFF553D0B),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF0F5F6),
-    surfaceContainer = Color(0xFFEAF1F3),
-    surfaceContainerHigh = Color(0xFFE3ECEF),
-    surfaceContainerHighest = Color(0xFFDBE6E9),
-    error = Color(0xFFBA1A1A),
-    onError = Color.White,
-    errorContainer = Color(0xFFFFDAD6),
-    onErrorContainer = Color(0xFF410002)
-)
+private val DarkColorScheme = appColorScheme(darkTheme = true)
+private val LightColorScheme = appColorScheme(darkTheme = false)
 
 @Composable
 fun AiCamAlertTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

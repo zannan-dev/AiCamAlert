@@ -4,14 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,10 +36,20 @@ fun SearchAndFilters(
     districtCounts: Map<String, Int>,
     selectedDistance: String,
     onDistanceChange: (String) -> Unit,
-    sortByDistance: Boolean,
-    onSortChange: (Boolean) -> Unit
+    autoFocus: Boolean = false,
 ) {
     var filtersExpanded by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+    val activeFilterCount = (if (selectedDistrict != "All Districts") 1 else 0) +
+        (if (selectedDistance != "All") 1 else 0)
     Column {
         // Search Bar
         TextField(
@@ -39,13 +58,38 @@ fun SearchAndFilters(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(14.dp)),
-            placeholder = { Text("Search by camera or district", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                .heightIn(min = 56.dp)
+                .focusRequester(focusRequester)
+                .semantics { contentDescription = "Search cameras or districts" },
+            shape = RoundedCornerShape(28.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
+            placeholder = { Text("Search cameras", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onSearchChange("") }) {
-                        Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(Modifier.padding(end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchChange("") }) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    IconButton(
+                        onClick = { filtersExpanded = !filtersExpanded },
+                        modifier = Modifier.semantics {
+                            stateDescription = "${if (filtersExpanded) "Expanded" else "Collapsed"}, $activeFilterCount active filters"
+                        },
+                    ) {
+                        BadgedBox(badge = {
+                            if (activeFilterCount > 0) {
+                                Badge(containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary) {
+                                    Text(activeFilterCount.toString())
+                                }
+                            }
+                        }) {
+                            Icon(Icons.Default.Tune, contentDescription = "Filters",
+                                tint = if (filtersExpanded || activeFilterCount > 0) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             },
@@ -55,35 +99,28 @@ fun SearchAndFilters(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                cursorColor = MaterialTheme.colorScheme.primary,
             ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            }),
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { filtersExpanded = !filtersExpanded }) {
-                Icon(Icons.Default.Tune, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                val count = (if (selectedDistrict != "All Districts") 1 else 0) +
-                    (if (selectedDistance != "All") 1 else 0)
-                Text(if (count > 0) "Filters ($count)" else "Filters")
-                Icon(if (filtersExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
-            }
-            TextButton(onClick = { onSortChange(!sortByDistance) }) {
-                Text(if (sortByDistance) "Nearest first" else "District order")
-            }
-        }
         androidx.compose.animation.AnimatedVisibility(visible = filtersExpanded) {
         Column {
             // District and Distance Dropdowns
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 FilterDropdown(

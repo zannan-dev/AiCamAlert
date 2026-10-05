@@ -47,9 +47,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     private val _selectedDistance = MutableStateFlow("All")
     val selectedDistance: StateFlow<String> = _selectedDistance.asStateFlow()
 
-    private val _sortByDistance = MutableStateFlow(true)
-    val sortByDistance: StateFlow<Boolean> = _sortByDistance.asStateFlow()
-
     private val _isListView = MutableStateFlow(false)
     val isListView: StateFlow<Boolean> = _isListView.asStateFlow()
 
@@ -87,9 +84,9 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     val districtsList: StateFlow<List<String>> = _districtsList.asStateFlow()
 
     val filteredCameras: StateFlow<List<CameraItem>> = combine(
-        _camerasWithDistance, _searchQuery, _selectedDistrict, _selectedDistance, _sortByDistance
-    ) { cameras, query, district, distance, byDistance ->
-        filterAndSort(cameras, query, district, distance, byDistance)
+        _camerasWithDistance, _searchQuery, _selectedDistrict, _selectedDistance
+    ) { cameras, query, district, distance ->
+        filterAndSort(cameras, query, district, distance)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // ── Distance recompute throttling ──
@@ -159,7 +156,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     fun setSearchQuery(query: String) { _searchQuery.value = query }
     fun setSelectedDistrict(district: String) { _selectedDistrict.value = district }
     fun setSelectedDistance(distance: String) { _selectedDistance.value = distance }
-    fun setSortByDistance(byDistance: Boolean) { _sortByDistance.value = byDistance }
 
     fun setIsListView(listView: Boolean) {
         _isListView.value = listView
@@ -279,9 +275,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         query: String,
         district: String,
         distance: String,
-        byDistance: Boolean
     ): List<CameraItem> {
-        var list = cameras.filter { camera ->
+        val list = cameras.filter { camera ->
             val matchesSearch = query.isEmpty() ||
                 camera.name.contains(query, ignoreCase = true) ||
                 camera.district.contains(query, ignoreCase = true)
@@ -301,12 +296,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             matchesSearch && matchesDistrict && matchesDistance
         }
 
-        list = if (byDistance) {
-            list.sortedBy { it.distanceMeters }
-        } else {
-            list.sortedBy { it.district }
-        }
-
-        return list
+        return list.sortedBy { it.distanceMeters }
     }
 }

@@ -6,12 +6,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import com.example.aicamalert.ui.components.HeaderSection
 import com.example.aicamalert.ui.components.SearchAndFilters
 import com.example.aicamalert.ui.theme.AiCamAlertTheme
-import com.example.aicamalert.ui.theme.AppThemeMode
-import com.example.aicamalert.ui.components.ThemeSettings
-import com.example.aicamalert.ui.theme.rememberAppThemeMode
-import com.example.aicamalert.ui.theme.saveAppThemeMode
-import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
@@ -28,9 +22,11 @@ class CameraControlsTest {
         }
         compose.onNodeWithContentDescription("Use dark theme").assertDoesNotExist()
         compose.onNodeWithContentDescription("Use light theme").assertDoesNotExist()
-        compose.onNodeWithText("Off · browse cameras anytime").assertIsDisplayed()
-        compose.onNode(isToggleable()).performClick()
-        compose.onNodeWithText("On · includes background alerts").assertIsDisplayed()
+        compose.onNodeWithText("AiCam Alert").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Settings").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Camera alerts").assertIsOff().performClick().assertIsOn()
+        compose.onNodeWithText("Off · browse cameras anytime").assertDoesNotExist()
+        compose.onNodeWithText("On · includes background alerts").assertDoesNotExist()
     }
 
     @Test
@@ -38,36 +34,13 @@ class CameraControlsTest {
         compose.setContent {
             AiCamAlertTheme(darkTheme = false) {
                 SearchAndFilters("", {}, "All Districts", {}, listOf("All Districts"),
-                    emptyMap(), "All", {}, true, {})
+                    emptyMap(), "All", {})
             }
         }
         compose.onNodeWithText("Distance Filter").assertDoesNotExist()
-        compose.onNodeWithText("Filters").performClick()
+        compose.onNodeWithText("Nearest first").assertDoesNotExist()
+        compose.onNodeWithText("District order").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Filters").performClick()
         compose.onNodeWithText("Distance Filter").assertIsDisplayed()
     }
-    @Test
-    fun settingsThemeChoicesUpdateAndPersistSelection() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val preferences = context.getSharedPreferences("aicam_prefs", android.content.Context.MODE_PRIVATE)
-        val previous = preferences.getString(AppThemeMode.PREFERENCE_KEY, null)
-        saveAppThemeMode(context, AppThemeMode.SYSTEM)
-        try {
-            compose.setContent {
-                val mode by rememberAppThemeMode()
-                AiCamAlertTheme(darkTheme = mode.isDark(false)) {
-                    ThemeSettings(mode) { saveAppThemeMode(context, it) }
-                }
-            }
-            compose.onNodeWithText("System (follow phone)").assertIsSelected()
-            compose.onNodeWithText("Dark").performClick().assertIsSelected()
-            assertEquals("DARK", preferences.getString(AppThemeMode.PREFERENCE_KEY, null))
-            compose.onNodeWithText("Light").performClick().assertIsSelected()
-            assertEquals("LIGHT", preferences.getString(AppThemeMode.PREFERENCE_KEY, null))
-            compose.onNodeWithText("System (follow phone)").performClick().assertIsSelected()
-            assertEquals("SYSTEM", preferences.getString(AppThemeMode.PREFERENCE_KEY, null))
-        } finally {
-            preferences.edit().putString(AppThemeMode.PREFERENCE_KEY, previous).apply()
-        }
-    }
-
 }
