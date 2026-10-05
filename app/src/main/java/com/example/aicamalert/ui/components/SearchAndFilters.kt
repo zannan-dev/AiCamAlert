@@ -1,12 +1,10 @@
 package com.example.aicamalert.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,27 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-@Composable
-fun ToggleRow(isListView: Boolean, onToggle: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        SegmentedToggle(
-            options = listOf("Map" to Icons.Default.Map, "List" to Icons.AutoMirrored.Filled.FormatListBulleted),
-            selectedOption = if (isListView) "List" else "Map",
-            onOptionSelected = { onToggle(it == "List") }
-        )
-    }
-}
 
 @Composable
 fun SearchAndFilters(
@@ -123,47 +104,6 @@ fun SearchAndFilters(
                 )
             }
         }
-        }
-    }
-}
-
-@Composable
-fun SegmentedToggle(
-    options: List<Pair<String, ImageVector>>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp))
-            .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        options.forEach { (text, icon) ->
-            val isSelected = selectedOption == text
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
-                    .clickable { onOptionSelected(text) }
-                    .padding(vertical = 8.dp, horizontal = 26.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = text,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = 14.sp
-                )
-            }
         }
     }
 }

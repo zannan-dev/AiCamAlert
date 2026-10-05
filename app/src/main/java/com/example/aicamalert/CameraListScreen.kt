@@ -5,6 +5,12 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -20,6 +26,7 @@ import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +71,7 @@ fun CameraListScreen(
     val isLocationEnabled by viewModel.isLocationEnabled.collectAsState()
     val userLocation by viewModel.locationManager.location.collectAsState()
 
+    val viewStateHolder = rememberSaveableStateHolder()
     val lifecycleOwner = LocalLifecycleOwner.current
     var isRadarEnablePending by rememberSaveable { mutableStateOf(false) }
     var showAlertSettings by rememberSaveable { mutableStateOf(false) }
@@ -174,7 +182,7 @@ fun CameraListScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
             HeaderSection(
                 radarEnabled = isBackgroundRadarEnabled,
                 onRadarToggle = { handleRadarToggle(it) },
@@ -182,11 +190,6 @@ fun CameraListScreen(
             )
             Surface(color = MaterialTheme.colorScheme.surface) {
                 Column(Modifier.padding(bottom = 10.dp)) {
-                    ToggleRow(isListView) {
-                        viewModel.setIsListView(it)
-                        if (it) viewModel.setFocusedCamera(null)
-                    }
-                    Spacer(Modifier.height(8.dp))
                     LocationStatusBar(
                         radarEnabled = isBackgroundRadarEnabled,
                         userLocation = userLocation,
@@ -195,47 +198,85 @@ fun CameraListScreen(
                     )
                 }
             }
-            if (isListView) {
-                Spacer(Modifier.height(12.dp))
-                SearchAndFilters(
-                    searchQuery = searchQuery,
-                    onSearchChange = { viewModel.setSearchQuery(it) },
-                    selectedDistrict = selectedDistrict,
-                    onDistrictChange = { viewModel.setSelectedDistrict(it) },
-                    districts = districtsList,
-                    districtCounts = districtCounts,
-                    selectedDistance = selectedDistance,
-                    onDistanceChange = { viewModel.setSelectedDistance(it) },
-                    sortByDistance = sortByDistance,
-                    onSortChange = { viewModel.setSortByDistance(it) },
-                )
-                Spacer(Modifier.height(8.dp))
-                if (filteredCameras.isEmpty()) {
-                    EmptyCameraState(onResetFilters = { viewModel.resetFilters() })
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(bottom = 16.dp),
-                    ) {
-                        items(filteredCameras, key = { "${it.latitude}_${it.longitude}_${it.name}" }) { camera ->
-                            CameraCard(camera, isGpsActive = userLocation != null,
-                                onFocusOnMap = { viewModel.setFocusedCamera(camera) })
+            AnimatedContent(
+                targetState = isListView,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                transitionSpec = {
+                    val direction = if (targetState) 1 else -1
+                    (fadeIn(tween(280)) + slideInHorizontally(
+                        tween(320, easing = FastOutSlowInEasing),
+                        initialOffsetX = { direction * (it / 12) },
+                    )).togetherWith(
+                        fadeOut(tween(180)) + slideOutHorizontally(
+                            tween(320, easing = FastOutSlowInEasing),
+                            targetOffsetX = { -direction * (it / 12) },
+                        ),
+                    ).using(null)
+                },
+                label = "Camera view transition",
+            ) { listView ->
+                viewStateHolder.SaveableStateProvider(if (listView) "list" else "map") {
+                    Column(Modifier.fillMaxSize()) {
+                        if (listView) {
+                            Spacer(Modifier.height(12.dp))
+                            SearchAndFilters(
+                                searchQuery = searchQuery,
+                                onSearchChange = { viewModel.setSearchQuery(it) },
+                                selectedDistrict = selectedDistrict,
+                                onDistrictChange = { viewModel.setSelectedDistrict(it) },
+                                districts = districtsList,
+                                districtCounts = districtCounts,
+                                selectedDistance = selectedDistance,
+                                onDistanceChange = { viewModel.setSelectedDistance(it) },
+                                sortByDistance = sortByDistance,
+                                onSortChange = { viewModel.setSortByDistance(it) },
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            if (filteredCameras.isEmpty()) {
+                                Box(Modifier.weight(1f).padding(bottom = 96.dp)) {
+                                    EmptyCameraState(onResetFilters = { viewModel.resetFilters() })
+                                }
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(bottom = 96.dp),
+                                ) {
+                                    items(filteredCameras, key = { "${it.latitude}_${it.longitude}_${it.name}" }) { camera ->
+                                        CameraCard(camera, isGpsActive = userLocation != null,
+                                            onFocusOnMap = { viewModel.setFocusedCamera(camera) })
+                                    }
+                                }
+                            }
+                        } else {
+                            Box(Modifier.fillMaxSize()) {
+                                CameraMapView(
+                                    cameras = filteredCameras,
+                                    focusedCamera = focusedCamera,
+                                    userLocation = userLocation,
+                                    darkTheme = darkTheme,
+                                    onRequestLocation = { requestLocationPermission() },
+                                    bottomOverlayPadding = 88.dp,
+                                )
+                            }
                         }
                     }
                 }
-            } else {
-                Box(Modifier.weight(1f)) {
-                    CameraMapView(
-                        cameras = filteredCameras,
-                        focusedCamera = focusedCamera,
-                        userLocation = userLocation,
-                        darkTheme = darkTheme,
-                        onRequestLocation = { requestLocationPermission() },
-                    )
-                }
             }
         }
+
+        FloatingViewNavigation(
+            isListView = isListView,
+            onSelectView = { listView ->
+                viewModel.setIsListView(listView)
+                if (listView) viewModel.setFocusedCamera(null)
+            },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+        )
 
         // In-App Full Screen Alert Overlay
         AnimatedVisibility(

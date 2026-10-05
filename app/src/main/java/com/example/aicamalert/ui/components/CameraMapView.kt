@@ -12,11 +12,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -24,6 +26,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.aicamalert.data.model.CameraItem
 import org.osmdroid.views.overlay.TilesOverlay
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -34,12 +39,15 @@ fun CameraMapView(
     focusedCamera: CameraItem?,
     userLocation: Location?,
     darkTheme: Boolean,
-    onRequestLocation: () -> Unit
+    onRequestLocation: () -> Unit,
+    bottomOverlayPadding: Dp = 0.dp,
 ) {
     val context = LocalContext.current
     val primaryColor = MaterialTheme.colorScheme.primary
     val lifecycleOwner = LocalLifecycleOwner.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
+    // Mutated by map callbacks without recomposing during pan/zoom; saved per tab.
+    val viewport = rememberSaveable { doubleArrayOf(Double.NaN, Double.NaN, 13.5) }
 
     // Handle Map Lifecycle
     DisposableEffect(lifecycleOwner) {
@@ -113,7 +121,7 @@ fun CameraMapView(
     var prevUserLocStr by remember { mutableStateOf("") }
 
     // Handle map camera animate when focusedCamera changes
-    LaunchedEffect(focusedCamera) {
+    LaunchedEffect(focusedCamera, mapViewRef) {
         if (focusedCamera != null && mapViewRef != null) {
             mapViewRef?.controller?.animateTo(
                 GeoPoint(focusedCamera.latitude, focusedCamera.longitude),
@@ -151,6 +159,8 @@ fun CameraMapView(
 
                     val initialCenter = if (focusedCamera != null) {
                         GeoPoint(focusedCamera.latitude, focusedCamera.longitude)
+                    } else if (viewport[0].isFinite() && viewport[1].isFinite()) {
+                        GeoPoint(viewport[0], viewport[1])
                     } else if (userLocation != null) {
                         GeoPoint(userLocation.latitude, userLocation.longitude)
                     } else if (cameras.isNotEmpty()) {
@@ -158,8 +168,25 @@ fun CameraMapView(
                     } else {
                         GeoPoint(10.8505, 76.2711)
                     }
-                    controller.setZoom(if (focusedCamera != null) 16.0 else 13.5)
+                    controller.setZoom(if (focusedCamera != null) 16.0 else viewport[2])
                     controller.setCenter(initialCenter)
+                    val map = this
+                    fun saveViewport() {
+                        viewport[0] = map.mapCenter.latitude
+                        viewport[1] = map.mapCenter.longitude
+                        viewport[2] = map.zoomLevelDouble
+                    }
+                    saveViewport()
+                    addMapListener(object : MapListener {
+                        override fun onScroll(event: ScrollEvent?): Boolean {
+                            saveViewport()
+                            return false
+                        }
+                        override fun onZoom(event: ZoomEvent?): Boolean {
+                            saveViewport()
+                            return false
+                        }
+                    })
 
                     mapViewRef = this
                 }
@@ -210,13 +237,7 @@ fun CameraMapView(
                     view.invalidate()
                 }
 
-                if (focusedCamera != null) {
-                    view.controller.animateTo(
-                        GeoPoint(focusedCamera.latitude, focusedCamera.longitude),
-                        16.0,
-                        500L
-                    )
-                }
+
             },
             onRelease = { view ->
                 view.onPause()
@@ -225,7 +246,7 @@ fun CameraMapView(
         )
 
         Surface(
-            modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 8.dp),
+            modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = bottomOverlayPadding + 8.dp),
             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
             shape = RoundedCornerShape(4.dp),
         ) {
@@ -241,7 +262,7 @@ fun CameraMapView(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 36.dp, end = 20.dp),
+                .padding(bottom = bottomOverlayPadding + 36.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
