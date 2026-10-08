@@ -42,6 +42,7 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -69,6 +70,9 @@ fun CameraMapView(
     }
     val lifecycleOwner = LocalLifecycleOwner.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
+    var overviewVisible by remember { mutableStateOf(false) }
+    val overviewOverlay = remember(context) { KeralaOverviewOverlay(context) }
+    val cameraMarkers = remember { mutableListOf<Marker>() }
     var selectedCameraKey by rememberSaveable { mutableStateOf<String?>(null) }
     val selectedCamera = cameras.firstOrNull { "${it.latitude}_${it.longitude}" == selectedCameraKey }
     BackHandler(enabled = selectedCamera != null) { selectedCameraKey = null }
@@ -123,6 +127,16 @@ fun CameraMapView(
         BitmapDrawable(context.resources, bitmap)
     }
 
+    val overviewMarkerIcon = remember(primaryColor) {
+        val size = (5 * context.resources.displayMetrics.density).toInt().coerceAtLeast(5)
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primaryColor.toArgb() }
+        Canvas(bitmap).drawCircle(size / 2f, size / 2f, size / 2f, paint)
+        BitmapDrawable(context.resources, bitmap)
+    }
+    val currentMarkerIcon by rememberUpdatedState(markerIcon)
+    val currentOverviewMarkerIcon by rememberUpdatedState(overviewMarkerIcon)
+
     // User Location Indicator Dot
     val userLocationIcon = remember(primaryColor, markerContentColor) {
         val size = 96
@@ -149,7 +163,7 @@ fun CameraMapView(
     var prevUserLocStr by remember(userLocationIcon) { mutableStateOf("") }
 
     // Handle map camera animate when focusedCamera changes
-    LaunchedEffect(focusedCamera, mapViewRef) {
+    LaunchedEffect(focusedCamera?.latitude, focusedCamera?.longitude, mapViewRef) {
         if (focusedCamera != null && mapViewRef != null) {
             selectedCameraKey = "${focusedCamera.latitude}_${focusedCamera.longitude}"
             mapViewRef?.controller?.animateTo(
@@ -170,6 +184,23 @@ fun CameraMapView(
                 MapView(ctx).apply {
                     setTileSource(aiCamTileSource)
                     setMultiTouchControls(true)
+                    setHorizontalMapRepetitionEnabled(false)
+                    setVerticalMapRepetitionEnabled(false)
+                    overlays.add(overviewOverlay)
+                    fun updateOverview(zoom: Double) {
+                        val showOverview = zoom <= KeralaOverviewOverlay.MAX_ZOOM
+                        setUseDataConnection(!showOverview)
+                        overlayManager.tilesOverlay.isEnabled = !showOverview
+                        if (overviewVisible != showOverview) {
+                            overviewVisible = showOverview
+                            cameraMarkers.forEach { marker ->
+                                marker.icon = if (showOverview) currentOverviewMarkerIcon else currentMarkerIcon
+                                marker.setAnchor(Marker.ANCHOR_CENTER,
+                                    if (showOverview) Marker.ANCHOR_CENTER else Marker.ANCHOR_BOTTOM)
+                            }
+                        }
+                        invalidate()
+                    }
 
                     val mapBgColor = mapBackgroundColor
                     setBackgroundColor(mapBgColor)
@@ -180,24 +211,30 @@ fun CameraMapView(
 
                     isTilesScaledToDpi = true
                     maxZoomLevel = 19.0
-                    minZoomLevel = 3.0
+                    minZoomLevel = 6.0
 
                     setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
 
                     zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
 
+                    val hasSavedViewport = viewport[0].isFinite() && viewport[1].isFinite()
                     val initialCenter = if (focusedCamera != null) {
                         GeoPoint(focusedCamera.latitude, focusedCamera.longitude)
-                    } else if (viewport[0].isFinite() && viewport[1].isFinite()) {
+                    } else if (hasSavedViewport) {
                         GeoPoint(viewport[0], viewport[1])
                     } else if (userLocation != null) {
                         GeoPoint(userLocation.latitude, userLocation.longitude)
-                    } else if (cameras.isNotEmpty()) {
-                        GeoPoint(cameras[0].latitude, cameras[0].longitude)
                     } else {
-                        GeoPoint(10.8505, 76.2711)
+                        GeoPoint(10.4, 76.3)
                     }
-                    controller.setZoom(if (focusedCamera != null) 16.0 else viewport[2])
+                    val initialZoom = when {
+                        focusedCamera != null -> 16.0
+                        hasSavedViewport -> viewport[2]
+                        userLocation != null -> 13.5
+                        else -> 7.5
+                    }
+                    updateOverview(initialZoom)
+                    controller.setZoom(initialZoom)
                     controller.setCenter(initialCenter)
                     val map = this
                     overlays.add(MapEventsOverlay(object : MapEventsReceiver {
@@ -221,14 +258,27 @@ fun CameraMapView(
                         }
                         override fun onZoom(event: ZoomEvent?): Boolean {
                             saveViewport()
+                            updateOverview(event?.zoomLevel ?: map.zoomLevelDouble)
                             return false
                         }
                     })
 
+                    if (focusedCamera == null && userLocation == null && !hasSavedViewport) {
+                        addOnFirstLayoutListener(object : MapView.OnFirstLayoutListener {
+                            override fun onFirstLayout(v: android.view.View, left: Int, top: Int, right: Int, bottom: Int) {
+                                val margin = maxOf(topOverlayPadding, bottomOverlayPadding) + 40.dp
+                                zoomToBoundingBox(BoundingBox(12.85, 77.45, 8.15, 74.85), false,
+                                    (margin.value * ctx.resources.displayMetrics.density).toInt())
+                            }
+                        })
+                    }
+
                     mapViewRef = this
+                    if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) onResume()
                 }
             },
             update = { view ->
+                overviewOverlay.darkTheme = darkTheme
                 val mapBgColor = mapBackgroundColor
                 view.setBackgroundColor(mapBgColor)
                 view.overlayManager.tilesOverlay.loadingBackgroundColor = mapBgColor
@@ -237,11 +287,12 @@ fun CameraMapView(
                 view.invalidate()
 
                 // Diff-based marker update: only recreate if data actually changed
-                val currentCameraKeys = cameras.map { "${it.latitude}_${it.longitude}" }.toSet()
+                val currentCameraKeys = cameras.map { "${it.latitude}_${it.longitude}_${it.name}_${it.district}_${it.distance}" }.toSet()
                 val currentUserLocStr = userLocation?.let { "${it.latitude}_${it.longitude}" } ?: ""
 
                 if (currentCameraKeys != prevCameraKeys || currentUserLocStr != prevUserLocStr) {
                     view.overlays.removeAll { it is Marker }
+                    cameraMarkers.clear()
 
                     // Add User Location Marker
                     userLocation?.let { loc ->
@@ -259,8 +310,9 @@ fun CameraMapView(
                     cameras.forEach { camera ->
                         val marker = Marker(view).apply {
                             position = GeoPoint(camera.latitude, camera.longitude)
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            icon = markerIcon
+                            setAnchor(Marker.ANCHOR_CENTER,
+                                if (overviewVisible) Marker.ANCHOR_CENTER else Marker.ANCHOR_BOTTOM)
+                            icon = if (overviewVisible) overviewMarkerIcon else markerIcon
                             title = camera.name
                             snippet = "${camera.district} • ${camera.distance}"
                             infoWindow = null
@@ -276,23 +328,33 @@ fun CameraMapView(
                             }
                         }
                         view.overlays.add(marker)
+                        cameraMarkers.add(marker)
                     }
 
                     prevCameraKeys = currentCameraKeys
                     prevUserLocStr = currentUserLocStr
+                    view.overlays.remove(overviewOverlay.labelsOverlay)
+                    view.overlays.add(overviewOverlay.labelsOverlay)
                     view.invalidate()
                 }
-
-
+                if (!view.overlays.contains(overviewOverlay.labelsOverlay)) {
+                    view.overlays.add(overviewOverlay.labelsOverlay)
+                }
+                cameraMarkers.forEach { it.icon = if (overviewVisible) overviewMarkerIcon else markerIcon }
             },
             onRelease = { view ->
                 view.onPause()
+                view.onDetach()
+                cameraMarkers.clear()
+                mapViewRef = null
             },
             modifier = Modifier.fillMaxSize()
         )
 
         Text(
-            "© OpenStreetMap",
+            if (overviewVisible) {
+                "Kerala offline overview · Zoom in for roads\nDataMeet / geoBoundaries · CC BY 2.5 IN"
+            } else "© OpenStreetMap",
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelSmall.copy(
                 shadow = Shadow(
@@ -303,7 +365,10 @@ fun CameraMapView(
             modifier = Modifier.align(Alignment.TopEnd)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
                 .padding(top = topOverlayPadding + 8.dp, end = 12.dp)
-                .clickable { uriHandler.openUri("https://www.openstreetmap.org/copyright") }
+                .clickable {
+                    uriHandler.openUri(if (overviewVisible) "https://github.com/datameet/maps"
+                        else "https://www.openstreetmap.org/copyright")
+                }
                 .padding(horizontal = 6.dp, vertical = 3.dp),
         )
 

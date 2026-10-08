@@ -8,7 +8,8 @@ Android app that warns drivers in Kerala about nearby **Kerala MVD AI speed came
 
 - **Browse cameras**
   - List view ordered nearest first, with a floating bottom search button that expands into search (name / district), district filters with counts, and distance filters (`< 5/10/25/50 km`).
-  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Both themes use OpenStreetMap tiles with an app-identifying User-Agent; dark mode uses a night filter with charcoal land, blue water, green vegetation, and softer light labels. The tile source has a separate cache from previously blocked tiles, with 2 download threads and a 500 MB disk limit. Geofence regions are clustered; map markers are not.
+  - Map view powered by **OSMdroid** (OpenStreetMap) with individual camera markers, user location, and tap-to-focus. Zoom levels 6–10 use a bundled Kerala boundary overview with nearby state outlines, place labels, and smaller camera dots, without tile downloads. Closer zooms in both themes use OpenStreetMap tiles with an app-identifying User-Agent; dark mode uses a night filter with charcoal land, blue water, green vegetation, and softer light labels. The tile source has a separate cache from previously blocked tiles, with 2 download threads and a 500 MB disk limit. Detailed roads still require internet unless cached. Geofence regions are clustered; map markers are not.
+  - Without a saved viewport, location, or focused camera, the map starts with Kerala fitted to the viewport. Theme and location updates preserve the chosen zoom and center. Boundary source and license are recorded in `app/src/main/assets/kerala_overview_LICENSE.txt`.
   - Distance to each camera computed on-device via `Location.distanceBetween`, throttled to every 12 s / 100 m in `CameraViewModel:242`.
 
 - **Proactive proximity alerts**
