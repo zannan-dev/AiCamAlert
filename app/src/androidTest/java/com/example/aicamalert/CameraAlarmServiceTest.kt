@@ -80,6 +80,55 @@ class CameraAlarmServiceTest {
             }
         }
     }
+
+    @Test
+    fun powerButtonAcknowledgesBackgroundAlarmWithoutDisablingRadarOrRestoringAlarm() {
+        preparePermissions()
+        val preferences = context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE)
+        val radarWasEnabled = preferences.getBoolean("bg_radar_enabled", false)
+        preferences.edit().putBoolean("bg_radar_enabled", true).commit()
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            try {
+                instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP").close()
+                scenario.onActivity { CameraProximityService.startAlarm(it, camera) }
+                awaitCondition { AlertSoundManager.isPlaying() }
+                scenario.moveToState(Lifecycle.State.CREATED)
+                // Sleep is the power button's screen-off operation, without toggling an unknown screen state.
+                instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_SLEEP").close()
+                awaitCondition { AlertSoundManager.activeAlert.value == null && !AlertSoundManager.isPlaying() }
+                assertTrue(preferences.getBoolean("bg_radar_enabled", false))
+                assertFalse(preferences.contains("pending_camera_alarm"))
+                val manager = context.getSystemService(NotificationManager::class.java)
+                awaitCondition {
+                    manager.activeNotifications.any {
+                        it.id == CameraProximityService.NOTIFICATION_ID && it.notification.actions.isNullOrEmpty()
+                    }
+                }
+
+                instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP").close()
+                scenario.moveToState(Lifecycle.State.RESUMED)
+                scenario.onActivity { it.stopService(android.content.Intent(it, CameraProximityService::class.java)) }
+                scenario.onActivity { CameraProximityService.startService(it) }
+                instrumentation.waitForIdleSync()
+                assertNull(AlertSoundManager.activeAlert.value)
+
+                val next = camera.copy(name = "Next camera after power acknowledgement")
+                scenario.onActivity { CameraProximityService.startAlarm(it, next) }
+                awaitCondition { AlertSoundManager.isPlaying() && AlertSoundManager.activeAlert.value?.name == next.name }
+                ActivityScenario.launch(FullScreenAlertActivity::class.java).use { alertScenario ->
+                    instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_SLEEP").close()
+                    awaitCondition { AlertSoundManager.activeAlert.value == null && !AlertSoundManager.isPlaying() }
+                    instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP").close()
+                    awaitCondition { alertScenario.state == Lifecycle.State.DESTROYED }
+                }
+            } finally {
+                instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP").close()
+                CameraProximityService.stopService(context)
+                preferences.edit().putBoolean("bg_radar_enabled", radarWasEnabled).commit()
+            }
+        }
+    }
+
     @Test
     fun serviceRecreationRestoresAlarmUntilAcknowledged() {
         preparePermissions()

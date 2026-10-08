@@ -5,7 +5,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import com.example.aicamalert.data.model.CameraItem
 import com.example.aicamalert.location.CameraGeofenceManager
@@ -46,6 +48,16 @@ class CameraProximityService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var locationCollectJob: Job? = null
     private var radarTracking = false
+    private val screenOffReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // Android delivers screen state changes, not raw power-button presses.
+            // A screen timeout also acknowledges an alarm; an already-off screen
+            // does not prevent a newly triggered camera from sounding.
+            if (intent.action == Intent.ACTION_SCREEN_OFF && AlertSoundManager.activeAlert.value != null) {
+                stopAlarm()
+            }
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -56,6 +68,10 @@ class CameraProximityService : Service() {
         repository = app.repository
         locationManager = app.locationManager
         foregroundTracker = app.foregroundTracker
+        androidx.core.content.ContextCompat.registerReceiver(
+            this, screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF),
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
 
         serviceScope.launch {
             repository.loadCameras()
@@ -67,10 +83,7 @@ class CameraProximityService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP_ALARM -> {
-                clearSavedAlarm(this)
-                AlertSoundManager.stop()
-                updateForegroundNotification()
-                if (!radarEnabled()) stopSelf()
+                stopAlarm()
             }
             ACTION_PAUSE_RADAR -> {
                 radarTracking = false
@@ -95,6 +108,13 @@ class CameraProximityService : Service() {
 
     private fun radarEnabled() = getSharedPreferences("aicam_prefs", MODE_PRIVATE)
         .getBoolean("bg_radar_enabled", false)
+
+    private fun stopAlarm() {
+        clearSavedAlarm(this)
+        AlertSoundManager.stop()
+        updateForegroundNotification()
+        if (!radarEnabled()) stopSelf()
+    }
 
     private fun startRadarTracking() {
         if (!PermissionUtils.hasLocationPermission(this)) return
@@ -259,7 +279,7 @@ class CameraProximityService : Service() {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID_ALERT)
             .setContentTitle("Speed camera ahead")
-            .setContentText("${camera.name} · ${camera.distance} away. Tap Stop alarm to acknowledge.")
+            .setContentText("${camera.name} · ${camera.distance} away. Tap Stop alarm or press power to turn off the screen.")
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -276,6 +296,7 @@ class CameraProximityService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        unregisterReceiver(screenOffReceiver)
         locationCollectJob?.cancel()
         locationManager.setRadarLocationEnabled(false)
         AlertSoundManager.stop()

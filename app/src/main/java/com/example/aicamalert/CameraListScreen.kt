@@ -14,6 +14,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -72,6 +74,9 @@ fun CameraListScreen(
     val isBackgroundRadarEnabled by viewModel.isBackgroundRadarEnabled.collectAsState()
     val focusedCamera by viewModel.focusedCamera.collectAsState()
     val activeProximityCamera by viewModel.activeProximityCamera.collectAsState()
+    // Keep the last warning visible while its exit animation completes.
+    var lastProximityCamera by remember { mutableStateOf(activeProximityCamera) }
+    SideEffect { activeProximityCamera?.let { lastProximityCamera = it } }
     val filteredCameras by viewModel.filteredCameras.collectAsState()
     val districtsList by viewModel.districtsList.collectAsState()
     val districtCounts by viewModel.districtCounts.collectAsState()
@@ -347,10 +352,11 @@ fun CameraListScreen(
         // In-App Full Screen Alert Overlay
         AnimatedVisibility(
             visible = activeProximityCamera != null,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
+            enter = fadeIn(tween(320)) + scaleIn(
+                spring(dampingRatio = 0.9f, stiffness = 280f), initialScale = 0.97f),
+            exit = fadeOut(tween(200)) + scaleOut(tween(200), targetScale = 0.98f),
         ) {
-            activeProximityCamera?.let { cam ->
+            (activeProximityCamera ?: lastProximityCamera)?.let { cam ->
                 FullScreenAlertContent(
                     cameraName = cam.name,
                     district = cam.district,
