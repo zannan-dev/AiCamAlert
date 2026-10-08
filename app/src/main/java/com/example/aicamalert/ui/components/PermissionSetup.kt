@@ -48,6 +48,32 @@ private fun Context.activity(): Activity? {
     return current as? Activity
 }
 
+/** Request background access separately so Android can show its location permission flow. */
+@Composable
+internal fun rememberBackgroundLocationRequest(onResult: () -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val preferences = remember(context) { context.getSharedPreferences("aicam_prefs", Context.MODE_PRIVATE) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { onResult() }
+    return {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && PermissionUtils.hasLocationPermission(context)) {
+            val requested = preferences.getBoolean("setup_requested_background", false)
+            val activity = context.activity()
+            val canRequest = !requested || activity?.let {
+                ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            } == true
+            if (canRequest) {
+                preferences.edit().putBoolean("setup_requested_background", true).apply()
+                launcher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            } else {
+                // After permanent denial Android ignores runtime requests; keep a settings escape route.
+                PermissionUtils.requestBackgroundLocationPermission(context)
+            }
+        } else {
+            onResult()
+        }
+    }
+}
+
 /** Rechecks actual Android grants instead of trusting a saved onboarding flag. */
 @Composable
 fun PermissionSetupGate(
@@ -61,7 +87,6 @@ fun PermissionSetupGate(
     var state by remember { mutableStateOf(readPermissions(context)) }
     var setupComplete by remember { mutableStateOf(preferences.getBoolean("permission_setup_complete", false)) }
     var preciseRequested by rememberSaveable { mutableStateOf(preferences.getBoolean("setup_requested_location", false)) }
-    var backgroundRequested by rememberSaveable { mutableStateOf(preferences.getBoolean("setup_requested_background", false)) }
     var notificationsRequested by rememberSaveable { mutableStateOf(preferences.getBoolean("setup_requested_notifications", false)) }
     val pendingAlarm by AlertSoundManager.activeAlert.collectAsState()
 
@@ -95,15 +120,11 @@ fun PermissionSetupGate(
 
     val locationRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { refresh() }
     val notificationRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { refresh() }
-    val backgroundRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { refresh() }
+    val requestBackgroundLocation = rememberBackgroundLocationRequest { refresh() }
     val activity = context.activity()
     val locationNeedsSettings = preciseRequested && activity?.let {
         !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_FINE_LOCATION)
     } == true
-    val backgroundNeedsSettings = Build.VERSION.SDK_INT >= 30 ||
-        (backgroundRequested && activity?.let {
-            !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        } == true)
     val notificationsNeedSettings = PermissionUtils.hasNotificationRuntimePermission(context) ||
         (notificationsRequested && activity?.let {
             !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.POST_NOTIFICATIONS)
@@ -133,13 +154,7 @@ fun PermissionSetupGate(
                             locationRequest.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
                         }
                     }
-                    RequiredSetupStep.BACKGROUND_LOCATION -> {
-                        if (Build.VERSION.SDK_INT == 29 && !backgroundNeedsSettings) {
-                            backgroundRequested = true
-                            preferences.edit().putBoolean("setup_requested_background", true).apply()
-                            backgroundRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                        } else PermissionUtils.requestBackgroundLocationPermission(context)
-                    }
+                    RequiredSetupStep.BACKGROUND_LOCATION -> requestBackgroundLocation()
                     RequiredSetupStep.NOTIFICATIONS -> {
                         if (Build.VERSION.SDK_INT >= 33 && !notificationsNeedSettings) {
                             notificationsRequested = true

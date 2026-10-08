@@ -90,7 +90,7 @@ object PermissionUtils {
         }
     }
 
-    /** Android 11+ has no public deep link directly to this app's location grant. */
+    /** Settings fallback when Android no longer allows a background permission request. */
     fun requestBackgroundLocationPermission(context: Context) = openAppSettings(context)
 
     fun appSettingsIntent(context: Context) = Intent(

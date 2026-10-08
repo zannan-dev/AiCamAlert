@@ -106,6 +106,8 @@ fun CameraListScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(listener) }
     }
 
+    val requestBackgroundLocation = rememberBackgroundLocationRequest { viewModel.refreshPermissions() }
+
     // Permission launchers
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -168,17 +170,17 @@ fun CameraListScreen(
             title = { Text("Allow background camera alerts") },
             text = {
                 Text(
-                    "To detect camera zones while the app is closed, set Location to “Allow all the time” in the next screen: Permissions → Location.",
+                    "To detect camera zones while the app is closed, choose “Allow all the time” in the location permission screen. If App info opens, select Permissions → Location.",
                 )
             },
             confirmButton = {
                 Button(
                     onClick = {
                         showBackgroundLocationGuidance = false
-                        PermissionUtils.requestBackgroundLocationPermission(context)
+                        requestBackgroundLocation()
                     },
                 ) {
-                    Text("Open app settings")
+                    Text("Allow background location")
                 }
             },
             dismissButton = {

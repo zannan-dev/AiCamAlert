@@ -4,7 +4,7 @@ import android.content.Context
 
 enum class RequiredSetupStep(val title: String, val explanation: String, val action: String) {
     PRECISE_LOCATION("Precise location", "Choose Precise and allow location while using the app. If Settings opens, select Permissions → Location.", "Allow precise location"),
-    BACKGROUND_LOCATION("Background location", "Select Permissions → Location → Allow all the time. Keep Precise location enabled so alerts work while the app is closed.", "Allow background location"),
+    BACKGROUND_LOCATION("Background location", "Choose Allow all the time on the location permission screen. If App info opens, select Permissions → Location. Keep Precise location enabled so alerts work while the app is closed.", "Allow background location"),
     NOTIFICATIONS("Notifications", "Allow notifications, including Speed Camera Proximity Warning, so every alarm has a visible Stop alarm action.", "Allow notifications"),
     LOCATION_SERVICES("Device location", "Turn on your phone’s Location switch to receive GPS fixes while travelling.", "Turn on location"),
     FULL_SCREEN_ALERTS("Full-screen alerts", "Allow full-screen notifications so camera warnings can appear when your phone is locked.", "Allow full-screen alerts"),
