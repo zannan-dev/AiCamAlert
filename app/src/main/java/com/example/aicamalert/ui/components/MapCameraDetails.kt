@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.aicamalert.data.model.CameraItem
+import com.example.aicamalert.ui.scroll.rememberScrollBounce
+import com.example.aicamalert.ui.scroll.rememberSmoothFlingBehavior
 
 /** Theme-aware details for the selected map camera, above the navigation pill. */
 @Composable
@@ -34,7 +36,15 @@ fun MapCameraDetails(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 10.dp,
     ) {
-        Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Column(
+            Modifier.then(rememberScrollBounce())
+                .verticalScroll(
+                    state = rememberScrollState(),
+                    overscrollEffect = null,
+                    flingBehavior = rememberSmoothFlingBehavior(),
+                )
+                .padding(16.dp),
+        ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                 Surface(shape = RoundedCornerShape(14.dp),
                     color = MaterialTheme.colorScheme.primaryContainer) {

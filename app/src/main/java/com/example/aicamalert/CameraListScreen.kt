@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aicamalert.ui.components.*
+import com.example.aicamalert.ui.scroll.rememberScrollBounce
+import com.example.aicamalert.ui.scroll.rememberSmoothFlingBehavior
 import com.example.aicamalert.util.PermissionUtils
 import com.example.aicamalert.viewmodel.CameraViewModel
 
@@ -225,7 +227,9 @@ fun CameraListScreen(
                     )) {
                         if (listView) {
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
+                                flingBehavior = rememberSmoothFlingBehavior(),
+                                overscrollEffect = null,
+                                modifier = Modifier.fillMaxSize().then(rememberScrollBounce()),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 contentPadding = PaddingValues(
                                     // Let cards sit beneath the app bar's 24 dp

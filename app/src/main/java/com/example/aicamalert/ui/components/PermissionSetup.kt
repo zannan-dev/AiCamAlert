@@ -33,6 +33,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.aicamalert.CameraProximityService
 import com.example.aicamalert.alert.AlertSoundManager
+import com.example.aicamalert.ui.scroll.rememberScrollBounce
+import com.example.aicamalert.ui.scroll.rememberSmoothFlingBehavior
 import com.example.aicamalert.util.PermissionUtils
 import com.example.aicamalert.util.RequiredPermissionState
 import com.example.aicamalert.util.RequiredSetupStep
@@ -171,8 +173,13 @@ fun PermissionSetupScreen(
     val step = state.nextMissing
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f).then(rememberScrollBounce()),
+                overscrollEffect = null,
+                flingBehavior = rememberSmoothFlingBehavior(),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 item {
                     Icon(Icons.Default.Shield, null, Modifier.size(36.dp), tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(12.dp))
