@@ -58,6 +58,55 @@ class CameraAlertGateTest {
     }
 
     @Test
+    fun shortReturnTripAlertsAgainWithoutLeavingAlertRadius() {
+        assertNull(gate.nextAlert(fix(10.0017, 0)))
+        assertEquals("Ahead", gate.nextAlert(fix(10.002, 3))?.first?.name)
+        // Turn away before reaching the camera; retreat about 66 m, still inside 500 m.
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.0014, 6, bearing = 180f))?.first?.name)
+        assertEquals("Ahead", gate.nextAlert(fix(10.0018, 9))?.first?.name)
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.0022, 12))?.first?.name)
+    }
+
+    @Test
+    fun passingCameraAndReturningNearbyAlertsAgain() {
+        gate.nextAlert(fix(10.0017, 0))
+        assertEquals("Ahead", gate.nextAlert(fix(10.002, 3))?.first?.name)
+        gate.nextAlert(fix(10.0038, 6))
+        // Pass the camera and move 89 m beyond it; then return south.
+        gate.nextAlert(fix(10.0048, 9))
+        assertEquals("Ahead", gate.nextAlert(fix(10.0045, 12, bearing = 180f))?.first?.name)
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.0042, 15, bearing = 180f))?.first?.name)
+    }
+
+    @Test
+    fun smallRetreatAndWaitingDoNotRepeatAcknowledgedCamera() {
+        gate.nextAlert(fix(10.0017, 0))
+        assertEquals("Ahead", gate.nextAlert(fix(10.002, 3))?.first?.name)
+        // About 22 m away is insufficient to count as a new trip.
+        gate.nextAlert(fix(10.0018, 6, bearing = 180f))
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.002, 9))?.first?.name)
+        assertNull(gate.nextAlert(fix(10.00202, 12, speed = 0f)))
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.0023, 15))?.first?.name)
+    }
+
+    @Test
+    fun inaccurateRetreatDoesNotRearmUntilBeyondGpsUncertainty() {
+        gate.nextAlert(fix(10.001, 0).apply { accuracy = 40f })
+        assertEquals("Ahead", gate.nextAlert(fix(10.002, 3).apply { accuracy = 40f })?.first?.name)
+        // 66 m of apparent retreat is less than the combined 80 m uncertainty.
+        gate.nextAlert(fix(10.0014, 6, bearing = 180f).apply { accuracy = 40f })
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.002, 9).apply { accuracy = 40f })?.first?.name)
+    }
+
+    @Test
+    fun outOfOrderRetreatCannotRearmCamera() {
+        gate.nextAlert(fix(10.0017, 0))
+        assertEquals("Ahead", gate.nextAlert(fix(10.002, 5))?.first?.name)
+        assertNull(gate.nextAlert(fix(10.001, 3, bearing = 180f)))
+        assertNotEquals("Ahead", gate.nextAlert(fix(10.0023, 10))?.first?.name)
+    }
+
+    @Test
     fun staleFixDoesNotAlert() {
         val stale = fix(10.002, 0).apply { elapsedRealtimeNanos -= 60_000_000_000L }
         assertNull(gate.nextAlert(stale))

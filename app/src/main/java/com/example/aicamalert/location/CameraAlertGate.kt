@@ -6,24 +6,22 @@ import com.example.aicamalert.data.model.CameraItem
 
 /** Emits one alert per camera approach, after GPS has confirmed movement. */
 class CameraAlertGate(private val engine: ProximityEngine) {
-    private val alerted = mutableMapOf<String, CameraItem>()
+    private data class AlertedApproach(
+        val camera: CameraItem,
+        var closestDistance: Float,
+        var closestAccuracy: Float,
+    )
+
+    private val alerted = mutableMapOf<String, AlertedApproach>()
     private var movementAnchor: Location? = null
 
     @Synchronized
     fun nextAlert(location: Location): Pair<CameraItem, Double>? {
         if (!isUsable(location)) return null
-        alerted.entries.removeAll { (_, camera) ->
-            val distance = FloatArray(1)
-            Location.distanceBetween(
-                location.latitude, location.longitude,
-                camera.latitude, camera.longitude, distance,
-            )
-            distance[0] > REARM_DISTANCE_METERS
-        }
-
         val anchor = movementAnchor
         // UI and service can deliver the same fix during a lifecycle transition.
         if (anchor != null && location.elapsedRealtimeNanos <= anchor.elapsedRealtimeNanos) return null
+        updateApproaches(location, confirmedMovement = false)
         if (anchor == null ||
             location.elapsedRealtimeNanos - anchor.elapsedRealtimeNanos > MAX_SAMPLE_GAP_NANOS
         ) {
@@ -45,6 +43,7 @@ class CameraAlertGate(private val engine: ProximityEngine) {
              else displacement / elapsedSeconds >= MIN_SPEED_MPS)
         if (!moving) return null
 
+        updateApproaches(location, confirmedMovement = true)
         movementAnchor = Location(location)
         val travelBearing = if (engine.hasReliableBearing(location)) location.bearing
             else anchor.bearingTo(location)
@@ -60,9 +59,37 @@ class CameraAlertGate(private val engine: ProximityEngine) {
             },
             travelBearing = travelBearing,
         ) ?: return null
-        alerted[cameraKey(result.first)] = result.first
+        alerted[cameraKey(result.first)] = AlertedApproach(
+            result.first, result.second.toFloat(), locationAccuracy(location),
+        )
         return result
     }
+
+    private fun updateApproaches(location: Location, confirmedMovement: Boolean) {
+        alerted.entries.removeAll { (_, approach) ->
+            val distance = FloatArray(1)
+            Location.distanceBetween(location.latitude, location.longitude,
+                approach.camera.latitude, approach.camera.longitude, distance)
+            when {
+                distance[0] > REARM_DISTANCE_METERS -> true
+                !confirmedMovement -> false
+                distance[0] < approach.closestDistance -> {
+                    approach.closestDistance = distance[0]
+                    approach.closestAccuracy = locationAccuracy(location)
+                    false
+                }
+                else -> {
+                    // A new approach can start within the alert radius, after passing
+                    // the camera or turning away. Require retreat beyond GPS uncertainty.
+                    val retreatRequired = maxOf(MIN_RETREAT_METERS,
+                        approach.closestAccuracy + locationAccuracy(location))
+                    distance[0] - approach.closestDistance >= retreatRequired
+                }
+            }
+        }
+    }
+
+    private fun locationAccuracy(location: Location) = if (location.hasAccuracy()) location.accuracy else 0f
 
     @Synchronized
     fun reset() {
@@ -82,6 +109,7 @@ class CameraAlertGate(private val engine: ProximityEngine) {
     companion object {
         // Beyond the largest speed-adjusted alert radius, plus a GPS buffer.
         const val REARM_DISTANCE_METERS = 1_400f
+        private const val MIN_RETREAT_METERS = 50f
         private const val MIN_PROGRESS_METERS = 3f
         private const val MIN_MOVEMENT_METERS = 10f
         private const val MIN_SPEED_MPS = 0.5f
